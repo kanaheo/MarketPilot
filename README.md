@@ -60,6 +60,19 @@ trustworthy.
 - [Cost plan](docs/cost-plan.md)
 - [Learning development plan](docs/learning-plan.md)
 
+## Quality checks
+
+GitHub Actions runs the [Web CI workflow](.github/workflows/web-ci.yml) for
+pull requests and pushes targeting `develop` or `main`.
+
+```text
+npm ci -> npm run lint -> npm run build
+```
+
+This verifies reproducible dependency installation, ESLint rules, TypeScript,
+and the Next.js production build. Requiring this check before merge will be
+configured with a GitHub Ruleset after the workflow runs successfully.
+
 ## Current status
 
 Phase 0 complete: product and architecture design.
@@ -123,6 +136,19 @@ MarketPilot은 수익을 보장하거나 확정적인 예측을 제공하지 않
 - [로드맵](docs/roadmap.md#한국어)
 - [비용 계획](docs/cost-plan.md#한국어)
 - [학습 중심 개발 일정](docs/learning-plan.md#한국어)
+
+### 품질 검사
+
+`develop` 또는 `main`을 대상으로 하는 Pull Request와 push에서는 GitHub
+Actions의 [Web CI 워크플로](.github/workflows/web-ci.yml)가 자동으로 실행됩니다.
+
+```text
+npm ci -> npm run lint -> npm run build
+```
+
+이를 통해 동일한 의존성 설치, ESLint 규칙, TypeScript 및 Next.js 프로덕션 빌드를
+검증합니다. 워크플로가 정상 실행된 후 GitHub Ruleset을 설정하여 병합 전 필수
+검사로 지정할 예정입니다.
 
 ### 현재 상태
 
@@ -189,6 +215,19 @@ MarketPilotは、利益を保証したり、確実な予測を提供したりす
 - [ロードマップ](docs/roadmap.md#日本語)
 - [コスト計画](docs/cost-plan.md#日本語)
 - [学習中心の開発計画](docs/learning-plan.md#日本語)
+
+### 品質チェック
+
+`develop`または`main`を対象とするPull Requestとpushでは、GitHub Actionsの
+[Web CIワークフロー](.github/workflows/web-ci.yml)が自動的に実行されます。
+
+```text
+npm ci -> npm run lint -> npm run build
+```
+
+これにより、再現可能な依存関係のインストール、ESLintルール、TypeScript、
+Next.jsの本番ビルドを検証します。ワークフローの正常動作を確認した後、
+GitHub Rulesetでマージ前の必須チェックとして設定する予定です。
 
 ### 現在の状況
 
