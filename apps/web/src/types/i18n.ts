@@ -44,6 +44,66 @@ export type Messages = Readonly<{
     errorTitle: string;
     errorDescription: string;
   };
+  auth: {
+    languageLabel: string;
+    story: {
+      ariaLabel: string;
+      eyebrow: string;
+      title: string;
+      description: string;
+      previewLabel: string;
+      benefits: readonly string[];
+      note: string;
+    };
+    login: {
+      title: string;
+      description: string;
+      emailAction: string;
+      switchPrompt: string;
+      switchAction: string;
+      termsPrefix: string;
+      termsSuffix: string;
+    };
+    signup: {
+      title: string;
+      description: string;
+      emailAction: string;
+      switchPrompt: string;
+      switchAction: string;
+      termsPrefix: string;
+      termsSuffix: string;
+    };
+    providers: {
+      google: {
+        login: string;
+        signup: string;
+      };
+      github: {
+        login: string;
+        signup: string;
+      };
+    };
+    email: {
+      label: string;
+      placeholder: string;
+    };
+    status: {
+      connecting: string;
+      errorTitle: string;
+      errorDescription: string;
+      cancelledTitle: string;
+      cancelledDescription: string;
+      dismiss: string;
+    };
+    or: string;
+    terms: string;
+    privacy: string;
+    termsSeparator: string;
+    trust: {
+      secure: string;
+      paperOnly: string;
+    };
+  };
   dashboard: {
     header: {
       greeting: string;
