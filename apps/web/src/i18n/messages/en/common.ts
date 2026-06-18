@@ -24,4 +24,11 @@ export const common = {
   user: {
     role: "Paper investor",
   },
+  feedback: {
+    loading: "Loading your dashboard.",
+    retry: "Try again",
+    errorTitle: "We couldn't load your dashboard",
+    errorDescription:
+      "Please try again in a moment. If the problem continues, check your network connection.",
+  },
 } as const satisfies Omit<Messages, "dashboard">;

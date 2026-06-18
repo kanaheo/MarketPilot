@@ -40,6 +40,11 @@ export const dashboard = {
     portfolio: "My portfolio",
     benchmark: "S&P 500",
     periodLabel: "Performance period",
+    empty: {
+      title: "No performance data yet",
+      description:
+        "Your portfolio performance will appear after the first transaction is recorded.",
+    },
     periods: [
       { label: "1W", active: false },
       { label: "1M", active: true },
@@ -52,6 +57,12 @@ export const dashboard = {
     updated: "Updated 10s ago",
     realtime: "Fixture prices",
     manage: "Manage watchlist",
+    empty: {
+      title: "Your watchlist is empty",
+      description:
+        "Add symbols to quickly track their prices and daily changes.",
+      action: "Add symbols",
+    },
     columns: {
       symbol: "Symbol",
       price: "Price",
@@ -66,6 +77,11 @@ export const dashboard = {
     probability: "Upside chance",
     disclaimer:
       "Signals are not investment advice. Review historical model performance and current risks together.",
+    empty: {
+      title: "No signals to display",
+      description:
+        "New signals will appear here after the next market analysis is complete.",
+    },
     risks: {
       low: "Low risk",
       medium: "Medium risk",
@@ -92,6 +108,12 @@ export const dashboard = {
     viewPortfolio: "View portfolio",
     viewAll: "View all holdings",
     shareUnit: " sh",
+    empty: {
+      title: "No holdings yet",
+      description:
+        "Your positions will appear here after your first paper order is filled.",
+      action: "Explore markets",
+    },
     columns: {
       symbol: "Symbol",
       quantity: "Quantity",
@@ -104,6 +126,10 @@ export const dashboard = {
     description: "Recent cash flows and orders",
     more: "Account activity menu",
     viewAll: "View all transactions",
+    empty: {
+      title: "No account activity yet",
+      description: "Deposits, withdrawals, and paper orders will appear here.",
+    },
     items: {
       deposit: {
         title: "Additional deposit",

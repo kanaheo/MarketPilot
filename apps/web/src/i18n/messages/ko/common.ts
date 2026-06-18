@@ -24,4 +24,11 @@ export const common = {
   user: {
     role: "모의투자자",
   },
+  feedback: {
+    loading: "대시보드를 불러오는 중입니다.",
+    retry: "다시 시도",
+    errorTitle: "대시보드를 불러오지 못했습니다",
+    errorDescription:
+      "잠시 후 다시 시도해 주세요. 문제가 계속되면 네트워크 상태를 확인해 주세요.",
+  },
 } as const satisfies Omit<Messages, "dashboard">;

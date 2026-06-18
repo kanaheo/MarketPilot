@@ -24,4 +24,11 @@ export const common = {
   user: {
     role: "ペーパー投資家",
   },
+  feedback: {
+    loading: "ダッシュボードを読み込んでいます。",
+    retry: "もう一度試す",
+    errorTitle: "ダッシュボードを読み込めませんでした",
+    errorDescription:
+      "しばらくしてから再度お試しください。問題が続く場合はネットワーク接続を確認してください。",
+  },
 } as const satisfies Omit<Messages, "dashboard">;

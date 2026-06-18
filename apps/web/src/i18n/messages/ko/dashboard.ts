@@ -39,6 +39,10 @@ export const dashboard = {
     portfolio: "내 포트폴리오",
     benchmark: "S&P 500",
     periodLabel: "성과 조회 기간",
+    empty: {
+      title: "아직 성과 데이터가 없습니다",
+      description: "첫 거래가 기록되면 포트폴리오 성과를 확인할 수 있습니다.",
+    },
     periods: [
       { label: "1주", active: false },
       { label: "1개월", active: true },
@@ -51,6 +55,12 @@ export const dashboard = {
     updated: "10초 전 업데이트",
     realtime: "예시 시세",
     manage: "관심 종목 관리",
+    empty: {
+      title: "관심 종목이 없습니다",
+      description:
+        "관심 있는 종목을 추가하면 가격과 등락률을 빠르게 확인할 수 있습니다.",
+      action: "종목 추가",
+    },
     columns: {
       symbol: "종목",
       price: "현재가",
@@ -65,6 +75,10 @@ export const dashboard = {
     probability: "상승 가능성",
     disclaimer:
       "신호는 투자 권유가 아니며, 모형의 과거 성과와 현재 위험 요인을 함께 검토해야 합니다.",
+    empty: {
+      title: "현재 표시할 신호가 없습니다",
+      description: "새로운 시장 분석이 완료되면 이곳에 신호가 표시됩니다.",
+    },
     risks: {
       low: "위험 낮음",
       medium: "위험 중간",
@@ -91,6 +105,11 @@ export const dashboard = {
     viewPortfolio: "포트폴리오 보기",
     viewAll: "전체 보유 종목 보기",
     shareUnit: "주",
+    empty: {
+      title: "보유 종목이 없습니다",
+      description: "첫 모의주문을 체결하면 보유 종목이 이곳에 표시됩니다.",
+      action: "시장 탐색",
+    },
     columns: {
       symbol: "종목",
       quantity: "보유량",
@@ -103,6 +122,10 @@ export const dashboard = {
     description: "최근 현금 흐름 및 주문",
     more: "계좌 활동 메뉴",
     viewAll: "거래 내역 전체 보기",
+    empty: {
+      title: "아직 계좌 활동이 없습니다",
+      description: "입출금이나 모의주문이 발생하면 최근 활동이 표시됩니다.",
+    },
     items: {
       deposit: {
         title: "추가 입금",

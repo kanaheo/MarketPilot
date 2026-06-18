@@ -35,6 +35,13 @@ export type DashboardPageProps = Readonly<{
   }>;
 }>;
 
+export type DashboardErrorProps = Readonly<{
+  error: Error & {
+    digest?: string;
+  };
+  reset: () => void;
+}>;
+
 type LocalizedDashboardSectionProps<Key extends keyof DashboardMessages> =
   Readonly<{
     locale: Locale;
