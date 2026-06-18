@@ -1,3 +1,4 @@
+import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 import type { Locale } from "@/types/i18n";
@@ -17,4 +18,27 @@ export type SidebarProps = Readonly<{
 
 export type TopBarProps = Readonly<{
   locale: Locale;
+}>;
+
+export type PanelProps = Readonly<{
+  children: ReactNode;
+  className?: string;
+}>;
+
+export type SectionHeaderProps = Readonly<{
+  actionLabel?: string;
+  description?: string;
+  icon?: LucideIcon;
+  meta?: string;
+  title: string;
+}>;
+
+export type TrendValueProps = Readonly<{
+  children: ReactNode;
+  value: number;
+}>;
+
+export type AssetMarkProps = Readonly<{
+  color: string;
+  symbol: string;
 }>;
