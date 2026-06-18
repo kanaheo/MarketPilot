@@ -42,6 +42,20 @@ Phase 2 connects the Phase 1 screens to FastAPI and PostgreSQL one feature at
 a time. For example, the virtual deposit feature will be completed through
 the UI, API, database, recalculation, and tests before another feature begins.
 
+### Continuous integration
+
+The repository uses GitHub Actions to verify changes before they are
+integrated into `develop` or `main`.
+
+1. A pull request or push triggers `Web CI`.
+2. GitHub prepares Node.js from the root `.nvmrc`.
+3. `npm ci` installs the exact versions in `package-lock.json`.
+4. `npm run lint` checks ESLint rules.
+5. `npm run build` checks TypeScript and the production build.
+
+The workflow file is `.github/workflows/web-ci.yml`. After its first successful
+run, a GitHub Ruleset will make `Web CI / Lint and build` a required check.
+
 ---
 
 ## 한국어
@@ -84,6 +98,20 @@ Phase 2에서는 Phase 1 화면을 FastAPI와 PostgreSQL에 기능 하나씩 연
 예를 들어 가상자금 입금 기능의 UI, API, DB 저장, 잔액 재계산 및 테스트를 모두
 완료한 후에 다음 기능을 시작합니다.
 
+### 지속적 통합(CI)
+
+저장소는 변경사항을 `develop` 또는 `main`에 통합하기 전에 GitHub Actions로
+자동 검증합니다.
+
+1. Pull Request 또는 push가 `Web CI`를 실행한다.
+2. GitHub가 루트 `.nvmrc`를 읽어 Node.js를 준비한다.
+3. `npm ci`가 `package-lock.json`에 기록된 정확한 버전을 설치한다.
+4. `npm run lint`가 ESLint 규칙을 검사한다.
+5. `npm run build`가 TypeScript와 프로덕션 빌드를 검사한다.
+
+워크플로 파일은 `.github/workflows/web-ci.yml`입니다. 최초 성공 실행을 확인한 뒤
+GitHub Ruleset에서 `Web CI / Lint and build`를 필수 검사로 지정합니다.
+
 ---
 
 ## 日本語
@@ -125,3 +153,16 @@ MarketPilotは小さな学習単位で開発します。各単位は独立して
 Phase 2では、Phase 1の画面をFastAPIとPostgreSQLへ機能単位で接続します。
 例えば仮想資金の入金機能について、UI、API、DB保存、残高再計算、テストを
 完了してから次の機能へ進みます。
+
+### 継続的インテグレーション（CI）
+
+変更を`develop`または`main`へ統合する前に、GitHub Actionsで自動検証します。
+
+1. Pull Requestまたはpushによって`Web CI`を実行する。
+2. GitHubがルートの`.nvmrc`を読み、Node.jsを準備する。
+3. `npm ci`が`package-lock.json`に記録された正確なバージョンをインストールする。
+4. `npm run lint`がESLintルールを検証する。
+5. `npm run build`がTypeScriptと本番ビルドを検証する。
+
+ワークフローファイルは`.github/workflows/web-ci.yml`です。初回の成功を確認後、
+GitHub Rulesetで`Web CI / Lint and build`を必須チェックに設定します。
