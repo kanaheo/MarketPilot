@@ -42,3 +42,23 @@ export type AssetMarkProps = Readonly<{
   color: string;
   symbol: string;
 }>;
+
+export type EmptyStateProps = Readonly<{
+  actionLabel?: string;
+  description: string;
+  icon?: LucideIcon;
+  title: string;
+}>;
+
+export type ErrorStateProps = Readonly<{
+  actionLabel: string;
+  description: string;
+  onRetry: () => void;
+  title: string;
+}>;
+
+export type LoadingSkeletonProps = Readonly<{
+  className?: string;
+  height: number | string;
+  width?: number | string;
+}>;

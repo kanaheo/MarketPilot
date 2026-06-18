@@ -40,6 +40,11 @@ export const dashboard = {
     portfolio: "マイポートフォリオ",
     benchmark: "S&P 500",
     periodLabel: "成績の表示期間",
+    empty: {
+      title: "まだ運用成績データがありません",
+      description:
+        "最初の取引が記録されると、ポートフォリオ成績が表示されます。",
+    },
     periods: [
       { label: "1週", active: false },
       { label: "1か月", active: true },
@@ -52,6 +57,11 @@ export const dashboard = {
     updated: "10秒前に更新",
     realtime: "サンプル価格",
     manage: "ウォッチリストを管理",
+    empty: {
+      title: "ウォッチリストは空です",
+      description: "銘柄を追加すると、価格と騰落率をすぐに確認できます。",
+      action: "銘柄を追加",
+    },
     columns: {
       symbol: "銘柄",
       price: "現在値",
@@ -66,6 +76,10 @@ export const dashboard = {
     probability: "上昇可能性",
     disclaimer:
       "シグナルは投資助言ではありません。モデルの過去成績と現在のリスクを併せて確認してください。",
+    empty: {
+      title: "表示できるシグナルがありません",
+      description: "次の市場分析が完了すると、新しいシグナルが表示されます。",
+    },
     risks: {
       low: "低リスク",
       medium: "中リスク",
@@ -92,6 +106,11 @@ export const dashboard = {
     viewPortfolio: "ポートフォリオを見る",
     viewAll: "すべての保有銘柄を見る",
     shareUnit: "株",
+    empty: {
+      title: "保有銘柄がありません",
+      description: "最初のペーパー注文が約定すると、保有銘柄が表示されます。",
+      action: "市場を探す",
+    },
     columns: {
       symbol: "銘柄",
       quantity: "保有数",
@@ -104,6 +123,11 @@ export const dashboard = {
     description: "最近のキャッシュフローと注文",
     more: "口座アクティビティメニュー",
     viewAll: "取引履歴をすべて見る",
+    empty: {
+      title: "まだ口座アクティビティがありません",
+      description:
+        "入出金やペーパー注文が発生すると、最近の履歴が表示されます。",
+    },
     items: {
       deposit: {
         title: "追加入金",

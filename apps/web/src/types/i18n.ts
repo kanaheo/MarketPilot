@@ -38,6 +38,12 @@ export type Messages = Readonly<{
   user: {
     role: string;
   };
+  feedback: {
+    loading: string;
+    retry: string;
+    errorTitle: string;
+    errorDescription: string;
+  };
   dashboard: {
     header: {
       greeting: string;
@@ -77,6 +83,10 @@ export type Messages = Readonly<{
       portfolio: string;
       benchmark: string;
       periodLabel: string;
+      empty: {
+        title: string;
+        description: string;
+      };
       periods: readonly {
         label: string;
         active: boolean;
@@ -87,6 +97,11 @@ export type Messages = Readonly<{
       updated: string;
       realtime: string;
       manage: string;
+      empty: {
+        title: string;
+        description: string;
+        action: string;
+      };
       columns: {
         symbol: string;
         price: string;
@@ -100,6 +115,10 @@ export type Messages = Readonly<{
       viewAll: string;
       probability: string;
       disclaimer: string;
+      empty: {
+        title: string;
+        description: string;
+      };
       risks: {
         low: string;
         medium: string;
@@ -126,6 +145,11 @@ export type Messages = Readonly<{
       viewPortfolio: string;
       viewAll: string;
       shareUnit: string;
+      empty: {
+        title: string;
+        description: string;
+        action: string;
+      };
       columns: {
         symbol: string;
         quantity: string;
@@ -138,6 +162,10 @@ export type Messages = Readonly<{
       description: string;
       more: string;
       viewAll: string;
+      empty: {
+        title: string;
+        description: string;
+      };
       items: {
         deposit: {
           title: string;
