@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import type { Messages } from "@/types/i18n";
+import type { Locale } from "@/types/i18n";
 
 export type DashboardLayoutProps = Readonly<{
   children: ReactNode;
@@ -16,6 +17,7 @@ export type DashboardHeaderProps = Readonly<{
 }>;
 
 export type DashboardSummaryProps = Readonly<{
+  locale: Locale;
   messages: DashboardMessages["summary"];
 }>;
 
@@ -32,3 +34,16 @@ export type DashboardPageProps = Readonly<{
     locale: string;
   }>;
 }>;
+
+type LocalizedDashboardSectionProps<Key extends keyof DashboardMessages> =
+  Readonly<{
+    locale: Locale;
+    messages: DashboardMessages[Key];
+  }>;
+
+export type PerformanceChartProps =
+  LocalizedDashboardSectionProps<"performance">;
+export type WatchlistProps = LocalizedDashboardSectionProps<"watchlist">;
+export type MarketSignalsProps = LocalizedDashboardSectionProps<"signals">;
+export type HoldingsProps = LocalizedDashboardSectionProps<"holdings">;
+export type AccountActivityProps = LocalizedDashboardSectionProps<"activity">;
