@@ -17,6 +17,10 @@
 ## Engineering
 
 - Work one roadmap phase at a time.
+- Keep each change to one screen or one end-to-end feature.
+- Explain concepts, commands, target files, and completion criteria before
+  implementation.
+- Do not start the next learning unit until the current change is reviewed.
 - Prefer the simplest implementation that satisfies the current phase.
 - Add tests for portfolio math, cash flows, backtests, and order handling.
 - Preserve timestamps, sources, and model or strategy versions for decisions.
@@ -50,6 +54,9 @@
 ### 엔지니어링
 
 - 로드맵의 한 단계를 완료한 뒤 다음 단계로 진행한다.
+- 변경 범위를 화면 하나 또는 종단 간 기능 하나로 제한한다.
+- 구현 전에 개념, 명령어, 대상 파일 및 완료 기준을 설명한다.
+- 현재 변경사항을 검토하기 전에 다음 학습 단위를 시작하지 않는다.
 - 현재 단계의 요구사항을 충족하는 가장 단순한 구현을 우선한다.
 - 포트폴리오 계산, 현금 흐름, 백테스트와 주문 처리에 테스트를 추가한다.
 - 판단 시점, 출처, 모델 또는 전략 버전을 보존한다.
@@ -83,6 +90,9 @@
 ### エンジニアリング
 
 - ロードマップのフェーズを一つずつ進める。
+- 変更範囲を一画面または一つのエンドツーエンド機能に限定する。
+- 実装前に概念、コマンド、対象ファイル、完了条件を説明する。
+- 現在の変更をレビューするまで次の学習単位を開始しない。
 - 現在のフェーズを満たす最もシンプルな実装を優先する。
 - ポートフォリオ計算、キャッシュフロー、バックテスト、注文処理にテストを追加する。
 - 判断に使用した時刻、情報源、モデルまたは戦略のバージョンを保持する。
