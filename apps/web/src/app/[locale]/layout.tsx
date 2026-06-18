@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { localeFontClassNames } from "@/config/fonts";
 import { siteMetadata } from "@/config/site";
 import { isLocale, locales } from "@/i18n/config";
 import type { LocaleLayoutProps } from "@/types/i18n";
@@ -35,7 +36,7 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale}>
-      <body>{children}</body>
+      <body className={localeFontClassNames[locale]}>{children}</body>
     </html>
   );
 }

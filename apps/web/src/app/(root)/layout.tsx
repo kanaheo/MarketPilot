@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { localeFontClassNames } from "@/config/fonts";
 import { siteMetadata } from "@/config/site";
 import type { ChildrenProps } from "@/types/common";
 
@@ -10,7 +11,7 @@ export const metadata: Metadata = siteMetadata.ko;
 export default function RedirectRootLayout({ children }: ChildrenProps) {
   return (
     <html lang="ko">
-      <body>{children}</body>
+      <body className={localeFontClassNames.ko}>{children}</body>
     </html>
   );
 }

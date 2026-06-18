@@ -20,7 +20,7 @@
 @theme inline {
   --color-background: var(--color-background);
   --color-foreground: var(--color-text);
-  --font-sans: Arial, Helvetica, sans-serif;
+  --font-sans: var(--font-app);
   --font-mono: "SFMono-Regular", Consolas, monospace;
 }
 
@@ -38,8 +38,12 @@ body {
   margin: 0;
   background: var(--color-background);
   color: var(--color-text);
-  font-family: Arial, Helvetica, sans-serif;
-  letter-spacing: 0;
+  font-family: var(--font-app), sans-serif;
+  font-feature-settings:
+    "kern" 1,
+    "liga" 1;
+  letter-spacing: -0.012em;
+  text-rendering: optimizeLegibility;
 }
 
 button,
@@ -74,7 +78,8 @@ button {
   gap: 10px;
   padding: 0 8px;
   font-size: 18px;
-  font-weight: 750;
+  font-weight: 760;
+  letter-spacing: -0.035em;
 }
 
 .brand-mark {
@@ -277,30 +282,149 @@ button {
   padding: 32px 30px 56px;
 }
 
-.page-placeholder {
-  min-height: 360px;
-  border: 1px dashed #c7cfcb;
-  border-radius: var(--radius-panel);
-  background: rgba(255, 255, 255, 0.56);
-  padding: 32px;
+.dashboard-page {
+  display: grid;
+  gap: 24px;
 }
 
-.page-placeholder h1 {
-  margin: 8px 0 0;
-  font-size: 28px;
+.dashboard-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
 }
 
-.page-placeholder p {
-  max-width: 600px;
-  color: var(--color-text-muted);
-  line-height: 1.7;
-}
-
-.page-placeholder .page-eyebrow {
+.dashboard-header h1 {
   margin: 0;
-  color: var(--color-primary);
+  font-size: clamp(24px, 2.1vw, 30px);
+  line-height: 1.2;
+  font-weight: 720;
+  letter-spacing: -0.045em;
+}
+
+.dashboard-header p {
+  margin: 9px 0 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.dashboard-actions {
+  display: flex;
+  flex: none;
+  gap: 10px;
+}
+
+.dashboard-action {
+  display: inline-flex;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: var(--radius-control);
+  padding: 0 16px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.dashboard-action:hover {
+  transform: translateY(-1px);
+}
+
+.dashboard-action.secondary {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.dashboard-action.secondary:hover {
+  background: var(--color-surface-muted);
+}
+
+.dashboard-action.primary {
+  border: 1px solid var(--color-primary);
+  background: var(--color-primary);
+  color: white;
+  box-shadow: 0 5px 14px rgba(22, 121, 111, 0.16);
+}
+
+.dashboard-action.primary:hover {
+  border-color: var(--color-primary-strong);
+  background: var(--color-primary-strong);
+}
+
+.dashboard-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.summary-card {
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+  padding: 18px;
+  box-shadow: 0 1px 2px rgba(22, 32, 28, 0.03);
+}
+
+.summary-card-heading,
+.summary-card-detail {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.summary-card-heading {
+  color: var(--color-text-muted);
   font-size: 12px;
-  font-weight: 750;
+  font-weight: 700;
+}
+
+.summary-card-heading svg {
+  flex: none;
+  color: #7b8580;
+}
+
+.summary-card-value {
+  display: block;
+  margin-top: 16px;
+  overflow-wrap: anywhere;
+  font-size: clamp(21px, 1.7vw, 26px);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  font-weight: 760;
+  letter-spacing: -0.045em;
+}
+
+.summary-card-detail {
+  margin-top: 18px;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.summary-card-detail span:last-child {
+  text-align: right;
+}
+
+.summary-card-detail.positive {
+  color: var(--color-primary);
+}
+
+.summary-card-detail.positive span:last-child,
+.summary-card-detail.neutral {
+  color: var(--color-text-muted);
+}
+
+.summary-card-detail.warning {
+  color: #c47a27;
 }
 
 @media (max-width: 900px) {
@@ -315,5 +439,47 @@ button {
 
   .market-status > span:last-child {
     display: none;
+  }
+
+  .dashboard-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .app-sidebar {
+    display: none;
+  }
+
+  .app-workspace {
+    margin-left: 0;
+  }
+
+  .app-topbar {
+    padding: 0 16px;
+  }
+
+  .portfolio-selector span {
+    display: none;
+  }
+
+  .dashboard-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .dashboard-actions {
+    width: 100%;
+  }
+
+  .dashboard-action {
+    flex: 1;
+    padding: 0 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-summary-grid {
+    grid-template-columns: 1fr;
   }
 }

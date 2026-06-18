@@ -39,8 +39,42 @@ export type Messages = Readonly<{
     role: string;
   };
   dashboard: {
-    phase: string;
-    title: string;
-    placeholder: string;
+    header: {
+      greeting: string;
+      description: string;
+      actions: {
+        history: string;
+        addFunds: string;
+      };
+    };
+    summary: {
+      summaryLabel: string;
+      cards: {
+        totalValue: {
+          label: string;
+          value: string;
+          detail: string;
+          detailAside: string;
+        };
+        availableCash: {
+          label: string;
+          value: string;
+          detail: string;
+          detailAside: string;
+        };
+        todayProfit: {
+          label: string;
+          value: string;
+          detail: string;
+          detailAside: string;
+        };
+        maxDrawdown: {
+          label: string;
+          value: string;
+          detail: string;
+          detailAside: string;
+        };
+      };
+    };
   };
 }>;
