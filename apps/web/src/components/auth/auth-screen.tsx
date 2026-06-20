@@ -18,7 +18,7 @@ import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
-import { GitHubIcon, GoogleIcon } from "@/components/auth/provider-icons";
+import { GoogleIcon } from "@/components/auth/provider-icons";
 import { LanguageSelector } from "@/components/navigation/language-selector";
 import {
   createEmailAuthSchema,
@@ -30,11 +30,6 @@ import type {
   AuthScreenProps,
   AuthStatus,
 } from "@/types/auth";
-
-const providerIcons = {
-  github: GitHubIcon,
-  google: GoogleIcon,
-};
 
 export function AuthScreen({
   googleAuthEnabled,
@@ -66,27 +61,18 @@ export function AuthScreen({
   const alternateMode: AuthMode = mode === "login" ? "signup" : "login";
   const alternateHref = `/${locale}/${alternateMode}`;
 
-  async function startProvider(provider: AuthProvider) {
-    setActiveProvider(provider);
+  async function startGoogleAuth() {
+    setActiveProvider("google");
     setStatus("loading");
 
-    if (provider === "google") {
-      try {
-        await signIn("google", {
-          redirectTo: `/${locale}`,
-        });
-      } catch {
-        setActiveProvider(null);
-        setStatus("error");
-      }
-
-      return;
-    }
-
-    window.setTimeout(() => {
+    try {
+      await signIn("google", {
+        redirectTo: `/${locale}`,
+      });
+    } catch {
       setActiveProvider(null);
-      setStatus("idle");
-    }, 900);
+      setStatus("error");
+    }
   }
 
   async function submitEmail() {
@@ -223,40 +209,29 @@ export function AuthScreen({
           ) : null}
 
           <div className="auth-provider-grid">
-            {(["google", "github"] as const).map((provider) => {
-              const Icon = providerIcons[provider];
-              const providerMessage = messages.providers[provider];
-              const providerLoading = isLoading && activeProvider === provider;
-              const providerDisabled =
-                isLoading || (provider === "google" && !googleAuthEnabled);
-
-              return (
-                <button
-                  className="auth-provider-button"
-                  disabled={providerDisabled}
-                  key={provider}
-                  onClick={() => {
-                    void startProvider(provider);
-                  }}
-                  type="button"
-                >
-                  {providerLoading ? (
-                    <LoaderCircle
-                      className="auth-spinner"
-                      size={18}
-                      aria-hidden="true"
-                    />
-                  ) : (
-                    <Icon />
-                  )}
-                  <span>
-                    {providerLoading
-                      ? messages.status.connecting
-                      : providerMessage[mode]}
-                  </span>
-                </button>
-              );
-            })}
+            <button
+              className="auth-provider-button"
+              disabled={isLoading || !googleAuthEnabled}
+              onClick={() => {
+                void startGoogleAuth();
+              }}
+              type="button"
+            >
+              {isLoading && activeProvider === "google" ? (
+                <LoaderCircle
+                  className="auth-spinner"
+                  size={18}
+                  aria-hidden="true"
+                />
+              ) : (
+                <GoogleIcon />
+              )}
+              <span>
+                {isLoading && activeProvider === "google"
+                  ? messages.status.connecting
+                  : messages.providers.google[mode]}
+              </span>
+            </button>
           </div>
 
           <div className="auth-divider">

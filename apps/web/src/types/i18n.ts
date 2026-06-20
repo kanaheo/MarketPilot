@@ -36,7 +36,9 @@ export type Messages = Readonly<{
     label: string;
   };
   user: {
+    fallbackName: string;
     role: string;
+    signOut: string;
   };
   feedback: {
     loading: string;
@@ -75,10 +77,6 @@ export type Messages = Readonly<{
     };
     providers: {
       google: {
-        login: string;
-        signup: string;
-      };
-      github: {
         login: string;
         signup: string;
       };

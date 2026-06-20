@@ -40,10 +40,6 @@ export const auth = {
       login: "Google로 로그인",
       signup: "Google로 가입",
     },
-    github: {
-      login: "GitHub로 로그인",
-      signup: "GitHub로 가입",
-    },
   },
   email: {
     label: "이메일",
