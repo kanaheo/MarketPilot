@@ -40,10 +40,6 @@ export const auth = {
       login: "Continue with Google",
       signup: "Sign up with Google",
     },
-    github: {
-      login: "Continue with GitHub",
-      signup: "Sign up with GitHub",
-    },
   },
   email: {
     label: "Email",

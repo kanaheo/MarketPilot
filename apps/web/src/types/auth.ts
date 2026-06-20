@@ -2,7 +2,7 @@ import type { Messages } from "@/types/i18n";
 import type { Locale } from "@/types/i18n";
 
 export type AuthMode = "login" | "signup";
-export type AuthProvider = "google" | "github" | "email";
+export type AuthProvider = "google" | "email";
 export type AuthStatus = "idle" | "loading" | "error" | "cancelled";
 
 export type AuthPageProps = Readonly<{

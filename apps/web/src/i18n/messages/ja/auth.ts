@@ -40,10 +40,6 @@ export const auth = {
       login: "Googleでログイン",
       signup: "Googleで登録",
     },
-    github: {
-      login: "GitHubでログイン",
-      signup: "GitHubで登録",
-    },
   },
   email: {
     label: "メールアドレス",

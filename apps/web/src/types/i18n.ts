@@ -78,10 +78,6 @@ export type Messages = Readonly<{
         login: string;
         signup: string;
       };
-      github: {
-        login: string;
-        signup: string;
-      };
     };
     email: {
       label: string;
