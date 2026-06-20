@@ -13,6 +13,9 @@ export default async function LoginPage({
 
   return (
     <AuthScreen
+      googleAuthEnabled={Boolean(
+        process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET,
+      )}
       initialMode="login"
       locale={locale}
       messages={getMessages(locale).auth}

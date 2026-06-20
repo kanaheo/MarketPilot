@@ -16,6 +16,7 @@ export type AuthPageProps = Readonly<{
 }>;
 
 export type AuthScreenProps = Readonly<{
+  googleAuthEnabled: boolean;
   initialMode: AuthMode;
   locale: Locale;
   messages: Messages["auth"];

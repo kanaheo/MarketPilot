@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -36,6 +37,7 @@ const providerIcons = {
 };
 
 export function AuthScreen({
+  googleAuthEnabled,
   initialMode,
   locale,
   messages,
@@ -64,9 +66,22 @@ export function AuthScreen({
   const alternateMode: AuthMode = mode === "login" ? "signup" : "login";
   const alternateHref = `/${locale}/${alternateMode}`;
 
-  function startProvider(provider: AuthProvider) {
+  async function startProvider(provider: AuthProvider) {
     setActiveProvider(provider);
     setStatus("loading");
+
+    if (provider === "google") {
+      try {
+        await signIn("google", {
+          redirectTo: `/${locale}`,
+        });
+      } catch {
+        setActiveProvider(null);
+        setStatus("error");
+      }
+
+      return;
+    }
 
     window.setTimeout(() => {
       setActiveProvider(null);
@@ -212,13 +227,17 @@ export function AuthScreen({
               const Icon = providerIcons[provider];
               const providerMessage = messages.providers[provider];
               const providerLoading = isLoading && activeProvider === provider;
+              const providerDisabled =
+                isLoading || (provider === "google" && !googleAuthEnabled);
 
               return (
                 <button
                   className="auth-provider-button"
-                  disabled={isLoading}
+                  disabled={providerDisabled}
                   key={provider}
-                  onClick={() => startProvider(provider)}
+                  onClick={() => {
+                    void startProvider(provider);
+                  }}
                   type="button"
                 >
                   {providerLoading ? (
