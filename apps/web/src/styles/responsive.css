@@ -1,0 +1,209 @@
+@media (max-width: 900px) {
+  :root {
+    --sidebar-width: 196px;
+  }
+
+  .app-main {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+
+  .market-status > span:last-child {
+    display: none;
+  }
+
+  .dashboard-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .auth-shell {
+    grid-template-columns: minmax(330px, 0.8fr) minmax(460px, 1.2fr);
+  }
+
+  .auth-story {
+    padding-right: 34px;
+    padding-left: 34px;
+  }
+
+  .auth-story h1 {
+    font-size: 40px;
+  }
+
+  .dashboard-primary-grid,
+  .dashboard-secondary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .compact-panel {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 680px) {
+  .app-sidebar {
+    display: none;
+  }
+
+  .app-workspace {
+    margin-left: 0;
+  }
+
+  .app-topbar {
+    padding: 0 16px;
+  }
+
+  .portfolio-selector span {
+    display: none;
+  }
+
+  .auth-shell {
+    display: block;
+  }
+
+  .auth-story {
+    min-height: auto;
+    padding: 24px 22px 34px;
+  }
+
+  .auth-story-content {
+    width: 100%;
+    padding: 52px 0 0;
+  }
+
+  .auth-story h1 {
+    font-size: clamp(34px, 11vw, 46px);
+  }
+
+  .auth-story-content > p {
+    font-size: 13px;
+  }
+
+  .auth-preview {
+    display: none;
+  }
+
+  .auth-benefits {
+    margin-top: 26px;
+  }
+
+  .auth-story-note {
+    margin-top: 34px;
+  }
+
+  .auth-workspace {
+    min-height: auto;
+    padding: 80px 18px 38px;
+  }
+
+  .auth-toolbar {
+    top: 22px;
+    right: 18px;
+  }
+
+  .auth-card {
+    padding: 28px 22px;
+  }
+
+  .dashboard-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .dashboard-loading-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .dashboard-loading-actions {
+    width: 100%;
+  }
+
+  .dashboard-loading-actions .loading-skeleton {
+    width: 50% !important;
+  }
+
+  .dashboard-actions {
+    width: 100%;
+  }
+
+  .dashboard-action {
+    flex: 1;
+    padding: 0 10px;
+  }
+
+  .performance-heading-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .period-tabs {
+    width: 100%;
+  }
+
+  .period-tabs button {
+    flex: 1;
+  }
+
+  .watchlist-panel,
+  .performance-panel,
+  .compact-panel {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .panel-footer-action {
+    width: calc(100% + 28px);
+    margin-right: -14px;
+    margin-left: -14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .watchlist-columns {
+    grid-template-columns: minmax(110px, 1.25fr) 72px 58px;
+  }
+
+  .watchlist-columns > :last-child {
+    display: none;
+  }
+
+  .holdings-columns {
+    grid-template-columns: minmax(100px, 1.2fr) 42px minmax(82px, 0.9fr);
+  }
+
+  .holdings-columns > :last-child {
+    display: none;
+  }
+
+  .performance-chart {
+    height: 210px;
+  }
+
+  .auth-email-control {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-email-control button {
+    width: 100%;
+  }
+
+  .auth-trust-row {
+    align-items: center;
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-skeleton::after {
+    animation: none;
+  }
+
+  .auth-spinner {
+    animation: none;
+  }
+}

@@ -48,6 +48,7 @@ export const auth = {
   email: {
     label: "Email",
     placeholder: "name@example.com",
+    invalid: "Enter a valid email address.",
   },
   status: {
     connecting: "Connecting...",
