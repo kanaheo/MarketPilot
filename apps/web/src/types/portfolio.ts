@@ -16,3 +16,13 @@ export type PortfolioSummaryProps = Readonly<{
   locale: Locale;
   messages: PortfolioMessages["summary"];
 }>;
+
+export type PortfolioValueChartProps = Readonly<{
+  locale: Locale;
+  messages: PortfolioMessages["valueChart"];
+}>;
+
+export type AssetAllocationProps = Readonly<{
+  locale: Locale;
+  messages: PortfolioMessages["allocation"];
+}>;

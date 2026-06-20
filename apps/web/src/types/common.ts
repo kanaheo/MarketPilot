@@ -33,6 +33,14 @@ export type PanelProps = Readonly<{
   className?: string;
 }>;
 
+export type PeriodTabsProps = Readonly<{
+  ariaLabel: string;
+  periods: readonly Readonly<{
+    active: boolean;
+    label: string;
+  }>[];
+}>;
+
 export type SectionHeaderProps = Readonly<{
   actionLabel?: string;
   description?: string;

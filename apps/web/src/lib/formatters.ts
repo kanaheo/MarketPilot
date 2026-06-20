@@ -28,6 +28,16 @@ export function formatDollar(value: number, locale: Locale) {
   }).format(value);
 }
 
+export function formatCompactDollar(value: number, locale: Locale) {
+  return new Intl.NumberFormat(localeCodes[locale], {
+    compactDisplay: "short",
+    currency: "USD",
+    maximumFractionDigits: 0,
+    notation: "compact",
+    style: "currency",
+  }).format(value);
+}
+
 export function formatPercent(
   value: number,
   locale: Locale,

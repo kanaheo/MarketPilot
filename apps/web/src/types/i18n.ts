@@ -255,5 +255,26 @@ export type Messages = Readonly<{
         maxDrawdown: string;
       };
     };
+    valueChart: {
+      title: string;
+      chartLabel: string;
+      portfolio: string;
+      benchmark: string;
+      periodLabel: string;
+      periods: readonly {
+        label: string;
+        active: boolean;
+      }[];
+    };
+    allocation: {
+      title: string;
+      chartLabel: string;
+      totalValue: string;
+      items: {
+        stocks: string;
+        etfs: string;
+        cash: string;
+      };
+    };
   };
 }>;

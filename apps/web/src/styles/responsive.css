@@ -31,7 +31,8 @@
   }
 
   .dashboard-primary-grid,
-  .dashboard-secondary-grid {
+  .dashboard-secondary-grid,
+  .portfolio-insights-grid {
     grid-template-columns: 1fr;
   }
 
@@ -137,12 +138,35 @@
     flex-direction: column;
   }
 
+  .portfolio-panel-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .period-tabs {
     width: 100%;
   }
 
   .period-tabs button {
     flex: 1;
+  }
+
+  .asset-allocation-content {
+    grid-template-columns: 1fr;
+  }
+
+  .allocation-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .allocation-list li {
+    grid-template-columns: 10px 1fr;
+  }
+
+  .allocation-values {
+    grid-column: 2;
+    justify-items: start;
   }
 
   .watchlist-panel,
@@ -183,6 +207,26 @@
 
   .performance-chart {
     height: 210px;
+  }
+
+  .portfolio-value-panel,
+  .asset-allocation-panel {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .portfolio-value-chart {
+    height: 220px;
+  }
+
+  .portfolio-chart-legend {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .allocation-list {
+    grid-template-columns: 1fr;
   }
 
   .auth-email-control {

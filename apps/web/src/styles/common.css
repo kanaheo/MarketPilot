@@ -75,6 +75,36 @@
   color: #c47a27;
 }
 
+.period-tabs {
+  display: flex;
+  flex: none;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+}
+
+.period-tabs button {
+  height: 32px;
+  border: 0;
+  border-right: 1px solid var(--color-border);
+  background: var(--color-surface);
+  padding: 0 13px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.period-tabs button:last-child {
+  border-right: 0;
+}
+
+.period-tabs button.active {
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  font-weight: 750;
+  box-shadow: inset 0 0 0 1px #cfd6d2;
+}
+
 .loading-skeleton {
   display: block;
   overflow: hidden;

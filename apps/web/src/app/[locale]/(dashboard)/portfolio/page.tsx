@@ -1,5 +1,7 @@
+import { AssetAllocation } from "@/components/portfolio/asset-allocation";
 import { PortfolioHeader } from "@/components/portfolio/portfolio-header";
 import { PortfolioSummary } from "@/components/portfolio/portfolio-summary";
+import { PortfolioValueChart } from "@/components/portfolio/portfolio-value-chart";
 import { assertLocale } from "@/i18n/config";
 import { getMessages } from "@/i18n/messages";
 import type { PortfolioPageProps } from "@/types/portfolio";
@@ -18,6 +20,16 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
         locale={locale}
         messages={messages.portfolio.summary}
       />
+      <div className="portfolio-insights-grid">
+        <PortfolioValueChart
+          locale={locale}
+          messages={messages.portfolio.valueChart}
+        />
+        <AssetAllocation
+          locale={locale}
+          messages={messages.portfolio.allocation}
+        />
+      </div>
     </div>
   );
 }
