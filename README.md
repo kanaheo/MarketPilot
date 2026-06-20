@@ -59,6 +59,7 @@ trustworthy.
 - [Roadmap](docs/roadmap.md)
 - [Cost plan](docs/cost-plan.md)
 - [Learning development plan](docs/learning-plan.md)
+- [Authentication](docs/authentication.md)
 
 ## Quality checks
 
@@ -136,6 +137,7 @@ MarketPilot은 수익을 보장하거나 확정적인 예측을 제공하지 않
 - [로드맵](docs/roadmap.md#한국어)
 - [비용 계획](docs/cost-plan.md#한국어)
 - [학습 중심 개발 일정](docs/learning-plan.md#한국어)
+- [인증](docs/authentication.md#한국어)
 
 ### 품질 검사
 
@@ -215,6 +217,7 @@ MarketPilotは、利益を保証したり、確実な予測を提供したりす
 - [ロードマップ](docs/roadmap.md#日本語)
 - [コスト計画](docs/cost-plan.md#日本語)
 - [学習中心の開発計画](docs/learning-plan.md#日本語)
+- [認証](docs/authentication.md#日本語)
 
 ### 品質チェック
 
