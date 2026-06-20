@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MarketPilot Web
 
-## Getting Started
+[English](#english) | [한국어](#한국어) | [日本語](#日本語)
 
-First, run the development server:
+<a id="english"></a>
+
+## English
+
+MarketPilot Web is the responsive frontend for MarketPilot, a paper-trading
+application for exploring investment ideas without using real money.
+
+### Features
+
+- localized interface in Korean, English, and Japanese
+- portfolio dashboard and market overview
+- watchlist, holdings, performance, and risk signals
+- responsive login and signup screens
+- paper-trading-only product safeguards
+
+### Stack
+
+Next.js, TypeScript, React, Auth.js, React Hook Form, Zod, and Recharts.
+
+### Run locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+<a id="한국어"></a>
 
-## Learn More
+## 한국어
 
-To learn more about Next.js, take a look at the following resources:
+MarketPilot Web은 실제 자금을 사용하지 않고 투자 아이디어를 탐색할 수 있는
+모의투자 서비스 MarketPilot의 반응형 프론트엔드입니다.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 주요 기능
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- 한국어, 영어, 일본어 다국어 인터페이스
+- 포트폴리오 대시보드와 시장 현황
+- 관심 종목, 보유 종목, 성과 및 위험 신호
+- 반응형 로그인 및 회원가입 화면
+- 모의투자 전용 안전장치
 
-## Deploy on Vercel
+### 기술 스택
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Next.js, TypeScript, React, Auth.js, React Hook Form, Zod, Recharts를 사용합니다.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 로컬 실행
+
+```bash
+npm install
+npm run dev
+```
+
+[http://localhost:3000](http://localhost:3000)에서 확인할 수 있습니다.
+
+---
+
+<a id="日本語"></a>
+
+## 日本語
+
+MarketPilot Webは、実際の資金を使わずに投資アイデアを検討できる
+ペーパートレードサービスMarketPilotのレスポンシブフロントエンドです。
+
+### 主な機能
+
+- 韓国語、英語、日本語に対応したインターフェース
+- ポートフォリオダッシュボードと市場概要
+- ウォッチリスト、保有銘柄、パフォーマンス、リスクシグナル
+- レスポンシブなログイン・新規登録画面
+- ペーパートレード専用の安全対策
+
+### 技術スタック
+
+Next.js、TypeScript、React、Auth.js、React Hook Form、Zod、Rechartsを使用します。
+
+### ローカル実行
+
+```bash
+npm install
+npm run dev
+```
+
+[http://localhost:3000](http://localhost:3000)で確認できます。

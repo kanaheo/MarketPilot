@@ -13,10 +13,16 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 
 import { GitHubIcon, GoogleIcon } from "@/components/auth/provider-icons";
 import { LanguageSelector } from "@/components/navigation/language-selector";
+import {
+  createEmailAuthSchema,
+  type EmailAuthValues,
+} from "@/lib/validation/auth";
 import type {
   AuthMode,
   AuthProvider,
@@ -39,6 +45,19 @@ export function AuthScreen({
   const [activeProvider, setActiveProvider] = useState<AuthProvider | null>(
     null,
   );
+  const {
+    formState: { errors, isSubmitting },
+    handleSubmit,
+    register,
+    trigger,
+  } = useForm<EmailAuthValues>({
+    defaultValues: {
+      email: "",
+    },
+    mode: "onChange",
+    reValidateMode: "onChange",
+    resolver: zodResolver(createEmailAuthSchema(messages.email.invalid)),
+  });
 
   const mode = initialMode;
   const modeMessages = messages[mode];
@@ -55,18 +74,17 @@ export function AuthScreen({
     }, 900);
   }
 
-  function submitEmail(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function submitEmail() {
     setActiveProvider("email");
     setStatus("loading");
 
-    window.setTimeout(() => {
-      setActiveProvider(null);
-      setStatus("idle");
-    }, 900);
+    await new Promise((resolve) => window.setTimeout(resolve, 900));
+
+    setActiveProvider(null);
+    setStatus("idle");
   }
 
-  const isLoading = status === "loading";
+  const isLoading = status === "loading" || isSubmitting;
 
   return (
     <div className="auth-shell">
@@ -226,17 +244,31 @@ export function AuthScreen({
             <span>{messages.or}</span>
           </div>
 
-          <form className="auth-email-form" onSubmit={submitEmail}>
+          <form
+            className="auth-email-form"
+            noValidate
+            onSubmit={handleSubmit(submitEmail)}
+          >
             <label htmlFor={`${mode}-email`}>{messages.email.label}</label>
             <div className="auth-email-control">
               <input
+                aria-describedby={
+                  errors.email ? `${mode}-email-error` : undefined
+                }
+                aria-invalid={errors.email ? "true" : "false"}
                 autoComplete="email"
                 disabled={isLoading}
                 id={`${mode}-email`}
-                name="email"
                 placeholder={messages.email.placeholder}
-                required
                 type="email"
+                {...register("email", {
+                  onBlur: () => {
+                    void trigger("email");
+                  },
+                  onChange: () => {
+                    void trigger("email");
+                  },
+                })}
               />
               <button disabled={isLoading} type="submit">
                 {isLoading && activeProvider === "email" ? (
@@ -251,6 +283,16 @@ export function AuthScreen({
                 <span>{modeMessages.emailAction}</span>
               </button>
             </div>
+            {errors.email ? (
+              <p
+                className="auth-field-error"
+                id={`${mode}-email-error`}
+                role="alert"
+              >
+                <CircleAlert size={14} strokeWidth={2.25} aria-hidden="true" />
+                <span>{errors.email.message}</span>
+              </p>
+            ) : null}
           </form>
 
           <p className="auth-switch">

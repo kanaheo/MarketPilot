@@ -48,6 +48,7 @@ export const auth = {
   email: {
     label: "이메일",
     placeholder: "name@example.com",
+    invalid: "올바른 이메일 주소를 입력해 주세요.",
   },
   status: {
     connecting: "연결 중...",

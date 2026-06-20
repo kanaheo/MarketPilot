@@ -86,6 +86,7 @@ export type Messages = Readonly<{
     email: {
       label: string;
       placeholder: string;
+      invalid: string;
     };
     status: {
       connecting: string;

@@ -48,6 +48,7 @@ export const auth = {
   email: {
     label: "メールアドレス",
     placeholder: "name@example.com",
+    invalid: "有効なメールアドレスを入力してください。",
   },
   status: {
     connecting: "接続中...",
