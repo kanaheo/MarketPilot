@@ -22,7 +22,9 @@ export const common = {
     label: "言語を選択",
   },
   user: {
+    fallbackName: "MarketPilotユーザー",
     role: "ペーパー投資家",
+    signOut: "ログアウト",
   },
   feedback: {
     loading: "ダッシュボードを読み込んでいます。",

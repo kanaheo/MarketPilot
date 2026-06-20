@@ -36,7 +36,9 @@ export type Messages = Readonly<{
     label: string;
   };
   user: {
+    fallbackName: string;
     role: string;
+    signOut: string;
   };
   feedback: {
     loading: string;

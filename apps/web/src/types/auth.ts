@@ -26,3 +26,8 @@ export type AuthScreenProps = Readonly<{
 export type ProviderIconProps = Readonly<{
   size?: number;
 }>;
+
+export type SignOutButtonProps = Readonly<{
+  label: string;
+  redirectTo: string;
+}>;

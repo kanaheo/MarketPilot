@@ -1,3 +1,6 @@
+import { redirect } from "next/navigation";
+
+import { auth } from "@/auth";
 import { AuthScreen } from "@/components/auth/auth-screen";
 import { assertLocale } from "@/i18n/config";
 import { getMessages } from "@/i18n/messages";
@@ -10,6 +13,12 @@ export default async function SignupPage({
   const [{ locale }, query] = await Promise.all([params, searchParams]);
 
   assertLocale(locale);
+
+  const session = await auth();
+
+  if (session?.user) {
+    redirect(`/${locale}`);
+  }
 
   return (
     <AuthScreen

@@ -10,10 +10,18 @@ export type ChildrenProps = Readonly<{
 export type AppShellProps = Readonly<{
   children: ReactNode;
   locale: Locale;
+  user: AuthenticatedUser;
 }>;
 
 export type SidebarProps = Readonly<{
   locale: Locale;
+  user: AuthenticatedUser;
+}>;
+
+export type AuthenticatedUser = Readonly<{
+  email: string | null;
+  image: string | null;
+  name: string | null;
 }>;
 
 export type TopBarProps = Readonly<{

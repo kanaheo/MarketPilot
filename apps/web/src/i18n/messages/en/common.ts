@@ -22,7 +22,9 @@ export const common = {
     label: "Select language",
   },
   user: {
+    fallbackName: "MarketPilot user",
     role: "Paper investor",
+    signOut: "Sign out",
   },
   feedback: {
     loading: "Loading your dashboard.",
