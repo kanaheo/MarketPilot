@@ -241,4 +241,19 @@ export type Messages = Readonly<{
       };
     };
   };
+  portfolio: {
+    header: {
+      title: string;
+      description: string;
+    };
+    summary: {
+      label: string;
+      cards: {
+        totalValue: string;
+        availableCash: string;
+        totalReturn: string;
+        maxDrawdown: string;
+      };
+    };
+  };
 }>;

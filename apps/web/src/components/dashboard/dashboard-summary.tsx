@@ -1,6 +1,6 @@
 import { CircleDollarSign, Gauge, Shield, WalletCards } from "lucide-react";
 
-import { SummaryCard } from "@/components/dashboard/summary-card";
+import { SummaryCard } from "@/components/common/summary-card";
 import { dashboardData } from "@/data/dashboard";
 import { formatCurrency, formatPercent } from "@/lib/formatters";
 import type { DashboardSummaryProps } from "@/types/dashboard";

@@ -33,4 +33,4 @@ export const common = {
     errorDescription:
       "잠시 후 다시 시도해 주세요. 문제가 계속되면 네트워크 상태를 확인해 주세요.",
   },
-} as const satisfies Omit<Messages, "auth" | "dashboard">;
+} as const satisfies Omit<Messages, "auth" | "dashboard" | "portfolio">;

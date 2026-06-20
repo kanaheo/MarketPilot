@@ -41,6 +41,15 @@ export type SectionHeaderProps = Readonly<{
   title: string;
 }>;
 
+export type SummaryCardProps = Readonly<{
+  detail?: string;
+  detailAside?: string;
+  icon: LucideIcon;
+  label: string;
+  tone: "negative" | "neutral" | "positive" | "warning";
+  value: string;
+}>;
+
 export type TrendValueProps = Readonly<{
   children: ReactNode;
   value: number;
