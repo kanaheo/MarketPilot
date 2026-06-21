@@ -12,6 +12,8 @@ export function AssetAllocation({
   locale,
   messages,
 }: AssetAllocationProps) {
+  const totalValue = portfolioData.summary.totalValue.value;
+
   return (
     <Panel className="asset-allocation-panel">
       <SectionHeader title={messages.title} />
@@ -47,7 +49,7 @@ export function AssetAllocation({
             </ResponsiveContainer>
           </div>
           <div className="allocation-chart-center">
-            <strong>{formatDollar(124_580.4, locale)}</strong>
+            <strong>{formatDollar(totalValue, locale)}</strong>
             <span>{messages.totalValue}</span>
           </div>
         </div>
@@ -65,7 +67,7 @@ export function AssetAllocation({
               </span>
               <span className="allocation-values">
                 <strong>
-                  {formatPercent(item.ratio, locale, {
+                  {formatPercent(item.value / totalValue, locale, {
                     maximumFractionDigits: 0,
                     minimumFractionDigits: 0,
                     signDisplay: "never",

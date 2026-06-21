@@ -21,6 +21,9 @@ export function PortfolioValueChart({
   locale,
   messages,
 }: PortfolioValueChartProps) {
+  const latestValue =
+    portfolioData.valueHistory[portfolioData.valueHistory.length - 1];
+
   return (
     <Panel className="portfolio-value-panel">
       <div className="portfolio-panel-heading">
@@ -102,11 +105,11 @@ export function PortfolioValueChart({
       <div className="portfolio-chart-legend">
         <span className="portfolio">
           {messages.portfolio}{" "}
-          <strong>{formatDollar(124_580.4, locale)}</strong>
+          <strong>{formatDollar(latestValue.portfolio, locale)}</strong>
         </span>
         <span className="benchmark">
           {messages.benchmark}{" "}
-          <strong>{formatDollar(116_100, locale)}</strong>
+          <strong>{formatDollar(latestValue.benchmark, locale)}</strong>
         </span>
       </div>
     </Panel>

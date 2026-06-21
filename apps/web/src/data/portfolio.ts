@@ -1,12 +1,74 @@
+const availableCash = 18_240;
+
+const holdings = [
+  {
+    symbol: "AAPL",
+    name: "Apple Inc.",
+    assetClass: "stocks",
+    quantity: 120,
+    averagePrice: 175.32,
+    currentPrice: 198.92,
+    marketValue: 23_870.4,
+    returnRate: 0.1346,
+    color: "#555b62",
+  },
+  {
+    symbol: "MSFT",
+    name: "Microsoft Corp.",
+    assetClass: "stocks",
+    quantity: 80,
+    averagePrice: 338.47,
+    currentPrice: 347.21,
+    marketValue: 27_776.8,
+    returnRate: 0.0258,
+    color: "#2878d7",
+  },
+  {
+    symbol: "NVDA",
+    name: "NVIDIA Corp.",
+    assetClass: "stocks",
+    quantity: 22,
+    averagePrice: 874.19,
+    currentPrice: 831.82,
+    marketValue: 18_300,
+    returnRate: -0.0485,
+    color: "#76b900",
+  },
+  {
+    symbol: "VTI",
+    name: "Vanguard Total Stock Market ETF",
+    assetClass: "etfs",
+    quantity: 150,
+    averagePrice: 241.6,
+    currentPrice: 242.62,
+    marketValue: 36_393.2,
+    returnRate: 0.0042,
+    color: "#245ca6",
+  },
+] as const;
+
+const getAssetClassValue = (
+  assetClass: (typeof holdings)[number]["assetClass"],
+) =>
+  holdings
+    .filter((holding) => holding.assetClass === assetClass)
+    .reduce((total, holding) => total + holding.marketValue, 0);
+
+const investedValue = holdings.reduce(
+  (total, holding) => total + holding.marketValue,
+  0,
+);
+const totalValue = investedValue + availableCash;
+
 export const portfolioData = {
   summary: {
     totalValue: {
-      value: 124_580.4,
+      value: totalValue,
       gain: 14_120.8,
       returnRate: 0.1284,
     },
     availableCash: {
-      value: 18_240,
+      value: availableCash,
     },
     totalReturn: {
       value: 0.1284,
@@ -27,77 +89,33 @@ export const portfolioData = {
     { date: "06/10", benchmark: 113_700, portfolio: 122_100 },
     { date: "06/13", benchmark: 114_200, portfolio: 120_300 },
     { date: "06/16", benchmark: 114_800, portfolio: 124_300 },
-    { date: "06/19", benchmark: 116_100, portfolio: 124_580.4 },
+    { date: "06/19", benchmark: 116_100, portfolio: totalValue },
   ],
   allocation: [
     {
       key: "stocks",
-      value: 77_639.45,
-      ratio: 0.62,
+      value: getAssetClassValue("stocks"),
       color: "#11675f",
     },
     {
       key: "etfs",
-      value: 28_700.95,
-      ratio: 0.23,
+      value: getAssetClassValue("etfs"),
       color: "#43a678",
     },
     {
       key: "cash",
-      value: 18_240,
-      ratio: 0.15,
+      value: availableCash,
       color: "#b9d9b0",
     },
   ],
-  holdings: [
-    {
-      symbol: "AAPL",
-      name: "Apple Inc.",
-      quantity: 120,
-      averagePrice: 175.32,
-      currentPrice: 198.92,
-      marketValue: 23_870.4,
-      returnRate: 0.1346,
-      color: "#555b62",
-    },
-    {
-      symbol: "MSFT",
-      name: "Microsoft Corp.",
-      quantity: 80,
-      averagePrice: 338.47,
-      currentPrice: 347.21,
-      marketValue: 27_776.8,
-      returnRate: 0.0258,
-      color: "#2878d7",
-    },
-    {
-      symbol: "NVDA",
-      name: "NVIDIA Corp.",
-      quantity: 22,
-      averagePrice: 874.19,
-      currentPrice: 831.82,
-      marketValue: 18_300,
-      returnRate: -0.0485,
-      color: "#76b900",
-    },
-    {
-      symbol: "VTI",
-      name: "Vanguard Total Stock Market ETF",
-      quantity: 150,
-      averagePrice: 241.6,
-      currentPrice: 242.62,
-      marketValue: 36_393.2,
-      returnRate: 0.0042,
-      color: "#245ca6",
-    },
-  ],
+  holdings,
   cashActivity: [
     {
       key: "depositJune",
       type: "deposit",
       date: "2026-06-18",
       amount: 5_000,
-      balance: 18_240,
+      balance: availableCash,
     },
     {
       key: "applePurchase",

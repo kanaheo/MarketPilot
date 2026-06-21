@@ -29,12 +29,16 @@ export function PortfolioHoldings({
           aria-label={messages.title}
         >
           <div className="portfolio-holdings-row header" role="row">
-            <span>{messages.columns.asset}</span>
-            <span>{messages.columns.quantity}</span>
-            <span>{messages.columns.averagePrice}</span>
-            <span>{messages.columns.currentPrice}</span>
-            <span>{messages.columns.marketValue}</span>
-            <span>{messages.columns.returnRate}</span>
+            <span role="columnheader">{messages.columns.asset}</span>
+            <span role="columnheader">{messages.columns.quantity}</span>
+            <span className="average-price" role="columnheader">
+              {messages.columns.averagePrice}
+            </span>
+            <span className="current-price" role="columnheader">
+              {messages.columns.currentPrice}
+            </span>
+            <span role="columnheader">{messages.columns.marketValue}</span>
+            <span role="columnheader">{messages.columns.returnRate}</span>
           </div>
 
           {portfolioData.holdings.map((holding) => (
@@ -43,29 +47,31 @@ export function PortfolioHoldings({
               key={holding.symbol}
               role="row"
             >
-              <div className="asset-cell">
+              <div className="asset-cell" role="cell">
                 <AssetMark color={holding.color} symbol={holding.symbol} />
                 <span>
                   <strong>{holding.symbol}</strong>
                   <small>{holding.name}</small>
                 </span>
               </div>
-              <span className="numeric-cell">
+              <span className="numeric-cell" role="cell">
                 {holding.quantity}
                 {messages.shareUnit}
               </span>
-              <span className="numeric-cell average-price">
+              <span className="numeric-cell average-price" role="cell">
                 {formatDollar(holding.averagePrice, locale)}
               </span>
-              <span className="numeric-cell current-price">
+              <span className="numeric-cell current-price" role="cell">
                 {formatDollar(holding.currentPrice, locale)}
               </span>
-              <strong className="numeric-cell">
+              <strong className="numeric-cell" role="cell">
                 {formatDollar(holding.marketValue, locale)}
               </strong>
-              <TrendValue value={holding.returnRate}>
-                {formatPercent(holding.returnRate, locale)}
-              </TrendValue>
+              <span role="cell">
+                <TrendValue value={holding.returnRate}>
+                  {formatPercent(holding.returnRate, locale)}
+                </TrendValue>
+              </span>
             </div>
           ))}
         </div>
