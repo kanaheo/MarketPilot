@@ -1,0 +1,363 @@
+.portfolio-page {
+  display: grid;
+  gap: 24px;
+}
+
+.portfolio-header h1 {
+  margin: 0;
+  font-size: clamp(24px, 2.1vw, 30px);
+  line-height: 1.2;
+  font-weight: 720;
+  letter-spacing: -0.045em;
+}
+
+.portfolio-header p {
+  margin: 9px 0 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.portfolio-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.portfolio-insights-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(380px, 0.95fr);
+  gap: 14px;
+}
+
+.portfolio-value-panel,
+.asset-allocation-panel {
+  min-height: 366px;
+  padding: 18px;
+}
+
+.portfolio-panel-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.portfolio-value-chart {
+  height: 242px;
+  margin-top: 10px;
+}
+
+.portfolio-chart-legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 34px;
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+
+.portfolio-chart-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.portfolio-chart-legend span::before {
+  width: 28px;
+  height: 2px;
+  background: #11675f;
+  content: "";
+}
+
+.portfolio-chart-legend .benchmark::before {
+  background: repeating-linear-gradient(
+    90deg,
+    #98a19d 0 6px,
+    transparent 6px 10px
+  );
+}
+
+.portfolio-chart-legend strong {
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.asset-allocation-content {
+  display: grid;
+  grid-template-columns: minmax(190px, 1fr) minmax(180px, 0.85fr);
+  align-items: center;
+  gap: 16px;
+  min-height: 296px;
+}
+
+.allocation-chart-wrap {
+  position: relative;
+  min-width: 0;
+}
+
+.allocation-chart {
+  height: 248px;
+}
+
+.allocation-chart-center {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  display: grid;
+  width: 130px;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.allocation-chart-center strong {
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.035em;
+}
+
+.allocation-chart-center span {
+  margin-top: 5px;
+  color: var(--color-text-muted);
+  font-size: 10px;
+}
+
+.allocation-list {
+  display: grid;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.allocation-list li {
+  display: grid;
+  grid-template-columns: 10px minmax(70px, 1fr) auto;
+  align-items: start;
+  gap: 9px;
+}
+
+.allocation-color {
+  width: 10px;
+  height: 10px;
+  margin-top: 3px;
+  border-radius: 50%;
+}
+
+.allocation-name {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.allocation-values {
+  display: grid;
+  justify-items: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.allocation-values strong {
+  font-size: 12px;
+}
+
+.allocation-values small {
+  margin-top: 5px;
+  color: var(--color-text-muted);
+  font-size: 10px;
+}
+
+.portfolio-holdings-panel {
+  padding: 18px 18px 0;
+}
+
+.portfolio-holdings-table {
+  margin-top: 14px;
+  border-top: 1px solid var(--color-border);
+}
+
+.portfolio-holdings-row {
+  display: grid;
+  grid-template-columns:
+    minmax(210px, 1.5fr)
+    minmax(80px, 0.55fr)
+    minmax(115px, 0.8fr)
+    minmax(115px, 0.8fr)
+    minmax(125px, 0.9fr)
+    minmax(80px, 0.55fr);
+  min-height: 58px;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid #edf0ee;
+}
+
+.portfolio-holdings-row.header {
+  min-height: 36px;
+  color: var(--color-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.portfolio-holdings-row > :not(:first-child) {
+  text-align: right;
+}
+
+.portfolio-holdings-row .asset-cell {
+  min-width: 0;
+}
+
+.portfolio-holdings-row .asset-cell > span:last-child {
+  min-width: 0;
+}
+
+.portfolio-holdings-row .asset-cell strong,
+.portfolio-holdings-row .asset-cell small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.portfolio-holdings-row .asset-cell strong {
+  font-size: 12px;
+}
+
+.portfolio-holdings-row .asset-cell small {
+  margin-top: 3px;
+  color: var(--color-text-muted);
+  font-size: 10px;
+}
+
+.portfolio-holdings-row .numeric-cell,
+.portfolio-holdings-row .trend-value {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.portfolio-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 14px;
+}
+
+.portfolio-detail-panel {
+  min-height: 286px;
+  padding: 18px;
+}
+
+.cash-activity-list,
+.risk-overview-list {
+  margin-top: 12px;
+}
+
+.cash-activity-item {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  min-height: 66px;
+  align-items: center;
+  gap: 11px;
+  border-top: 1px solid #edf0ee;
+}
+
+.cash-activity-icon,
+.risk-overview-icon {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.cash-activity-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.cash-activity-icon.purchase {
+  background: #fdeaea;
+  color: #d84950;
+}
+
+.cash-activity-copy strong,
+.cash-activity-copy span,
+.cash-activity-amount small {
+  display: block;
+}
+
+.cash-activity-copy strong {
+  font-size: 11px;
+}
+
+.cash-activity-copy span,
+.cash-activity-amount small {
+  margin-top: 4px;
+  color: var(--color-text-muted);
+  font-size: 9px;
+}
+
+.cash-activity-amount {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.cash-activity-amount .trend-value {
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.risk-overview-item {
+  display: grid;
+  grid-template-columns: 38px minmax(130px, 0.9fr) minmax(180px, 1.2fr);
+  min-height: 66px;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid #edf0ee;
+}
+
+.risk-overview-icon {
+  width: 34px;
+  height: 34px;
+}
+
+.risk-overview-copy strong,
+.risk-overview-copy span {
+  display: block;
+}
+
+.risk-overview-copy strong {
+  font-size: 11px;
+}
+
+.risk-overview-copy span {
+  margin-top: 4px;
+  color: var(--color-text-muted);
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.risk-overview-score {
+  display: grid;
+  grid-template-columns: minmax(80px, 1fr) 66px;
+  align-items: center;
+  gap: 12px;
+}
+
+.risk-overview-score strong {
+  color: var(--color-text-muted);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.risk-progress {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e5e9e7;
+}
+
+.risk-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-primary);
+}

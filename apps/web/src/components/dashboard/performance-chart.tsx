@@ -14,6 +14,7 @@ import {
 
 import { EmptyState } from "@/components/common/empty-state";
 import { Panel } from "@/components/common/panel";
+import { PeriodTabs } from "@/components/common/period-tabs";
 import { SectionHeader } from "@/components/common/section-header";
 import { dashboardData } from "@/data/dashboard";
 import { formatPercent } from "@/lib/formatters";
@@ -29,17 +30,10 @@ export function PerformanceChart({ locale, messages }: PerformanceChartProps) {
           description={messages.description}
           title={messages.title}
         />
-        <div className="period-tabs" aria-label={messages.periodLabel}>
-          {messages.periods.map((period) => (
-            <button
-              className={period.active ? "active" : ""}
-              key={period.label}
-              type="button"
-            >
-              {period.label}
-            </button>
-          ))}
-        </div>
+        <PeriodTabs
+          ariaLabel={messages.periodLabel}
+          periods={messages.periods}
+        />
       </div>
 
       {hasPerformanceData ? (

@@ -12,7 +12,8 @@
     display: none;
   }
 
-  .dashboard-summary-grid {
+  .dashboard-summary-grid,
+  .portfolio-summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -30,7 +31,9 @@
   }
 
   .dashboard-primary-grid,
-  .dashboard-secondary-grid {
+  .dashboard-secondary-grid,
+  .portfolio-insights-grid,
+  .portfolio-details-grid {
     grid-template-columns: 1fr;
   }
 
@@ -136,12 +139,48 @@
     flex-direction: column;
   }
 
+  .portfolio-panel-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .period-tabs {
     width: 100%;
   }
 
   .period-tabs button {
     flex: 1;
+  }
+
+  .asset-allocation-content {
+    grid-template-columns: 1fr;
+  }
+
+  .allocation-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .allocation-list li {
+    grid-template-columns: 10px 1fr;
+  }
+
+  .allocation-values {
+    grid-column: 2;
+    justify-items: start;
+  }
+
+  .portfolio-holdings-row {
+    grid-template-columns:
+      minmax(180px, 1.4fr)
+      minmax(70px, 0.55fr)
+      minmax(110px, 0.8fr)
+      minmax(110px, 0.8fr)
+      minmax(75px, 0.55fr);
+  }
+
+  .portfolio-holdings-row .average-price {
+    display: none;
   }
 
   .watchlist-panel,
@@ -159,7 +198,8 @@
 }
 
 @media (max-width: 480px) {
-  .dashboard-summary-grid {
+  .dashboard-summary-grid,
+  .portfolio-summary-grid {
     grid-template-columns: 1fr;
   }
 
@@ -181,6 +221,60 @@
 
   .performance-chart {
     height: 210px;
+  }
+
+  .portfolio-value-panel,
+  .asset-allocation-panel {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .portfolio-value-chart {
+    height: 220px;
+  }
+
+  .portfolio-chart-legend {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .allocation-list {
+    grid-template-columns: 1fr;
+  }
+
+  .portfolio-holdings-panel {
+    overflow-x: hidden;
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .portfolio-holdings-row {
+    grid-template-columns:
+      minmax(125px, 1.25fr)
+      48px
+      minmax(92px, 0.85fr)
+      64px;
+    gap: 10px;
+  }
+
+  .portfolio-holdings-row .average-price,
+  .portfolio-holdings-row .current-price {
+    display: none;
+  }
+
+  .portfolio-detail-panel {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .risk-overview-item {
+    grid-template-columns: 36px minmax(0, 1fr);
+    padding: 10px 0;
+  }
+
+  .risk-overview-score {
+    grid-column: 2;
   }
 
   .auth-email-control {

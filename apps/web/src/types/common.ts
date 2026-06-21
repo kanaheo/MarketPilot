@@ -33,12 +33,29 @@ export type PanelProps = Readonly<{
   className?: string;
 }>;
 
+export type PeriodTabsProps = Readonly<{
+  ariaLabel: string;
+  periods: readonly Readonly<{
+    active: boolean;
+    label: string;
+  }>[];
+}>;
+
 export type SectionHeaderProps = Readonly<{
   actionLabel?: string;
   description?: string;
   icon?: LucideIcon;
   meta?: string;
   title: string;
+}>;
+
+export type SummaryCardProps = Readonly<{
+  detail?: string;
+  detailAside?: string;
+  icon: LucideIcon;
+  label: string;
+  tone: "negative" | "neutral" | "positive" | "warning";
+  value: string;
 }>;
 
 export type TrendValueProps = Readonly<{

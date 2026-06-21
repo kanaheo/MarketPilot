@@ -21,14 +21,6 @@ export type DashboardSummaryProps = Readonly<{
   messages: DashboardMessages["summary"];
 }>;
 
-export type SummaryCardProps = Readonly<{
-  label: string;
-  value: string;
-  detail: string;
-  detailAside?: string;
-  tone: "positive" | "neutral" | "warning";
-}>;
-
 export type DashboardPageProps = Readonly<{
   params: Promise<{
     locale: string;

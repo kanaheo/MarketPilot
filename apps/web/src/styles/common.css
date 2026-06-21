@@ -7,6 +7,104 @@
   box-shadow: 0 1px 2px rgba(22, 32, 28, 0.025);
 }
 
+.summary-card {
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+  padding: 18px;
+  box-shadow: 0 1px 2px rgba(22, 32, 28, 0.03);
+}
+
+.summary-card-heading,
+.summary-card-detail {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.summary-card-heading {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.summary-card-heading svg {
+  flex: none;
+  color: #7b8580;
+}
+
+.summary-card-value {
+  display: block;
+  margin-top: 16px;
+  overflow-wrap: anywhere;
+  font-size: clamp(21px, 1.7vw, 26px);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  font-weight: 760;
+  letter-spacing: -0.045em;
+}
+
+.summary-card-detail {
+  margin-top: 18px;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.summary-card-detail span:last-child {
+  text-align: right;
+}
+
+.summary-card-detail.positive {
+  color: var(--color-primary);
+}
+
+.summary-card-detail.positive span:last-child,
+.summary-card-detail.neutral {
+  color: var(--color-text-muted);
+}
+
+.summary-card-detail.negative {
+  color: #d84950;
+}
+
+.summary-card-detail.warning {
+  color: #c47a27;
+}
+
+.period-tabs {
+  display: flex;
+  flex: none;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+}
+
+.period-tabs button {
+  height: 32px;
+  border: 0;
+  border-right: 1px solid var(--color-border);
+  background: var(--color-surface);
+  padding: 0 13px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.period-tabs button:last-child {
+  border-right: 0;
+}
+
+.period-tabs button.active {
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  font-weight: 750;
+  box-shadow: inset 0 0 0 1px #cfd6d2;
+}
+
 .loading-skeleton {
   display: block;
   overflow: hidden;

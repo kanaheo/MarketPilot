@@ -1,10 +1,9 @@
-import type { LucideIcon } from "lucide-react";
-
-import type { SummaryCardProps } from "@/types/dashboard";
+import type { SummaryCardProps } from "@/types/common";
 
 const toneClassNames = {
-  positive: "positive",
+  negative: "negative",
   neutral: "neutral",
+  positive: "positive",
   warning: "warning",
 } as const;
 
@@ -15,7 +14,7 @@ export function SummaryCard({
   label,
   tone,
   value,
-}: SummaryCardProps & { icon: LucideIcon }) {
+}: SummaryCardProps) {
   return (
     <article className="summary-card">
       <div className="summary-card-heading">
@@ -23,10 +22,12 @@ export function SummaryCard({
         <Icon size={19} strokeWidth={1.8} aria-hidden="true" />
       </div>
       <strong className="summary-card-value">{value}</strong>
-      <div className={`summary-card-detail ${toneClassNames[tone]}`}>
-        <span>{detail}</span>
-        {detailAside ? <span>{detailAside}</span> : null}
-      </div>
+      {detail || detailAside ? (
+        <div className={`summary-card-detail ${toneClassNames[tone]}`}>
+          {detail ? <span>{detail}</span> : null}
+          {detailAside ? <span>{detailAside}</span> : null}
+        </div>
+      ) : null}
     </article>
   );
 }
