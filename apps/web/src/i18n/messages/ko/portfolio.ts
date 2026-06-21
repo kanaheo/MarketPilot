@@ -37,4 +37,21 @@ export const portfolio = {
       cash: "현금",
     },
   },
+  holdings: {
+    title: "보유 종목",
+    description: "현재 모의투자 포지션 · 현금 제외",
+    shareUnit: "주",
+    columns: {
+      asset: "자산",
+      quantity: "수량",
+      averagePrice: "평균 매수가",
+      currentPrice: "현재가",
+      marketValue: "평가금액",
+      returnRate: "수익률",
+    },
+    empty: {
+      title: "보유 종목이 없습니다",
+      description: "첫 모의주문이 체결되면 보유 종목이 이곳에 표시됩니다.",
+    },
+  },
 } as const satisfies Messages["portfolio"];

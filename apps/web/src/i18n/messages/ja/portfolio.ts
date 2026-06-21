@@ -38,4 +38,22 @@ export const portfolio = {
       cash: "現金",
     },
   },
+  holdings: {
+    title: "保有銘柄",
+    description: "現在のペーパーポジション · 現金を除く",
+    shareUnit: "株",
+    columns: {
+      asset: "資産",
+      quantity: "数量",
+      averagePrice: "平均取得価格",
+      currentPrice: "現在値",
+      marketValue: "評価額",
+      returnRate: "収益率",
+    },
+    empty: {
+      title: "保有銘柄がありません",
+      description:
+        "最初のペーパー注文が約定すると、保有銘柄が表示されます。",
+    },
+  },
 } as const satisfies Messages["portfolio"];

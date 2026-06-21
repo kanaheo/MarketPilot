@@ -276,5 +276,22 @@ export type Messages = Readonly<{
         cash: string;
       };
     };
+    holdings: {
+      title: string;
+      description: string;
+      shareUnit: string;
+      columns: {
+        asset: string;
+        quantity: string;
+        averagePrice: string;
+        currentPrice: string;
+        marketValue: string;
+        returnRate: string;
+      };
+      empty: {
+        title: string;
+        description: string;
+      };
+    };
   };
 }>;

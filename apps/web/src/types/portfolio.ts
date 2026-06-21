@@ -26,3 +26,8 @@ export type AssetAllocationProps = Readonly<{
   locale: Locale;
   messages: PortfolioMessages["allocation"];
 }>;
+
+export type PortfolioHoldingsProps = Readonly<{
+  locale: Locale;
+  messages: PortfolioMessages["holdings"];
+}>;

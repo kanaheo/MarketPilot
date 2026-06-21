@@ -169,6 +169,19 @@
     justify-items: start;
   }
 
+  .portfolio-holdings-row {
+    grid-template-columns:
+      minmax(180px, 1.4fr)
+      minmax(70px, 0.55fr)
+      minmax(110px, 0.8fr)
+      minmax(110px, 0.8fr)
+      minmax(75px, 0.55fr);
+  }
+
+  .portfolio-holdings-row .average-price {
+    display: none;
+  }
+
   .watchlist-panel,
   .performance-panel,
   .compact-panel {
@@ -227,6 +240,26 @@
 
   .allocation-list {
     grid-template-columns: 1fr;
+  }
+
+  .portfolio-holdings-panel {
+    overflow-x: hidden;
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .portfolio-holdings-row {
+    grid-template-columns:
+      minmax(125px, 1.25fr)
+      48px
+      minmax(92px, 0.85fr)
+      64px;
+    gap: 10px;
+  }
+
+  .portfolio-holdings-row .average-price,
+  .portfolio-holdings-row .current-price {
+    display: none;
   }
 
   .auth-email-control {

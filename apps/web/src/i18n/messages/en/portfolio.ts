@@ -37,4 +37,22 @@ export const portfolio = {
       cash: "Cash",
     },
   },
+  holdings: {
+    title: "Holdings",
+    description: "Current paper positions · cash excluded",
+    shareUnit: " sh",
+    columns: {
+      asset: "Asset",
+      quantity: "Quantity",
+      averagePrice: "Average price",
+      currentPrice: "Current price",
+      marketValue: "Market value",
+      returnRate: "Return",
+    },
+    empty: {
+      title: "No holdings yet",
+      description:
+        "Your positions will appear here after your first paper order is filled.",
+    },
+  },
 } as const satisfies Messages["portfolio"];

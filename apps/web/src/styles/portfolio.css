@@ -164,3 +164,70 @@
   color: var(--color-text-muted);
   font-size: 10px;
 }
+
+.portfolio-holdings-panel {
+  padding: 18px 18px 0;
+}
+
+.portfolio-holdings-table {
+  margin-top: 14px;
+  border-top: 1px solid var(--color-border);
+}
+
+.portfolio-holdings-row {
+  display: grid;
+  grid-template-columns:
+    minmax(210px, 1.5fr)
+    minmax(80px, 0.55fr)
+    minmax(115px, 0.8fr)
+    minmax(115px, 0.8fr)
+    minmax(125px, 0.9fr)
+    minmax(80px, 0.55fr);
+  min-height: 58px;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid #edf0ee;
+}
+
+.portfolio-holdings-row.header {
+  min-height: 36px;
+  color: var(--color-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.portfolio-holdings-row > :not(:first-child) {
+  text-align: right;
+}
+
+.portfolio-holdings-row .asset-cell {
+  min-width: 0;
+}
+
+.portfolio-holdings-row .asset-cell > span:last-child {
+  min-width: 0;
+}
+
+.portfolio-holdings-row .asset-cell strong,
+.portfolio-holdings-row .asset-cell small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.portfolio-holdings-row .asset-cell strong {
+  font-size: 12px;
+}
+
+.portfolio-holdings-row .asset-cell small {
+  margin-top: 3px;
+  color: var(--color-text-muted);
+  font-size: 10px;
+}
+
+.portfolio-holdings-row .numeric-cell,
+.portfolio-holdings-row .trend-value {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}

@@ -1,5 +1,6 @@
 import { AssetAllocation } from "@/components/portfolio/asset-allocation";
 import { PortfolioHeader } from "@/components/portfolio/portfolio-header";
+import { PortfolioHoldings } from "@/components/portfolio/portfolio-holdings";
 import { PortfolioSummary } from "@/components/portfolio/portfolio-summary";
 import { PortfolioValueChart } from "@/components/portfolio/portfolio-value-chart";
 import { assertLocale } from "@/i18n/config";
@@ -30,6 +31,10 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
           messages={messages.portfolio.allocation}
         />
       </div>
+      <PortfolioHoldings
+        locale={locale}
+        messages={messages.portfolio.holdings}
+      />
     </div>
   );
 }
