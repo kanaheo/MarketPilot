@@ -91,4 +91,44 @@ export const portfolioData = {
       color: "#245ca6",
     },
   ],
+  cashActivity: [
+    {
+      key: "depositJune",
+      type: "deposit",
+      date: "2026-06-18",
+      amount: 5_000,
+      balance: 18_240,
+    },
+    {
+      key: "applePurchase",
+      type: "purchase",
+      date: "2026-06-12",
+      amount: -3_920,
+      balance: 13_240,
+    },
+    {
+      key: "depositMay",
+      type: "deposit",
+      date: "2026-06-05",
+      amount: 10_000,
+      balance: 17_160,
+    },
+  ],
+  risk: [
+    {
+      key: "diversification",
+      score: 0.74,
+      status: "good",
+    },
+    {
+      key: "concentration",
+      score: 0.34,
+      status: "moderate",
+    },
+    {
+      key: "volatility",
+      score: 0.1245,
+      status: "measured",
+    },
+  ],
 } as const;

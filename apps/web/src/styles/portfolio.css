@@ -231,3 +231,133 @@
   font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
+
+.portfolio-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 14px;
+}
+
+.portfolio-detail-panel {
+  min-height: 286px;
+  padding: 18px;
+}
+
+.cash-activity-list,
+.risk-overview-list {
+  margin-top: 12px;
+}
+
+.cash-activity-item {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  min-height: 66px;
+  align-items: center;
+  gap: 11px;
+  border-top: 1px solid #edf0ee;
+}
+
+.cash-activity-icon,
+.risk-overview-icon {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.cash-activity-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.cash-activity-icon.purchase {
+  background: #fdeaea;
+  color: #d84950;
+}
+
+.cash-activity-copy strong,
+.cash-activity-copy span,
+.cash-activity-amount small {
+  display: block;
+}
+
+.cash-activity-copy strong {
+  font-size: 11px;
+}
+
+.cash-activity-copy span,
+.cash-activity-amount small {
+  margin-top: 4px;
+  color: var(--color-text-muted);
+  font-size: 9px;
+}
+
+.cash-activity-amount {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.cash-activity-amount .trend-value {
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.risk-overview-item {
+  display: grid;
+  grid-template-columns: 38px minmax(130px, 0.9fr) minmax(180px, 1.2fr);
+  min-height: 66px;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid #edf0ee;
+}
+
+.risk-overview-icon {
+  width: 34px;
+  height: 34px;
+}
+
+.risk-overview-copy strong,
+.risk-overview-copy span {
+  display: block;
+}
+
+.risk-overview-copy strong {
+  font-size: 11px;
+}
+
+.risk-overview-copy span {
+  margin-top: 4px;
+  color: var(--color-text-muted);
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.risk-overview-score {
+  display: grid;
+  grid-template-columns: minmax(80px, 1fr) 66px;
+  align-items: center;
+  gap: 12px;
+}
+
+.risk-overview-score strong {
+  color: var(--color-text-muted);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.risk-progress {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e5e9e7;
+}
+
+.risk-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-primary);
+}

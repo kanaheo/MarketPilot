@@ -31,3 +31,13 @@ export type PortfolioHoldingsProps = Readonly<{
   locale: Locale;
   messages: PortfolioMessages["holdings"];
 }>;
+
+export type CashActivityProps = Readonly<{
+  locale: Locale;
+  messages: PortfolioMessages["cashActivity"];
+}>;
+
+export type RiskOverviewProps = Readonly<{
+  locale: Locale;
+  messages: PortfolioMessages["risk"];
+}>;

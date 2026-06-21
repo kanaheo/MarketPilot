@@ -55,4 +55,47 @@ export const portfolio = {
         "Your positions will appear here after your first paper order is filled.",
     },
   },
+  cashActivity: {
+    title: "Cash activity",
+    description: "Recent deposits and paper purchases",
+    balance: "Available cash",
+    items: {
+      depositJune: {
+        title: "Deposit",
+      },
+      applePurchase: {
+        title: "Bought AAPL · 20 shares",
+      },
+      depositMay: {
+        title: "Deposit",
+      },
+    },
+    empty: {
+      title: "No cash activity yet",
+      description: "Deposits and paper purchases will appear here.",
+    },
+  },
+  risk: {
+    title: "Risk overview",
+    description: "Current portfolio risk indicators",
+    status: {
+      good: "Good",
+      moderate: "Moderate",
+      measured: "Measured",
+    },
+    items: {
+      diversification: {
+        title: "Diversification",
+        description: "Spread across stocks, ETFs, and cash",
+      },
+      concentration: {
+        title: "Concentration",
+        description: "Top three holdings represent 71%",
+      },
+      volatility: {
+        title: "Volatility (1Y)",
+        description: "Annualized portfolio volatility",
+      },
+    },
+  },
 } as const satisfies Messages["portfolio"];

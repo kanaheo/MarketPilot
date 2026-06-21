@@ -38,6 +38,15 @@ export function formatCompactDollar(value: number, locale: Locale) {
   }).format(value);
 }
 
+export function formatShortDate(value: string, locale: Locale) {
+  return new Intl.DateTimeFormat(localeCodes[locale], {
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+    year: "numeric",
+  }).format(new Date(`${value}T00:00:00Z`));
+}
+
 export function formatPercent(
   value: number,
   locale: Locale,

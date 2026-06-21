@@ -32,7 +32,8 @@
 
   .dashboard-primary-grid,
   .dashboard-secondary-grid,
-  .portfolio-insights-grid {
+  .portfolio-insights-grid,
+  .portfolio-details-grid {
     grid-template-columns: 1fr;
   }
 
@@ -260,6 +261,20 @@
   .portfolio-holdings-row .average-price,
   .portfolio-holdings-row .current-price {
     display: none;
+  }
+
+  .portfolio-detail-panel {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .risk-overview-item {
+    grid-template-columns: 36px minmax(0, 1fr);
+    padding: 10px 0;
+  }
+
+  .risk-overview-score {
+    grid-column: 2;
   }
 
   .auth-email-control {

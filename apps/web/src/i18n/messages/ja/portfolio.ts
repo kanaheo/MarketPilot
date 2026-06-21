@@ -56,4 +56,47 @@ export const portfolio = {
         "最初のペーパー注文が約定すると、保有銘柄が表示されます。",
     },
   },
+  cashActivity: {
+    title: "現金アクティビティ",
+    description: "最近の入金とペーパー購入",
+    balance: "利用可能な現金",
+    items: {
+      depositJune: {
+        title: "入金",
+      },
+      applePurchase: {
+        title: "AAPLを20株購入",
+      },
+      depositMay: {
+        title: "入金",
+      },
+    },
+    empty: {
+      title: "現金アクティビティはありません",
+      description: "入金とペーパー購入の履歴がここに表示されます。",
+    },
+  },
+  risk: {
+    title: "リスク概要",
+    description: "現在のポートフォリオリスク指標",
+    status: {
+      good: "良好",
+      moderate: "中程度",
+      measured: "測定値",
+    },
+    items: {
+      diversification: {
+        title: "分散投資",
+        description: "株式、ETF、現金に分散",
+      },
+      concentration: {
+        title: "集中度",
+        description: "上位3資産が71%を占有",
+      },
+      volatility: {
+        title: "ボラティリティ（1年）",
+        description: "年率換算ポートフォリオ変動率",
+      },
+    },
+  },
 } as const satisfies Messages["portfolio"];

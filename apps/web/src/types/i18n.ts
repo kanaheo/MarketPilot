@@ -293,5 +293,48 @@ export type Messages = Readonly<{
         description: string;
       };
     };
+    cashActivity: {
+      title: string;
+      description: string;
+      balance: string;
+      items: {
+        depositJune: {
+          title: string;
+        };
+        applePurchase: {
+          title: string;
+        };
+        depositMay: {
+          title: string;
+        };
+      };
+      empty: {
+        title: string;
+        description: string;
+      };
+    };
+    risk: {
+      title: string;
+      description: string;
+      status: {
+        good: string;
+        moderate: string;
+        measured: string;
+      };
+      items: {
+        diversification: {
+          title: string;
+          description: string;
+        };
+        concentration: {
+          title: string;
+          description: string;
+        };
+        volatility: {
+          title: string;
+          description: string;
+        };
+      };
+    };
   };
 }>;
