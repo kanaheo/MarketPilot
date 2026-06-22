@@ -490,6 +490,160 @@ export type Messages = Readonly<{
       };
     };
   };
+  backtests: {
+    header: {
+      eyebrow: string;
+      title: string;
+      description: string;
+      dataBadge: string;
+    };
+    setup: {
+      title: string;
+      description: string;
+      fields: {
+        startDate: string;
+        endDate: string;
+        initialCapital: string;
+        currency: string;
+        benchmark: string;
+        strategy: string;
+      };
+      hints: {
+        initialCapital: string;
+      };
+      options: {
+        currencies: readonly {
+          label: string;
+          value: "USD" | "KRW" | "JPY";
+        }[];
+        benchmarks: readonly {
+          label: string;
+          value: "SPY" | "KOSPI" | "NIKKEI225";
+        }[];
+      };
+      strategies: {
+        momentum: BacktestStrategyMessage;
+        movingAverage: BacktestStrategyMessage;
+        buyAndHold: BacktestStrategyMessage;
+      };
+    };
+    risk: {
+      title: string;
+      description: string;
+      fields: {
+        maxPositionWeight: string;
+        cashReserve: string;
+        stopLoss: string;
+        rebalanceFrequency: string;
+        feeRate: string;
+        slippageRate: string;
+        executionTiming: string;
+      };
+      hints: {
+        maxPositionWeight: string;
+        cashReserve: string;
+        stopLoss: string;
+        executionTiming: string;
+      };
+      options: {
+        rebalanceFrequencies: readonly {
+          label: string;
+          value: "weekly" | "monthly" | "quarterly";
+        }[];
+        executionTimings: readonly {
+          label: string;
+          value: "nextOpen" | "sameClose";
+        }[];
+      };
+    };
+    assets: {
+      title: string;
+      description: string;
+      searchLabel: string;
+      searchPlaceholder: string;
+      noResults: string;
+      equalize: string;
+      remove: string;
+      invested: string;
+      cash: string;
+      target: string;
+      columns: {
+        asset: string;
+        weight: string;
+        remove: string;
+      };
+    };
+    action: {
+      noticeTitle: string;
+      noticeDescription: string;
+      run: string;
+      running: string;
+      completed: string;
+    };
+    summary: {
+      title: string;
+      totalReturn: string;
+      annualizedReturn: string;
+      maxDrawdown: string;
+      sharpeRatio: string;
+      benchmark: string;
+      excessReturn: string;
+      riskDetail: string;
+      winRate: string;
+      trades: string;
+      fixture: string;
+    };
+    chart: {
+      title: string;
+      description: string;
+      fixture: string;
+      portfolio: string;
+      benchmark: string;
+      drawdown: string;
+    };
+    comparison: {
+      title: string;
+      description: string;
+      strategy: string;
+      benchmark: string;
+      finalValue: string;
+      excessReturn: string;
+      winRate: string;
+      trades: string;
+      note: string;
+    };
+    trades: {
+      title: string;
+      description: string;
+      countSuffix: string;
+      columns: {
+        date: string;
+        asset: string;
+        side: string;
+        price: string;
+        quantity: string;
+        fee: string;
+        returnRate: string;
+      };
+      sides: {
+        buy: string;
+        sell: string;
+      };
+    };
+    validation: {
+      required: string;
+      number: string;
+      initialCapital: string;
+      percentage: string;
+      stopLoss: string;
+      cost: string;
+      dateRange: string;
+      allocation: string;
+      assetsRequired: string;
+      assetWeight: string;
+      totalWeight: string;
+    };
+  };
 }>;
 
 type FilterMessageOption = Readonly<{
@@ -506,4 +660,9 @@ type AiDiscoveryMessage = Readonly<{
   signal: string;
   evidence: string;
   counterRisk: string;
+}>;
+
+type BacktestStrategyMessage = Readonly<{
+  title: string;
+  description: string;
 }>;

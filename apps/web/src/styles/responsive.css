@@ -45,6 +45,26 @@
     grid-template-columns: 1fr;
   }
 
+  .backtest-configuration-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .backtest-risk-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .backtest-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .backtest-results-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .backtest-asset-search-results {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .ai-discovery-grid {
     grid-template-columns: 1fr;
   }
@@ -168,6 +188,37 @@
   .markets-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .backtests-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .strategy-preset-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .strategy-preset {
+    min-height: auto;
+  }
+
+  .backtest-run-bar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .backtest-run-actions {
+    justify-content: space-between;
+  }
+
+  .backtest-assets-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .backtest-equalize-button {
+    width: fit-content;
   }
 
   .market-filter-primary {
@@ -334,6 +385,59 @@
   .market-search {
     height: 56px;
     padding: 0 14px;
+  }
+
+  .backtest-settings-panel,
+  .backtest-risk-panel,
+  .backtest-assets-panel,
+  .backtest-equity-panel,
+  .backtest-comparison-panel,
+  .backtest-trades-panel {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .backtest-field-grid,
+  .backtest-risk-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .backtest-field-grid .backtest-field:nth-child(3) {
+    grid-column: auto;
+  }
+
+  .backtest-run-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .backtest-run-actions button {
+    width: 100%;
+  }
+
+  .backtest-summary-grid,
+  .backtest-asset-search-results {
+    grid-template-columns: 1fr;
+  }
+
+  .backtest-selected-assets-header,
+  .backtest-selected-asset {
+    grid-template-columns: minmax(125px, 1fr) 100px 36px;
+    gap: 8px;
+  }
+
+  .backtest-allocation-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+    margin-right: -14px;
+    margin-left: -14px;
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .backtest-equity-chart {
+    height: 230px;
   }
 
   .market-search kbd {

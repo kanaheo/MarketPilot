@@ -7,7 +7,7 @@ export const common = {
       dashboard: "ダッシュボード",
       portfolio: "ポートフォリオ",
       markets: "市場検索",
-      backtests: "バックテスト",
+      backtests: "戦略シミュレーション",
       data: "データ",
     },
     settings: "設定",
@@ -35,5 +35,5 @@ export const common = {
   },
 } as const satisfies Omit<
   Messages,
-  "auth" | "dashboard" | "markets" | "portfolio"
+  "auth" | "backtests" | "dashboard" | "markets" | "portfolio"
 >;
