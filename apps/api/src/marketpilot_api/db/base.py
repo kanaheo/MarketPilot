@@ -16,12 +16,15 @@ class Base(DeclarativeBase):
     metadata = MetaData(naming_convention=naming_convention)
 
 
-class TimestampMixin:
+class CreatedAtMixin:
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
         server_default=func.now(),
     )
+
+
+class TimestampMixin(CreatedAtMixin):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

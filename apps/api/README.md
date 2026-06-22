@@ -12,6 +12,7 @@ FastAPI backend for MarketPilot.
 - SQLAlchemy database engine and session
 - database-aware `GET /readiness` endpoint
 - SQLAlchemy `users` model
+- portfolio and immutable cash-ledger models
 - Alembic database migrations
 
 ## Commands
