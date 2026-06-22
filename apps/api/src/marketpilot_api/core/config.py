@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     environment: Literal["local", "test", "production"] = "local"
     debug: bool = False
     internal_api_token: SecretStr | None = None
+    user_api_signing_secret: SecretStr | None = None
     database_url: str = (
         "postgresql+psycopg://marketpilot:marketpilot@127.0.0.1:5432/"
         "marketpilot"

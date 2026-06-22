@@ -36,11 +36,16 @@ Store the generated value as `MARKETPILOT_INTERNAL_API_TOKEN`.
 
 ```dotenv
 MARKETPILOT_INTERNAL_API_TOKEN=
+MARKETPILOT_USER_API_SIGNING_SECRET=
 ```
 
-The same value must be added to `apps/web/.env.local`. Optional settings such
-as `MARKETPILOT_DATABASE_URL` are documented in the application settings and
-normally do not need local overrides. Never commit `.env`.
+Generate a second value and store it as
+`MARKETPILOT_USER_API_SIGNING_SECRET`. Each value must match its counterpart
+in `apps/web/.env.local`, but the two values must be different from each
+other. The internal token is only for user synchronization. The signing
+secret verifies short-lived tokens for authenticated user APIs. Optional
+settings such as `MARKETPILOT_DATABASE_URL` normally do not need local
+overrides. Never commit `.env`.
 
 ### Database, migrations, and API
 
@@ -111,11 +116,15 @@ openssl rand -hex 32
 
 ```dotenv
 MARKETPILOT_INTERNAL_API_TOKEN=
+MARKETPILOT_USER_API_SIGNING_SECRET=
 ```
 
-같은 값을 `apps/web/.env.local`에도 입력합니다. `MARKETPILOT_DATABASE_URL` 같은
-선택 설정은 애플리케이션 기본 설정에 있으며 일반적인 로컬 개발에서는 변경하지
-않아도 됩니다. `.env`는 커밋하지 않습니다.
+두 번째 값을 새로 생성해 `MARKETPILOT_USER_API_SIGNING_SECRET`에 입력합니다.
+각 값은 `apps/web/.env.local`의 같은 이름 값과 일치해야 하지만, 두 비밀값끼리는
+서로 달라야 합니다. 내부 토큰은 사용자 동기화에만 사용하고, 서명 비밀키는 로그인
+사용자 API의 짧은 수명 토큰 검증에 사용합니다. `MARKETPILOT_DATABASE_URL` 같은
+선택 설정은 일반적인 로컬 개발에서는 변경하지 않아도 됩니다. `.env`는 커밋하지
+않습니다.
 
 ### DB, 마이그레이션, API 실행
 
@@ -186,11 +195,14 @@ openssl rand -hex 32
 
 ```dotenv
 MARKETPILOT_INTERNAL_API_TOKEN=
+MARKETPILOT_USER_API_SIGNING_SECRET=
 ```
 
-同じ値を`apps/web/.env.local`にも設定します。`MARKETPILOT_DATABASE_URL`などの
-任意設定はアプリケーションに既定値があり、通常のローカル開発では変更不要です。
-`.env`はコミットしません。
+2つ目の値を生成し、`MARKETPILOT_USER_API_SIGNING_SECRET`に設定します。各値は
+`apps/web/.env.local`の同名の値と一致させますが、2つのシークレット自体は別の
+値にします。内部トークンはユーザー同期専用で、署名シークレットは認証済み
+ユーザーAPI向けの短命トークン検証に使用します。`MARKETPILOT_DATABASE_URL`
+などの任意設定は通常のローカル開発では変更不要です。`.env`はコミットしません。
 
 ### DB、マイグレーション、APIの実行
 

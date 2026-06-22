@@ -7,6 +7,10 @@ from marketpilot_api.models import User
 from marketpilot_api.schemas.auth import UserSyncRequest
 
 
+def get_user_by_id(session: Session, user_id: uuid.UUID) -> User | None:
+    return session.scalar(select(User).where(User.id == user_id))
+
+
 def upsert_user(session: Session, data: UserSyncRequest) -> User:
     user = session.scalar(
         select(User).where(
