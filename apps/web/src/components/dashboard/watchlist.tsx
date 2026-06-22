@@ -4,39 +4,11 @@ import { AssetMark } from "@/components/common/asset-mark";
 import { EmptyState } from "@/components/common/empty-state";
 import { Panel } from "@/components/common/panel";
 import { SectionHeader } from "@/components/common/section-header";
+import { Sparkline } from "@/components/common/sparkline";
 import { TrendValue } from "@/components/common/trend-value";
 import { dashboardData } from "@/data/dashboard";
 import { formatDollar, formatPercent } from "@/lib/formatters";
 import type { WatchlistProps } from "@/types/dashboard";
-
-function Sparkline({
-  points,
-  positive,
-}: Readonly<{ points: readonly number[]; positive: boolean }>) {
-  const min = Math.min(...points);
-  const max = Math.max(...points);
-  const range = max - min || 1;
-  const path = points
-    .map((point, index) => {
-      const x = (index / (points.length - 1)) * 100;
-      const y = 28 - ((point - min) / range) * 24;
-      return `${index === 0 ? "M" : "L"} ${x} ${y}`;
-    })
-    .join(" ");
-
-  return (
-    <svg className="sparkline" viewBox="0 0 100 32" aria-hidden="true">
-      <path
-        d={path}
-        fill="none"
-        stroke={positive ? "#16796f" : "#db4d52"}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-      />
-    </svg>
-  );
-}
 
 export function Watchlist({ locale, messages }: WatchlistProps) {
   const hasWatchlistItems = dashboardData.watchlist.length > 0;

@@ -105,6 +105,26 @@
   box-shadow: inset 0 0 0 1px #cfd6d2;
 }
 
+.sparkline {
+  width: 100%;
+  min-width: 68px;
+  height: 32px;
+}
+
+.sparkline.positive {
+  color: var(--color-primary);
+}
+
+.sparkline.negative {
+  color: #d84950;
+}
+
+.sparkline path {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
 .loading-skeleton {
   display: block;
   overflow: hidden;

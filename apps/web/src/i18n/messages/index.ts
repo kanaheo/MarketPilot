@@ -2,14 +2,17 @@ import type { Locale, Messages } from "@/types/i18n";
 
 import { auth as enAuth } from "./en/auth";
 import { dashboard as enDashboard } from "./en/dashboard";
+import { markets as enMarkets } from "./en/markets";
 import { portfolio as enPortfolio } from "./en/portfolio";
 import { common as enCommon } from "./en/common";
 import { auth as jaAuth } from "./ja/auth";
 import { dashboard as jaDashboard } from "./ja/dashboard";
+import { markets as jaMarkets } from "./ja/markets";
 import { portfolio as jaPortfolio } from "./ja/portfolio";
 import { common as jaCommon } from "./ja/common";
 import { auth as koAuth } from "./ko/auth";
 import { dashboard as koDashboard } from "./ko/dashboard";
+import { markets as koMarkets } from "./ko/markets";
 import { portfolio as koPortfolio } from "./ko/portfolio";
 import { common as koCommon } from "./ko/common";
 
@@ -18,18 +21,21 @@ const messages = {
     ...koCommon,
     auth: koAuth,
     dashboard: koDashboard,
+    markets: koMarkets,
     portfolio: koPortfolio,
   },
   en: {
     ...enCommon,
     auth: enAuth,
     dashboard: enDashboard,
+    markets: enMarkets,
     portfolio: enPortfolio,
   },
   ja: {
     ...jaCommon,
     auth: jaAuth,
     dashboard: jaDashboard,
+    markets: jaMarkets,
     portfolio: jaPortfolio,
   },
 } as const satisfies Record<Locale, Messages>;

@@ -391,12 +391,6 @@
   color: var(--color-text-muted);
 }
 
-.sparkline {
-  width: 100%;
-  min-width: 68px;
-  height: 32px;
-}
-
 .panel-footer-action {
   width: calc(100% + 36px);
   min-height: 34px;

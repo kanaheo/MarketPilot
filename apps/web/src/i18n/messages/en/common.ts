@@ -33,4 +33,7 @@ export const common = {
     errorDescription:
       "Please try again in a moment. If the problem continues, check your network connection.",
   },
-} as const satisfies Omit<Messages, "auth" | "dashboard" | "portfolio">;
+} as const satisfies Omit<
+  Messages,
+  "auth" | "dashboard" | "markets" | "portfolio"
+>;

@@ -337,4 +337,173 @@ export type Messages = Readonly<{
       };
     };
   };
+  markets: {
+    header: {
+      eyebrow: string;
+      title: string;
+      description: string;
+      dataBadge: string;
+    };
+    filters: {
+      ariaLabel: string;
+      searchLabel: string;
+      searchPlaceholder: string;
+      detailsLabel: string;
+      reset: string;
+      resultsPrefix: string;
+      resultsSuffix: string;
+      fixtureNotice: string;
+      groups: {
+        country: string;
+        assetClass: string;
+        session: string;
+        sector: string;
+        exchange: string;
+        marketCap: string;
+        change: string;
+        volume: string;
+      };
+      options: {
+        country: readonly {
+          label: string;
+          value: MarketCountry;
+        }[];
+        assetClass: readonly {
+          label: string;
+          value: MarketAssetClass;
+        }[];
+        session: readonly {
+          label: string;
+          value: MarketSession;
+        }[];
+        sector: readonly FilterMessageOption[];
+        exchange: readonly FilterMessageOption[];
+        marketCap: readonly FilterMessageOption[];
+        change: readonly FilterMessageOption[];
+        volume: readonly FilterMessageOption[];
+      };
+      aiSignals: {
+        title: string;
+        description: string;
+      };
+    };
+    discovery: {
+      title: string;
+      description: string;
+      updated: string;
+      evidence: string;
+      counterRisk: string;
+      fixtureLabel: string;
+      disclaimer: string;
+      countries: {
+        us: string;
+        kr: string;
+        jp: string;
+      };
+      risks: {
+        low: string;
+        medium: string;
+      };
+      items: {
+        nvda: AiDiscoveryMessage;
+        samsung: AiDiscoveryMessage;
+        toyota: AiDiscoveryMessage;
+      };
+      empty: {
+        title: string;
+        description: string;
+      };
+    };
+    table: {
+      title: string;
+      resultsPrefix: string;
+      resultsSuffix: string;
+      sortLabel: string;
+      sortOptions: readonly {
+        label: string;
+        value: MarketSort;
+      }[];
+      columns: {
+        company: string;
+        market: string;
+        price: string;
+        change: string;
+        volume: string;
+        trend: string;
+        aiScore: string;
+        watchlist: string;
+      };
+      countries: {
+        us: string;
+        kr: string;
+        jp: string;
+      };
+      sessions: {
+        open: string;
+        closed: string;
+      };
+      noSignal: string;
+      addWatchlist: string;
+      removeWatchlist: string;
+      empty: {
+        title: string;
+        description: string;
+      };
+    };
+    pulse: {
+      title: string;
+      description: string;
+      breadthTitle: string;
+      advancing: string;
+      strongestSector: string;
+      averageChange: string;
+      unusualVolume: string;
+      noUnusualVolume: string;
+      shares: string;
+      summaryTitle: string;
+      updated: string;
+      summaries: {
+        positive: string;
+        mixed: string;
+        negative: string;
+      };
+      evidenceLabel: string;
+      evidence: string;
+      riskLabel: string;
+      risk: string;
+      source: string;
+      countries: {
+        us: string;
+        kr: string;
+        jp: string;
+      };
+      sectors: {
+        technology: string;
+        financials: string;
+        industrials: string;
+        consumer: string;
+        healthcare: string;
+      };
+      empty: {
+        title: string;
+        description: string;
+      };
+    };
+  };
+}>;
+
+type FilterMessageOption = Readonly<{
+  label: string;
+  value: string;
+}>;
+
+type MarketCountry = "all" | "us" | "kr" | "jp";
+type MarketAssetClass = "all" | "stocks" | "etfs";
+type MarketSession = "all" | "open" | "closed";
+type MarketSort = "aiScore" | "changeRate" | "name" | "volume";
+
+type AiDiscoveryMessage = Readonly<{
+  signal: string;
+  evidence: string;
+  counterRisk: string;
 }>;
