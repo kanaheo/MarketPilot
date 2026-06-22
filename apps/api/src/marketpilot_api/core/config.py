@@ -2,6 +2,7 @@ from functools import lru_cache
 from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import SecretStr
 
 
 class Settings(BaseSettings):
@@ -9,6 +10,7 @@ class Settings(BaseSettings):
     app_version: str = "0.1.0"
     environment: Literal["local", "test", "production"] = "local"
     debug: bool = False
+    internal_api_token: SecretStr | None = None
     database_url: str = (
         "postgresql+psycopg://marketpilot:marketpilot@127.0.0.1:5432/"
         "marketpilot"

@@ -22,16 +22,18 @@ python -m pip install -e ".[dev]"
 ## 2. 환경변수
 
 현재 로컬 기본값은 `compose.yaml`의 PostgreSQL 설정과 일치합니다. 따라서 기본
-로컬 개발에서는 `.env`를 만들지 않아도 실행됩니다.
+API와 DB 상태 확인만 할 때는 `.env` 없이도 실행됩니다.
 
-값을 직접 관리하거나 변경해야 할 때만 `apps/api/.env` 파일을 직접 만듭니다.
+사용자 인증 연결을 실행할 때는 `apps/api/.env` 파일이 필요합니다.
 
 ```bash
 cd apps/api
 touch .env
+openssl rand -hex 32
 ```
 
-아래 내용은 개발자 참고용 예시입니다.
+마지막 명령이 출력한 값을 복사해 아래
+`MARKETPILOT_INTERNAL_API_TOKEN`에 입력합니다.
 
 ```dotenv
 MARKETPILOT_APP_NAME=MarketPilot API
@@ -39,11 +41,14 @@ MARKETPILOT_APP_VERSION=0.1.0
 MARKETPILOT_ENVIRONMENT=local
 MARKETPILOT_DEBUG=true
 MARKETPILOT_DATABASE_URL=postgresql+psycopg://marketpilot:marketpilot@127.0.0.1:5432/marketpilot
+MARKETPILOT_INTERNAL_API_TOKEN=
 ```
 
 - `MARKETPILOT_DATABASE_URL`은 `드라이버://사용자:비밀번호@호스트:포트/DB명`
   형식입니다.
 - 현재 계정과 비밀번호는 로컬 Docker 개발 전용입니다.
+- `MARKETPILOT_INTERNAL_API_TOKEN`은 Next.js 서버가 내부 사용자 동기화 API를
+  호출할 때 사용하는 비밀키이며, 프론트 `.env.local`에도 동일한 값을 넣습니다.
 - 배포 환경에서는 반드시 별도의 강한 비밀번호와 DB 주소를 사용합니다.
 - `apps/api/.env`는 Git에서 제외되며 실제 비밀값을 커밋하지 않습니다.
 
