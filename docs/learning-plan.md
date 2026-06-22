@@ -42,6 +42,9 @@ Phase 2 connects the Phase 1 screens to FastAPI and PostgreSQL one feature at
 a time. For example, the virtual deposit feature will be completed through
 the UI, API, database, recalculation, and tests before another feature begins.
 
+The current backend foundation is summarized in
+[`backend/backend-overview.md`](backend/backend-overview.md).
+
 ### Continuous integration
 
 The repository uses GitHub Actions to verify changes before they are
@@ -98,6 +101,9 @@ Phase 2에서는 Phase 1 화면을 FastAPI와 PostgreSQL에 기능 하나씩 연
 예를 들어 가상자금 입금 기능의 UI, API, DB 저장, 잔액 재계산 및 테스트를 모두
 완료한 후에 다음 기능을 시작합니다.
 
+현재 백엔드 기반 구성은
+[`backend/backend-overview.md`](backend/backend-overview.md)에 요약합니다.
+
 ### 지속적 통합(CI)
 
 저장소는 변경사항을 `develop` 또는 `main`에 통합하기 전에 GitHub Actions로
@@ -153,6 +159,9 @@ MarketPilotは小さな学習単位で開発します。各単位は独立して
 Phase 2では、Phase 1の画面をFastAPIとPostgreSQLへ機能単位で接続します。
 例えば仮想資金の入金機能について、UI、API、DB保存、残高再計算、テストを
 完了してから次の機能へ進みます。
+
+現在のバックエンド基盤は
+[`backend/backend-overview.md`](backend/backend-overview.md)に要約します。
 
 ### 継続的インテグレーション（CI）
 
