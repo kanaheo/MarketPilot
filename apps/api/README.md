@@ -11,18 +11,24 @@ FastAPI backend for MarketPilot.
 - typed environment settings
 - SQLAlchemy database engine and session
 - database-aware `GET /readiness` endpoint
+- SQLAlchemy `users` model
+- Alembic database migrations
 
 ## Commands
 
 ```bash
 cd apps/api
 source .venv/bin/activate
+alembic upgrade head
 uvicorn marketpilot_api.main:app --reload
 python -m pytest
 ```
 
-Copy `.env.example` to `.env` only when local values need to differ from the
-safe defaults. The `.env` file is ignored by Git.
+Create `.env` only when local values need to differ from the safe defaults.
+The `.env` file is ignored by Git.
+
+See [Backend setup](../../docs/setup/backend-setup.md) for the complete setup
+order and environment variable guidance.
 
 ## PostgreSQL
 
