@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 
 import { AiDiscovery } from "@/components/markets/ai-discovery";
 import { MarketFilters } from "@/components/markets/market-filters";
+import { MarketPulse } from "@/components/markets/market-pulse";
 import { MarketTable } from "@/components/markets/market-table";
 import { marketInstruments } from "@/data/markets";
 import type {
@@ -118,15 +119,22 @@ export function MarketExplorer({ locale, messages }: MarketExplorerProps) {
         instruments={filteredInstruments}
         messages={messages.discovery}
       />
-      <MarketTable
-        instruments={sortedInstruments}
-        locale={locale}
-        messages={messages.table}
-        onSortChange={setSort}
-        onToggleWatchlist={toggleWatchlist}
-        sort={sort}
-        watchlist={watchlist}
-      />
+      <div className="market-results-grid">
+        <MarketTable
+          instruments={sortedInstruments}
+          locale={locale}
+          messages={messages.table}
+          onSortChange={setSort}
+          onToggleWatchlist={toggleWatchlist}
+          sort={sort}
+          watchlist={watchlist}
+        />
+        <MarketPulse
+          instruments={filteredInstruments}
+          locale={locale}
+          messages={messages.pulse}
+        />
+      </div>
     </>
   );
 }

@@ -161,4 +161,46 @@ export const markets = {
         "일부 조건을 초기화하거나 다른 티커 또는 회사명을 검색해 보세요.",
     },
   },
+  pulse: {
+    title: "시장 맥박",
+    description: "현재 필터 결과의 흐름을 압축해서 보여줍니다",
+    breadthTitle: "시장 확산도",
+    advancing: "상승",
+    strongestSector: "오늘의 강세 섹터",
+    averageChange: "평균",
+    unusualVolume: "이상 거래량",
+    noUnusualVolume: "이상 거래량 없음",
+    shares: "주",
+    summaryTitle: "AI 시장 요약",
+    updated: "Fixture 분석 · 10분 전 업데이트",
+    summaries: {
+      positive:
+        "현재 결과는 강세 섹터를 중심으로 전반적인 모멘텀이 개선되는 모습입니다.",
+      mixed:
+        "현재 결과는 혼조세이며, 상승 흐름이 일부 종목에 집중되어 있습니다.",
+      negative:
+        "일부 상대 강도 종목을 제외하면 현재 결과의 위험 선호가 약해지고 있습니다.",
+    },
+    evidenceLabel: "판단 근거",
+    evidence: "상승 종목 비율, 평균 등락률, 섹터 강도 및 거래량",
+    riskLabel: "반대 위험",
+    risk: "적은 fixture 표본은 시장의 강세와 약세를 과장할 수 있습니다.",
+    source: "출처: MarketPilot fixture 종목군 · 실시간 시장 데이터 아님",
+    countries: {
+      us: "미국",
+      kr: "한국",
+      jp: "일본",
+    },
+    sectors: {
+      technology: "기술",
+      financials: "금융",
+      industrials: "산업재",
+      consumer: "소비재",
+      healthcare: "헬스케어",
+    },
+    empty: {
+      title: "조건에 맞는 시장 흐름이 없습니다",
+      description: "검색 조건을 넓히면 시장 확산도와 주요 흐름을 계산합니다.",
+    },
+  },
 } as const satisfies Messages["markets"];

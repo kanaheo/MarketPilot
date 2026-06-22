@@ -161,4 +161,47 @@ export const markets = {
         "条件を一部リセットするか、別のティッカーや会社名を検索してください。",
     },
   },
+  pulse: {
+    title: "マーケットパルス",
+    description: "現在のフィルター結果の流れを要約します",
+    breadthTitle: "市場の広がり",
+    advancing: "上昇",
+    strongestSector: "本日の強いセクター",
+    averageChange: "平均",
+    unusualVolume: "異常出来高",
+    noUnusualVolume: "異常出来高なし",
+    shares: "株",
+    summaryTitle: "AI市場要約",
+    updated: "Fixture分析 · 10分前に更新",
+    summaries: {
+      positive:
+        "現在の結果では、強いセクターを中心に全体的なモメンタムが改善しています。",
+      mixed:
+        "現在の結果はまちまちで、上昇は一部の銘柄に集中しています。",
+      negative:
+        "一部の相対的に強い銘柄を除き、現在の結果ではリスク選好が弱まっています。",
+    },
+    evidenceLabel: "判断根拠",
+    evidence: "上昇銘柄比率、平均騰落率、セクター強度、出来高",
+    riskLabel: "反対リスク",
+    risk: "少数のfixtureサンプルは市場の強弱を誇張する可能性があります。",
+    source: "出典: MarketPilot fixture銘柄群 · リアルタイム市場データではありません",
+    countries: {
+      us: "米国",
+      kr: "韓国",
+      jp: "日本",
+    },
+    sectors: {
+      technology: "テクノロジー",
+      financials: "金融",
+      industrials: "資本財",
+      consumer: "消費財",
+      healthcare: "ヘルスケア",
+    },
+    empty: {
+      title: "条件に一致する市場動向がありません",
+      description:
+        "検索条件を広げると、市場の広がりと主要な動向を計算します。",
+    },
+  },
 } as const satisfies Messages["markets"];

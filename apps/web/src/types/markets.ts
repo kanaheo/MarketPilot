@@ -87,3 +87,9 @@ export type MarketTableProps = Readonly<{
   onSortChange: (sort: MarketSort) => void;
   onToggleWatchlist: (symbol: string) => void;
 }>;
+
+export type MarketPulseProps = Readonly<{
+  instruments: readonly MarketInstrument[];
+  locale: Locale;
+  messages: MarketsMessages["pulse"];
+}>;

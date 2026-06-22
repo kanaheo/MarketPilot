@@ -450,6 +450,45 @@ export type Messages = Readonly<{
         description: string;
       };
     };
+    pulse: {
+      title: string;
+      description: string;
+      breadthTitle: string;
+      advancing: string;
+      strongestSector: string;
+      averageChange: string;
+      unusualVolume: string;
+      noUnusualVolume: string;
+      shares: string;
+      summaryTitle: string;
+      updated: string;
+      summaries: {
+        positive: string;
+        mixed: string;
+        negative: string;
+      };
+      evidenceLabel: string;
+      evidence: string;
+      riskLabel: string;
+      risk: string;
+      source: string;
+      countries: {
+        us: string;
+        kr: string;
+        jp: string;
+      };
+      sectors: {
+        technology: string;
+        financials: string;
+        industrials: string;
+        consumer: string;
+        healthcare: string;
+      };
+      empty: {
+        title: string;
+        description: string;
+      };
+    };
   };
 }>;
 

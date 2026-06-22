@@ -41,6 +41,10 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
+  .market-results-grid {
+    grid-template-columns: 1fr;
+  }
+
   .ai-discovery-grid {
     grid-template-columns: 1fr;
   }
@@ -53,6 +57,10 @@
       minmax(65px, 0.5fr)
       54px
       40px;
+  }
+
+  .market-pulse-highlights {
+    grid-template-columns: 1fr;
   }
 
   .market-volume,

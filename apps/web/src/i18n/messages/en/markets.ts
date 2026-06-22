@@ -161,4 +161,47 @@ export const markets = {
         "Reset one or more conditions, or try a different symbol or company name.",
     },
   },
+  pulse: {
+    title: "Market pulse",
+    description: "A compact read of the currently filtered universe",
+    breadthTitle: "Market breadth",
+    advancing: "advancing",
+    strongestSector: "Strongest sector",
+    averageChange: "average",
+    unusualVolume: "Unusual volume",
+    noUnusualVolume: "No unusual volume",
+    shares: "shares",
+    summaryTitle: "AI market summary",
+    updated: "Fixture analysis · Updated 10m ago",
+    summaries: {
+      positive:
+        "Momentum is broadly constructive, led by the strongest sector in the current results.",
+      mixed:
+        "The selected universe is mixed, with gains concentrated in a smaller group of instruments.",
+      negative:
+        "Risk appetite is weakening across the selected universe, despite isolated relative strength.",
+    },
+    evidenceLabel: "Evidence",
+    evidence: "Breadth, average price change, sector leadership, and volume.",
+    riskLabel: "Counter-risk",
+    risk: "Small fixture samples can exaggerate market strength or weakness.",
+    source: "Source: MarketPilot fixture universe · Not live market data",
+    countries: {
+      us: "United States",
+      kr: "Korea",
+      jp: "Japan",
+    },
+    sectors: {
+      technology: "Technology",
+      financials: "Financials",
+      industrials: "Industrials",
+      consumer: "Consumer",
+      healthcare: "Healthcare",
+    },
+    empty: {
+      title: "No market pulse for these filters",
+      description:
+        "Broaden the search conditions to calculate breadth and market highlights.",
+    },
+  },
 } as const satisfies Messages["markets"];
