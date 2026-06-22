@@ -81,4 +81,84 @@ export const markets = {
       description: "根拠付きのfixture分析",
     },
   },
+  discovery: {
+    title: "AI銘柄発見",
+    description: "選択した市場で根拠とリスクを確認できるアイデア",
+    updated: "Fixture分析 · 10分前に更新",
+    evidence: "注目する理由",
+    counterRisk: "反対リスク",
+    fixtureLabel: "Fixtureシグナル · リアルタイム価格未接続",
+    disclaimer:
+      "AIシグナルは投資助言ではありません。ペーパー取引の判断前に根拠、反対リスク、データ時刻を確認してください。",
+    countries: {
+      us: "米国",
+      kr: "韓国",
+      jp: "日本",
+    },
+    risks: {
+      low: "低リスク",
+      medium: "中リスク",
+    },
+    items: {
+      nvda: {
+        signal: "モメンタム強化",
+        evidence: "相対強度と異常出来高が同時に改善しています。",
+        counterRisk: "直近の上昇により割高評価への余裕が減っています。",
+      },
+      samsung: {
+        signal: "反発構造を形成",
+        evidence: "半導体需要の期待と出来高が回復しています。",
+        counterRisk: "メモリ価格と海外投資家フローは景気敏感です。",
+      },
+      toyota: {
+        signal: "ディフェンシブな強さ",
+        evidence: "安定した現金創出と円安が底堅さを支えています。",
+        counterRisk: "為替反転と供給コストが利益率を下げる可能性があります。",
+      },
+    },
+    empty: {
+      title: "条件に一致するAIシグナルがありません",
+      description:
+        "市場または詳細条件を広げて、他のfixtureシグナルを確認してください。",
+    },
+  },
+  table: {
+    title: "市場銘柄",
+    resultsPrefix: "検索結果",
+    resultsSuffix: "件",
+    sortLabel: "並び順",
+    sortOptions: [
+      { label: "AIスコア順", value: "aiScore" },
+      { label: "騰落率順", value: "changeRate" },
+      { label: "出来高順", value: "volume" },
+      { label: "会社名順", value: "name" },
+    ],
+    columns: {
+      company: "銘柄",
+      market: "市場",
+      price: "現在値",
+      change: "騰落率",
+      volume: "出来高",
+      trend: "推移",
+      aiScore: "AIスコア",
+      watchlist: "注目",
+    },
+    countries: {
+      us: "米国",
+      kr: "韓国",
+      jp: "日本",
+    },
+    sessions: {
+      open: "取引中",
+      closed: "終了",
+    },
+    noSignal: "—",
+    addWatchlist: "ウォッチリストに追加",
+    removeWatchlist: "ウォッチリストから削除",
+    empty: {
+      title: "条件に一致する銘柄がありません",
+      description:
+        "条件を一部リセットするか、別のティッカーや会社名を検索してください。",
+    },
+  },
 } as const satisfies Messages["markets"];

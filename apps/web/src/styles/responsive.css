@@ -41,6 +41,25 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
+  .ai-discovery-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .market-table-row {
+    grid-template-columns:
+      minmax(160px, 1.3fr)
+      minmax(95px, 0.75fr)
+      minmax(90px, 0.7fr)
+      minmax(65px, 0.5fr)
+      54px
+      40px;
+  }
+
+  .market-volume,
+  .market-trend {
+    display: none;
+  }
+
   .compact-panel {
     min-height: auto;
   }
@@ -154,6 +173,11 @@
 
   .ai-signal-filter {
     min-height: 48px;
+  }
+
+  .ai-discovery-heading {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .performance-heading-row {
@@ -323,6 +347,37 @@
     flex-direction: column;
     padding-right: 14px;
     padding-left: 14px;
+  }
+
+  .ai-discovery-panel,
+  .market-table-panel {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .market-table-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .market-table-heading label {
+    justify-content: space-between;
+  }
+
+  .market-table-row {
+    grid-template-columns:
+      minmax(118px, 1.3fr)
+      minmax(78px, 0.8fr)
+      54px
+      38px;
+    gap: 8px;
+  }
+
+  .market-identity,
+  .market-volume,
+  .market-trend,
+  .market-price {
+    display: none;
   }
 
   .auth-email-control {

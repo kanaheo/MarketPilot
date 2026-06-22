@@ -47,6 +47,26 @@ export function formatShortDate(value: string, locale: Locale) {
   }).format(new Date(`${value}T00:00:00Z`));
 }
 
+export function formatMarketPrice(
+  value: number,
+  currency: "USD" | "KRW" | "JPY",
+  locale: Locale,
+) {
+  return new Intl.NumberFormat(localeCodes[locale], {
+    currency,
+    maximumFractionDigits: currency === "USD" ? 2 : currency === "JPY" ? 1 : 0,
+    minimumFractionDigits: currency === "USD" ? 2 : 0,
+    style: "currency",
+  }).format(value);
+}
+
+export function formatCompactNumber(value: number, locale: Locale) {
+  return new Intl.NumberFormat(localeCodes[locale], {
+    maximumFractionDigits: 1,
+    notation: "compact",
+  }).format(value);
+}
+
 export function formatPercent(
   value: number,
   locale: Locale,

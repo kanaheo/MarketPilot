@@ -281,3 +281,337 @@
   color: var(--color-primary-strong);
   font-size: 11px;
 }
+
+.ai-discovery-panel {
+  padding: 18px;
+}
+
+.ai-discovery-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.ai-discovery-heading > span {
+  flex: none;
+  color: var(--color-text-muted);
+  font-size: 9px;
+}
+
+.ai-discovery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.ai-discovery-card {
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: linear-gradient(145deg, #ffffff 0%, #f8fbfa 100%);
+  padding: 15px;
+}
+
+.ai-discovery-card > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ai-market-tag {
+  color: var(--color-text-muted);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ai-discovery-card h3 {
+  margin: 7px 0 0;
+  font-size: 14px;
+  letter-spacing: -0.025em;
+}
+
+.ai-discovery-card h3 small {
+  display: inline;
+  margin-left: 6px;
+  color: var(--color-text-muted);
+  font-size: 9px;
+  font-weight: 550;
+}
+
+.ai-risk-badge {
+  flex: none;
+  border-radius: 999px;
+  padding: 4px 7px;
+  font-size: 8px;
+  font-weight: 750;
+}
+
+.ai-risk-badge.low {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.ai-risk-badge.medium {
+  background: #fff2dc;
+  color: #b76a18;
+}
+
+.ai-signal-score {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+  border-bottom: 1px solid #e8ecea;
+  padding-bottom: 13px;
+}
+
+.ai-signal-score span {
+  color: var(--color-primary-strong);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.ai-signal-score strong {
+  color: var(--color-primary);
+  font-size: 24px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+}
+
+.ai-signal-reasons {
+  display: grid;
+  gap: 9px;
+  margin-top: 12px;
+}
+
+.ai-signal-reasons p {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  gap: 7px;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.ai-signal-reasons p:first-child svg {
+  color: var(--color-primary);
+}
+
+.ai-signal-reasons p:last-child svg {
+  color: #c47a27;
+}
+
+.ai-signal-reasons strong {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--color-text);
+  font-size: 9px;
+}
+
+.ai-discovery-card > footer {
+  margin-top: 13px;
+  color: #8a938f;
+  font-size: 8px;
+}
+
+.ai-discovery-disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin: 14px 0 0;
+  border-radius: 6px;
+  background: var(--color-primary-soft);
+  padding: 8px 10px;
+  color: var(--color-primary-strong);
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+.market-table-panel {
+  padding: 18px 18px 0;
+}
+
+.market-table-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.market-table-heading h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 740;
+  letter-spacing: -0.03em;
+}
+
+.market-table-heading p {
+  margin: 5px 0 0;
+  color: var(--color-text-muted);
+  font-size: 10px;
+}
+
+.market-table-heading p strong {
+  color: var(--color-primary-strong);
+}
+
+.market-table-heading label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-muted);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.market-table-heading select {
+  height: 34px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  outline: 0;
+  background: var(--color-surface);
+  padding: 0 9px;
+  color: var(--color-text);
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.market-table {
+  margin-top: 14px;
+  border-top: 1px solid var(--color-border);
+}
+
+.market-table-row {
+  display: grid;
+  grid-template-columns:
+    minmax(170px, 1.35fr)
+    minmax(105px, 0.75fr)
+    minmax(100px, 0.75fr)
+    minmax(70px, 0.55fr)
+    minmax(75px, 0.55fr)
+    minmax(88px, 0.65fr)
+    58px
+    42px;
+  min-height: 58px;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #edf0ee;
+}
+
+.market-table-row.header {
+  min-height: 36px;
+  color: var(--color-text-muted);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.market-table-row > :not(:first-child) {
+  text-align: right;
+}
+
+.market-table-row .asset-cell {
+  min-width: 0;
+}
+
+.market-table-row .asset-cell > span:last-child {
+  min-width: 0;
+}
+
+.market-table-row .asset-cell strong,
+.market-table-row .asset-cell small,
+.market-identity strong,
+.market-identity small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.market-table-row .asset-cell strong {
+  font-size: 11px;
+}
+
+.market-table-row .asset-cell small,
+.market-identity small {
+  margin-top: 3px;
+  color: var(--color-text-muted);
+  font-size: 8px;
+}
+
+.market-identity strong {
+  font-size: 10px;
+}
+
+.market-table-row .numeric-cell,
+.market-table-row .trend-value {
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.market-trend svg {
+  width: 84px;
+  height: 28px;
+  vertical-align: middle;
+}
+
+.market-trend svg.positive {
+  color: var(--color-primary);
+}
+
+.market-trend svg.negative {
+  color: #d84950;
+}
+
+.market-trend polyline {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.ai-score-cell strong,
+.ai-score-empty {
+  display: inline-grid;
+  min-width: 34px;
+  height: 24px;
+  place-items: center;
+  border-radius: 999px;
+  font-size: 9px;
+}
+
+.ai-score-cell strong {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-strong);
+}
+
+.ai-score-empty {
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
+}
+
+.watchlist-toggle {
+  display: inline-grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #8b9590;
+  cursor: pointer;
+}
+
+.watchlist-toggle:hover {
+  background: var(--color-surface-muted);
+  color: var(--color-primary);
+}
+
+.watchlist-toggle[data-active="true"] {
+  color: #d39b24;
+}

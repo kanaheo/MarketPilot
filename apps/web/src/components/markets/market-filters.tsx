@@ -1,9 +1,7 @@
 "use client";
 
 import { RotateCcw, Search, SlidersHorizontal, Sparkles } from "lucide-react";
-import { useMemo, useState } from "react";
 
-import { marketInstruments } from "@/data/markets";
 import type {
   MarketAssetClass,
   MarketCountry,
@@ -11,88 +9,23 @@ import type {
   MarketSession,
 } from "@/types/markets";
 
-const defaultDetails = {
-  sector: "all",
-  exchange: "all",
-  marketCap: "all",
-  changeBand: "all",
-  volumeBand: "all",
-} as const;
-
-export function MarketFilters({ messages }: MarketFiltersProps) {
-  const [query, setQuery] = useState("");
-  const [country, setCountry] = useState<MarketCountry>("all");
-  const [assetClass, setAssetClass] = useState<MarketAssetClass>("all");
-  const [session, setSession] = useState<MarketSession>("all");
-  const [sector, setSector] = useState<string>(defaultDetails.sector);
-  const [exchange, setExchange] = useState<string>(defaultDetails.exchange);
-  const [marketCap, setMarketCap] = useState<string>(defaultDetails.marketCap);
-  const [changeBand, setChangeBand] = useState<string>(
-    defaultDetails.changeBand,
-  );
-  const [volumeBand, setVolumeBand] = useState<string>(
-    defaultDetails.volumeBand,
-  );
-  const [aiSignalsOnly, setAiSignalsOnly] = useState(false);
-
-  const resultCount = useMemo(() => {
-    const normalizedQuery = query.trim().toLocaleLowerCase();
-
-    return marketInstruments.filter((instrument) => {
-      const matchesQuery =
-        normalizedQuery.length === 0 ||
-        instrument.symbol.toLocaleLowerCase().includes(normalizedQuery) ||
-        instrument.name.toLocaleLowerCase().includes(normalizedQuery);
-
-      return (
-        matchesQuery &&
-        (country === "all" || instrument.country === country) &&
-        (assetClass === "all" || instrument.assetClass === assetClass) &&
-        (session === "all" || instrument.session === session) &&
-        (sector === "all" || instrument.sector === sector) &&
-        (exchange === "all" || instrument.exchange === exchange) &&
-        (marketCap === "all" || instrument.marketCap === marketCap) &&
-        (changeBand === "all" || instrument.changeBand === changeBand) &&
-        (volumeBand === "all" || instrument.volumeBand === volumeBand) &&
-        (!aiSignalsOnly || instrument.hasAiSignal)
-      );
-    }).length;
-  }, [
-    aiSignalsOnly,
-    assetClass,
-    changeBand,
-    country,
-    exchange,
-    marketCap,
-    query,
-    sector,
-    session,
-    volumeBand,
-  ]);
-
-  function resetFilters() {
-    setQuery("");
-    setCountry("all");
-    setAssetClass("all");
-    setSession("all");
-    setSector(defaultDetails.sector);
-    setExchange(defaultDetails.exchange);
-    setMarketCap(defaultDetails.marketCap);
-    setChangeBand(defaultDetails.changeBand);
-    setVolumeBand(defaultDetails.volumeBand);
-    setAiSignalsOnly(false);
-  }
-
+export function MarketFilters({
+  messages,
+  onChange,
+  onReset,
+  resultCount,
+  state,
+}: MarketFiltersProps) {
   return (
     <section className="market-filter-shell" aria-label={messages.ariaLabel}>
       <label className="market-search">
         <Search size={20} aria-hidden="true" />
         <span className="sr-only">{messages.searchLabel}</span>
         <input
-          onChange={(event) => setQuery(event.target.value)}
+          onChange={(event) => onChange("query", event.target.value)}
           placeholder={messages.searchPlaceholder}
           type="search"
-          value={query}
+          value={state.query}
         />
         <kbd>⌘ K</kbd>
       </label>
@@ -100,21 +33,27 @@ export function MarketFilters({ messages }: MarketFiltersProps) {
       <div className="market-filter-primary">
         <FilterGroup
           label={messages.groups.country}
-          onChange={(value) => setCountry(value as MarketCountry)}
+          onChange={(value) =>
+            onChange("country", value as MarketCountry)
+          }
           options={messages.options.country}
-          value={country}
+          value={state.country}
         />
         <FilterGroup
           label={messages.groups.assetClass}
-          onChange={(value) => setAssetClass(value as MarketAssetClass)}
+          onChange={(value) =>
+            onChange("assetClass", value as MarketAssetClass)
+          }
           options={messages.options.assetClass}
-          value={assetClass}
+          value={state.assetClass}
         />
         <FilterGroup
           label={messages.groups.session}
-          onChange={(value) => setSession(value as MarketSession)}
+          onChange={(value) =>
+            onChange("session", value as MarketSession)
+          }
           options={messages.options.session}
-          value={session}
+          value={state.session}
         />
       </div>
 
@@ -124,7 +63,7 @@ export function MarketFilters({ messages }: MarketFiltersProps) {
             <SlidersHorizontal size={15} aria-hidden="true" />
             {messages.detailsLabel}
           </span>
-          <button onClick={resetFilters} type="button">
+          <button onClick={onReset} type="button">
             <RotateCcw size={14} aria-hidden="true" />
             {messages.reset}
           </button>
@@ -133,39 +72,41 @@ export function MarketFilters({ messages }: MarketFiltersProps) {
         <div className="market-select-grid">
           <MarketSelect
             label={messages.groups.sector}
-            onChange={setSector}
+            onChange={(value) => onChange("sector", value)}
             options={messages.options.sector}
-            value={sector}
+            value={state.sector}
           />
           <MarketSelect
             label={messages.groups.exchange}
-            onChange={setExchange}
+            onChange={(value) => onChange("exchange", value)}
             options={messages.options.exchange}
-            value={exchange}
+            value={state.exchange}
           />
           <MarketSelect
             label={messages.groups.marketCap}
-            onChange={setMarketCap}
+            onChange={(value) => onChange("marketCap", value)}
             options={messages.options.marketCap}
-            value={marketCap}
+            value={state.marketCap}
           />
           <MarketSelect
             label={messages.groups.change}
-            onChange={setChangeBand}
+            onChange={(value) => onChange("changeBand", value)}
             options={messages.options.change}
-            value={changeBand}
+            value={state.changeBand}
           />
           <MarketSelect
             label={messages.groups.volume}
-            onChange={setVolumeBand}
+            onChange={(value) => onChange("volumeBand", value)}
             options={messages.options.volume}
-            value={volumeBand}
+            value={state.volumeBand}
           />
           <button
-            aria-pressed={aiSignalsOnly}
+            aria-pressed={state.aiSignalsOnly}
             className="ai-signal-filter"
-            data-active={aiSignalsOnly}
-            onClick={() => setAiSignalsOnly((current) => !current)}
+            data-active={state.aiSignalsOnly}
+            onClick={() =>
+              onChange("aiSignalsOnly", !state.aiSignalsOnly)
+            }
             type="button"
           >
             <Sparkles size={16} aria-hidden="true" />

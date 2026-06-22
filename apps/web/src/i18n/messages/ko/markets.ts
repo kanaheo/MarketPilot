@@ -81,4 +81,84 @@ export const markets = {
       description: "근거가 포함된 fixture 분석",
     },
   },
+  discovery: {
+    title: "AI 종목 발견",
+    description: "선택한 시장에서 근거와 위험을 함께 살펴보는 아이디어",
+    updated: "Fixture 분석 · 10분 전 업데이트",
+    evidence: "주목하는 이유",
+    counterRisk: "반대 위험",
+    fixtureLabel: "Fixture 신호 · 실시간 시세 미연결",
+    disclaimer:
+      "AI 신호는 투자 조언이 아닙니다. 모의투자 판단 전 근거, 반대 위험과 데이터 시점을 함께 확인하세요.",
+    countries: {
+      us: "미국",
+      kr: "한국",
+      jp: "일본",
+    },
+    risks: {
+      low: "위험 낮음",
+      medium: "위험 중간",
+    },
+    items: {
+      nvda: {
+        signal: "모멘텀 강화",
+        evidence: "상대 강도와 이상 거래량이 함께 개선되고 있습니다.",
+        counterRisk: "최근 상승으로 밸류에이션 실수의 여유가 줄었습니다.",
+      },
+      samsung: {
+        signal: "반등 구조 형성",
+        evidence: "반도체 수요 기대와 거래량이 함께 회복되고 있습니다.",
+        counterRisk: "메모리 가격과 외국인 수급의 경기 민감도가 높습니다.",
+      },
+      toyota: {
+        signal: "방어적 강세",
+        evidence: "안정적인 현금 창출과 엔화 약세가 회복력을 지지합니다.",
+        counterRisk: "환율 반전과 공급 비용이 마진을 낮출 수 있습니다.",
+      },
+    },
+    empty: {
+      title: "조건에 맞는 AI 신호가 없습니다",
+      description:
+        "시장 또는 상세 조건을 넓혀 다른 fixture 신호를 확인해 보세요.",
+    },
+  },
+  table: {
+    title: "시장 종목",
+    resultsPrefix: "검색 결과",
+    resultsSuffix: "개",
+    sortLabel: "정렬",
+    sortOptions: [
+      { label: "AI 점수순", value: "aiScore" },
+      { label: "등락률순", value: "changeRate" },
+      { label: "거래량순", value: "volume" },
+      { label: "회사명순", value: "name" },
+    ],
+    columns: {
+      company: "종목",
+      market: "시장",
+      price: "현재가",
+      change: "등락률",
+      volume: "거래량",
+      trend: "추이",
+      aiScore: "AI 점수",
+      watchlist: "관심",
+    },
+    countries: {
+      us: "미국",
+      kr: "한국",
+      jp: "일본",
+    },
+    sessions: {
+      open: "개장 중",
+      closed: "마감",
+    },
+    noSignal: "—",
+    addWatchlist: "관심 종목에 추가",
+    removeWatchlist: "관심 종목에서 제거",
+    empty: {
+      title: "조건에 맞는 종목이 없습니다",
+      description:
+        "일부 조건을 초기화하거나 다른 티커 또는 회사명을 검색해 보세요.",
+    },
+  },
 } as const satisfies Messages["markets"];

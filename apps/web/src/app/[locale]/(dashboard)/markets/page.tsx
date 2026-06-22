@@ -1,4 +1,4 @@
-import { MarketFilters } from "@/components/markets/market-filters";
+import { MarketExplorer } from "@/components/markets/market-explorer";
 import { MarketsHeader } from "@/components/markets/markets-header";
 import { assertLocale } from "@/i18n/config";
 import { getMessages } from "@/i18n/messages";
@@ -14,7 +14,7 @@ export default async function MarketsPage({ params }: MarketsPageProps) {
   return (
     <div className="markets-page">
       <MarketsHeader messages={messages.markets.header} />
-      <MarketFilters messages={messages.markets.filters} />
+      <MarketExplorer locale={locale} messages={messages.markets} />
     </div>
   );
 }

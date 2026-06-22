@@ -81,4 +81,84 @@ export const markets = {
       description: "Evidence-backed fixture analysis",
     },
   },
+  discovery: {
+    title: "AI Discovery",
+    description: "Evidence-aware ideas across the selected market universe",
+    updated: "Fixture analysis · Updated 10m ago",
+    evidence: "Why it stands out",
+    counterRisk: "What could go wrong",
+    fixtureLabel: "Fixture signal · Not connected to live prices",
+    disclaimer:
+      "Signals are not investment advice. Review the evidence, counter-risk, and data timestamp before making a paper-trading decision.",
+    countries: {
+      us: "United States",
+      kr: "Korea",
+      jp: "Japan",
+    },
+    risks: {
+      low: "Low risk",
+      medium: "Medium risk",
+    },
+    items: {
+      nvda: {
+        signal: "Momentum strengthening",
+        evidence: "Relative strength and unusual volume are improving together.",
+        counterRisk: "The recent rally leaves less room for valuation mistakes.",
+      },
+      samsung: {
+        signal: "Rebound setup forming",
+        evidence: "Semiconductor demand expectations and volume are recovering.",
+        counterRisk: "Memory pricing and foreign flows remain highly cyclical.",
+      },
+      toyota: {
+        signal: "Defensive strength",
+        evidence: "Stable cash generation and a weaker yen support resilience.",
+        counterRisk: "Currency reversal and supply costs could reduce margins.",
+      },
+    },
+    empty: {
+      title: "No AI signals match these filters",
+      description:
+        "Broaden the market or detailed filters to review more fixture signals.",
+    },
+  },
+  table: {
+    title: "Market universe",
+    resultsPrefix: "Showing",
+    resultsSuffix: "instruments",
+    sortLabel: "Sort by",
+    sortOptions: [
+      { label: "AI score", value: "aiScore" },
+      { label: "Price change", value: "changeRate" },
+      { label: "Volume", value: "volume" },
+      { label: "Company name", value: "name" },
+    ],
+    columns: {
+      company: "Company",
+      market: "Market",
+      price: "Price",
+      change: "Change",
+      volume: "Volume",
+      trend: "Trend",
+      aiScore: "AI score",
+      watchlist: "Watch",
+    },
+    countries: {
+      us: "US",
+      kr: "Korea",
+      jp: "Japan",
+    },
+    sessions: {
+      open: "Open",
+      closed: "Closed",
+    },
+    noSignal: "—",
+    addWatchlist: "add to watchlist",
+    removeWatchlist: "remove from watchlist",
+    empty: {
+      title: "No instruments match these filters",
+      description:
+        "Reset one or more conditions, or try a different symbol or company name.",
+    },
+  },
 } as const satisfies Messages["markets"];
