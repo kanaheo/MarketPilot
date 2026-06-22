@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from marketpilot_api.core.config import get_settings
-from marketpilot_api.schemas.health import HealthResponse
+from marketpilot_api.routers.system import router as system_router
 
 settings = get_settings()
 
@@ -11,7 +11,4 @@ app = FastAPI(
     version=settings.app_version,
 )
 
-
-@app.get("/health", response_model=HealthResponse, tags=["system"])
-def health() -> HealthResponse:
-    return HealthResponse(status="ok", service="marketpilot-api")
+app.include_router(system_router)

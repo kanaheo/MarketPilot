@@ -9,6 +9,10 @@ class Settings(BaseSettings):
     app_version: str = "0.1.0"
     environment: Literal["local", "test", "production"] = "local"
     debug: bool = False
+    database_url: str = (
+        "postgresql+psycopg://marketpilot:marketpilot@127.0.0.1:5432/"
+        "marketpilot"
+    )
 
     model_config = SettingsConfigDict(
         env_file=".env",

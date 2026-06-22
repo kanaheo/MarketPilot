@@ -8,6 +8,7 @@ def test_settings_use_safe_defaults() -> None:
     assert settings.app_version == "0.1.0"
     assert settings.environment == "local"
     assert settings.debug is False
+    assert settings.database_url.startswith("postgresql+psycopg://")
 
 
 def test_settings_read_prefixed_environment_variables(
