@@ -337,4 +337,64 @@ export type Messages = Readonly<{
       };
     };
   };
+  markets: {
+    header: {
+      eyebrow: string;
+      title: string;
+      description: string;
+      dataBadge: string;
+    };
+    filters: {
+      ariaLabel: string;
+      searchLabel: string;
+      searchPlaceholder: string;
+      detailsLabel: string;
+      reset: string;
+      resultsPrefix: string;
+      resultsSuffix: string;
+      fixtureNotice: string;
+      groups: {
+        country: string;
+        assetClass: string;
+        session: string;
+        sector: string;
+        exchange: string;
+        marketCap: string;
+        change: string;
+        volume: string;
+      };
+      options: {
+        country: readonly {
+          label: string;
+          value: MarketCountry;
+        }[];
+        assetClass: readonly {
+          label: string;
+          value: MarketAssetClass;
+        }[];
+        session: readonly {
+          label: string;
+          value: MarketSession;
+        }[];
+        sector: readonly FilterMessageOption[];
+        exchange: readonly FilterMessageOption[];
+        marketCap: readonly FilterMessageOption[];
+        change: readonly FilterMessageOption[];
+        volume: readonly FilterMessageOption[];
+      };
+      aiSignals: {
+        title: string;
+        description: string;
+      };
+    };
+  };
 }>;
+
+type FilterMessageOption = Readonly<{
+  label: string;
+  value: string;
+}>;
+
+type MarketCountry = "all" | "us" | "kr" | "jp";
+type MarketAssetClass = "all" | "stocks" | "etfs";
+type MarketSession = "all" | "open" | "closed";

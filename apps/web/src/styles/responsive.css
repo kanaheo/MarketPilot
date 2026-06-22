@@ -37,6 +37,10 @@
     grid-template-columns: 1fr;
   }
 
+  .market-select-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .compact-panel {
     min-height: auto;
   }
@@ -132,6 +136,24 @@
   .dashboard-action {
     flex: 1;
     padding: 0 10px;
+  }
+
+  .markets-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .market-filter-primary {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .market-select-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ai-signal-filter {
+    min-height: 48px;
   }
 
   .performance-heading-row {
@@ -275,6 +297,32 @@
 
   .risk-overview-score {
     grid-column: 2;
+  }
+
+  .market-search {
+    height: 56px;
+    padding: 0 14px;
+  }
+
+  .market-search kbd {
+    display: none;
+  }
+
+  .market-filter-primary,
+  .market-filter-details {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .market-select-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .market-filter-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    padding-right: 14px;
+    padding-left: 14px;
   }
 
   .auth-email-control {
