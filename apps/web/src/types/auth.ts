@@ -31,3 +31,20 @@ export type SignOutButtonProps = Readonly<{
   label: string;
   redirectTo: string;
 }>;
+
+export type AuthenticatedUser = {
+  id: string;
+  auth_provider: string;
+  auth_subject: string;
+  email: string | null;
+  display_name: string | null;
+  image_url: string | null;
+};
+
+export type SyncAuthenticatedUserInput = {
+  authProvider: string;
+  authSubject: string;
+  email: string | null;
+  displayName: string | null;
+  imageUrl: string | null;
+};

@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 
-import { syncAuthenticatedUser } from "@/lib/server/marketpilot-api";
+import { syncAuthenticatedUser } from "@/lib/server/auth-user-sync";
 
 const googleClientId = process.env.AUTH_GOOGLE_ID;
 const googleClientSecret = process.env.AUTH_GOOGLE_SECRET;

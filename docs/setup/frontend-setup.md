@@ -1,13 +1,19 @@
 # Frontend Setup
 
-## 준비물
+[English](#english) | [한국어](#한국어) | [日本語](#日本語)
+
+<a id="english"></a>
+
+## English
+
+### Requirements
 
 - Node.js 22
 - npm
 
-저장소 루트의 `.nvmrc`를 사용하면 Node.js 버전을 맞출 수 있습니다.
+The root `.nvmrc` defines the supported Node.js version.
 
-## 설치 및 실행
+### Install and run
 
 ```bash
 cd apps/web
@@ -15,11 +21,11 @@ npm ci
 npm run dev
 ```
 
-브라우저에서 `http://localhost:3000`을 엽니다.
+Open `http://localhost:3000`.
 
-## 로그인 환경변수
+### Authentication environment
 
-Google 로그인을 사용하려면 `apps/web/.env.local`에 다음 값을 설정합니다.
+Add the following values to `apps/web/.env.local`.
 
 ```dotenv
 AUTH_URL=http://localhost:3000
@@ -30,22 +36,114 @@ MARKETPILOT_API_URL=http://127.0.0.1:8000
 MARKETPILOT_INTERNAL_API_TOKEN=
 ```
 
-`AUTH_SECRET`은 아래 명령으로 생성할 수 있습니다.
+Generate `AUTH_SECRET` with `npx auth secret`. Google credentials come from
+the Google OAuth web client. `MARKETPILOT_INTERNAL_API_TOKEN` must exactly
+match the value in `apps/api/.env` and must never use a `NEXT_PUBLIC_` prefix.
+Do not commit `.env.local`.
+
+See [Authentication](../frontend/authentication.md#english) for OAuth setup.
+
+### Checks
+
+```bash
+npm run lint
+npm run build
+```
+
+---
+
+<a id="한국어"></a>
+
+## 한국어
+
+### 준비물
+
+- Node.js 22
+- npm
+
+저장소 루트의 `.nvmrc`가 지원 Node.js 버전을 지정합니다.
+
+### 설치 및 실행
 
 ```bash
 cd apps/web
-npx auth secret
+npm ci
+npm run dev
 ```
 
-- `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`은 Google Cloud의 OAuth 웹 클라이언트 값입니다.
-- `MARKETPILOT_API_URL`은 Next.js 서버가 호출할 FastAPI 주소입니다.
-- `MARKETPILOT_INTERNAL_API_TOKEN`은 백엔드 `.env`에서 생성한 값과 정확히 동일하게
-  입력합니다.
-- `MARKETPILOT_INTERNAL_API_TOKEN`에는 `NEXT_PUBLIC_` 접두사를 붙이지 않습니다.
-- `.env.local`은 Git에서 제외되므로 실제 비밀값을 커밋하지 않습니다.
-- 로그인 설정의 자세한 내용은 [Authentication](../frontend/authentication.md#한국어)을 참고합니다.
+`http://localhost:3000`을 엽니다.
 
-## 검사
+### 인증 환경변수
+
+`apps/web/.env.local`에 다음 값을 추가합니다.
+
+```dotenv
+AUTH_URL=http://localhost:3000
+AUTH_SECRET=
+AUTH_GOOGLE_ID=
+AUTH_GOOGLE_SECRET=
+MARKETPILOT_API_URL=http://127.0.0.1:8000
+MARKETPILOT_INTERNAL_API_TOKEN=
+```
+
+`AUTH_SECRET`은 `npx auth secret`으로 생성합니다. Google 값은 OAuth 웹
+클라이언트에서 발급받습니다. `MARKETPILOT_INTERNAL_API_TOKEN`은
+`apps/api/.env`와 정확히 같아야 하며 `NEXT_PUBLIC_` 접두사를 붙이면 안 됩니다.
+`.env.local`은 커밋하지 않습니다.
+
+OAuth 설정은 [인증 문서](../frontend/authentication.md#한국어)를 참고합니다.
+
+### 검사
+
+```bash
+npm run lint
+npm run build
+```
+
+---
+
+<a id="日本語"></a>
+
+## 日本語
+
+### 必要環境
+
+- Node.js 22
+- npm
+
+ルートの`.nvmrc`が対応するNode.jsバージョンを定義します。
+
+### インストールと実行
+
+```bash
+cd apps/web
+npm ci
+npm run dev
+```
+
+`http://localhost:3000`を開きます。
+
+### 認証環境変数
+
+`apps/web/.env.local`に次の値を追加します。
+
+```dotenv
+AUTH_URL=http://localhost:3000
+AUTH_SECRET=
+AUTH_GOOGLE_ID=
+AUTH_GOOGLE_SECRET=
+MARKETPILOT_API_URL=http://127.0.0.1:8000
+MARKETPILOT_INTERNAL_API_TOKEN=
+```
+
+`AUTH_SECRET`は`npx auth secret`で生成します。Googleの値はOAuth Web
+クライアントから取得します。`MARKETPILOT_INTERNAL_API_TOKEN`は
+`apps/api/.env`と完全に一致させ、`NEXT_PUBLIC_`を付けないでください。
+`.env.local`はコミットしません。
+
+OAuth設定は[認証ドキュメント](../frontend/authentication.md#日本語)を参照します。
+
+### チェック
 
 ```bash
 npm run lint
