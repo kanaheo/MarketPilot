@@ -113,13 +113,14 @@ Exit: The repository clearly demonstrates full-stack, data, ML, and AWS skills.
 
 ## Immediate next milestone
 
-Build Phase 1 with fixture data:
+Dashboard, portfolio, and market-explorer fixture screens are complete. Finish
+Phase 1 with the backtest screen:
 
-1. dashboard layout
-2. portfolio balance and cash-flow controls
-3. holdings and return chart
-4. signal list with explanation and risk
-5. backtest setup form and result placeholder
+1. backtest setup form
+2. strategy and risk presets
+3. fixture performance summary
+4. equity and drawdown chart placeholders
+5. trade list and benchmark comparison
 
 ---
 
@@ -233,13 +234,14 @@ Build Phase 1 with fixture data:
 
 ### 바로 다음 목표
 
-예제 데이터로 1단계를 구현합니다.
+대시보드, 포트폴리오 및 시장 탐색 fixture 화면을 완료했습니다. 백테스트 화면으로
+1단계를 마무리합니다.
 
-1. 대시보드 레이아웃
-2. 포트폴리오 잔액 및 현금 흐름 조작
-3. 보유 종목 및 수익률 차트
-4. 설명과 위험 수준을 포함한 신호 목록
-5. 백테스트 설정 폼 및 결과 자리표시자
+1. 백테스트 설정 폼
+2. 전략 및 위험 프리셋
+3. fixture 성과 요약
+4. 자산 곡선 및 낙폭 차트 자리표시자
+5. 거래 목록 및 벤치마크 비교
 
 ---
 
@@ -353,10 +355,11 @@ Build Phase 1 with fixture data:
 
 ### 直近のマイルストーン
 
-フィクスチャーデータを使ってフェーズ1を構築します。
+ダッシュボード、ポートフォリオ、市場検索のfixture画面が完了しました。
+バックテスト画面でフェーズ1を仕上げます。
 
-1. ダッシュボードレイアウト
-2. ポートフォリオ残高とキャッシュフロー操作
-3. 保有銘柄と収益率チャート
-4. 説明とリスクを含むシグナル一覧
-5. バックテスト設定フォームと結果プレースホルダー
+1. バックテスト設定フォーム
+2. 戦略とリスクのプリセット
+3. fixture運用成績サマリー
+4. 資産曲線とドローダウンチャートのプレースホルダー
+5. 取引一覧とベンチマーク比較

@@ -3,13 +3,14 @@ import { SearchX, Star } from "lucide-react";
 import { AssetMark } from "@/components/common/asset-mark";
 import { EmptyState } from "@/components/common/empty-state";
 import { Panel } from "@/components/common/panel";
+import { Sparkline } from "@/components/common/sparkline";
 import { TrendValue } from "@/components/common/trend-value";
 import {
   formatCompactNumber,
   formatMarketPrice,
   formatPercent,
 } from "@/lib/formatters";
-import type { MarketInstrument, MarketTableProps } from "@/types/markets";
+import type { MarketTableProps } from "@/types/markets";
 
 export function MarketTable({
   instruments,
@@ -102,7 +103,10 @@ export function MarketTable({
                 {formatCompactNumber(instrument.volume, locale)}
               </span>
               <span className="market-trend" role="cell">
-                <Sparkline instrument={instrument} />
+                <Sparkline
+                  points={instrument.sparkline}
+                  positive={instrument.changeRate >= 0}
+                />
               </span>
               <span className="ai-score-cell" role="cell">
                 {instrument.aiScore === null ? (
@@ -146,31 +150,5 @@ export function MarketTable({
         />
       )}
     </Panel>
-  );
-}
-
-function Sparkline({ instrument }: Readonly<{ instrument: MarketInstrument }>) {
-  const width = 84;
-  const height = 28;
-  const minimum = Math.min(...instrument.sparkline);
-  const maximum = Math.max(...instrument.sparkline);
-  const range = maximum - minimum || 1;
-  const points = instrument.sparkline
-    .map((value, index) => {
-      const x = (index / (instrument.sparkline.length - 1)) * width;
-      const y = height - ((value - minimum) / range) * (height - 4) - 2;
-
-      return `${x},${y}`;
-    })
-    .join(" ");
-
-  return (
-    <svg
-      aria-hidden="true"
-      className={instrument.changeRate < 0 ? "negative" : "positive"}
-      viewBox={`0 0 ${width} ${height}`}
-    >
-      <polyline fill="none" points={points} stroke="currentColor" />
-    </svg>
   );
 }

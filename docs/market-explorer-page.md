@@ -44,7 +44,9 @@
 
 Global state was intentionally not added because the interaction state belongs
 only to this page. Shared components such as `Panel`, `SectionHeader`,
-`AssetMark`, `TrendValue`, and `EmptyState` are reused.
+`AssetMark`, `TrendValue`, `EmptyState`, and `Sparkline` are reused.
+Filtering and sorting are implemented as pure functions outside the React
+component so they can be tested and reused when API data is connected.
 
 ## Data and AI boundary
 
@@ -115,7 +117,9 @@ model result.
 
 상태가 이 페이지 안에서만 사용되므로 전역 상태는 추가하지 않았습니다.
 `Panel`, `SectionHeader`, `AssetMark`, `TrendValue`, `EmptyState` 등의 기존
-공통 컴포넌트를 재사용합니다.
+공통 컴포넌트를 재사용하며, 대시보드와 시장 탐색의 미니 차트는 공통
+`Sparkline`을 사용합니다. 필터와 정렬 계산은 React 컴포넌트 밖의 순수 함수로
+분리하여 API 연결과 테스트에서 재사용할 수 있도록 했습니다.
 
 ### 데이터 및 AI 경계
 
@@ -184,7 +188,9 @@ fixture 분석임을 명시하며 실시간 시장 데이터나 개인화된 투
 - `MarketPulse`: 現在の結果から算出する市場指標
 
 状態はこのページ内だけで使うため、グローバル状態は追加していません。
-既存の共通コンポーネントを再利用しています。
+既存の共通コンポーネントを再利用し、ダッシュボードと市場検索のミニチャートは
+共通の`Sparkline`を使用します。フィルターと並び替えはReactコンポーネント外の
+純粋関数として分離し、API接続とテストで再利用できる構造にしています。
 
 ### データとAIの境界
 

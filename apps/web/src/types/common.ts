@@ -63,6 +63,12 @@ export type TrendValueProps = Readonly<{
   value: number;
 }>;
 
+export type SparklineProps = Readonly<{
+  className?: string;
+  points: readonly number[];
+  positive: boolean;
+}>;
+
 export type AssetMarkProps = Readonly<{
   color: string;
   symbol: string;

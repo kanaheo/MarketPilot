@@ -555,24 +555,10 @@
   font-variant-numeric: tabular-nums;
 }
 
-.market-trend svg {
+.market-trend .sparkline {
   width: 84px;
   height: 28px;
   vertical-align: middle;
-}
-
-.market-trend svg.positive {
-  color: var(--color-primary);
-}
-
-.market-trend svg.negative {
-  color: #d84950;
-}
-
-.market-trend polyline {
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 2;
 }
 
 .ai-score-cell strong,
