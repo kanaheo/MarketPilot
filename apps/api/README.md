@@ -2,23 +2,18 @@
 
 FastAPI backend for MarketPilot.
 
-## Current unit
-
-Backend foundation **1-1**:
+## Current foundation
 
 - minimal FastAPI application
 - typed `GET /health` endpoint
 - endpoint test
+- Python 3.12 virtual environment
 
-Python 3.12 environment setup and dependency installation are handled in unit
-1-2.
-
-## Commands after unit 1-2
+## Commands
 
 ```bash
 cd apps/api
 source .venv/bin/activate
-pip install -e ".[dev]"
 uvicorn marketpilot_api.main:app --reload
 pytest
 ```
