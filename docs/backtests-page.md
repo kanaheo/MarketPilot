@@ -35,9 +35,27 @@ selection state. Result generation is isolated in `lib/backtests.ts` as a pure,
 deterministic fixture function so a real backtest API can replace it later
 without restructuring the screen.
 
+Default form values, the fixture asset universe, strategy keys, and initial
+asset weights live in `data/backtests.ts`. Allocation validation and equal
+weight calculation are pure functions outside React components.
+
 The current numbers are not historical market calculations. They are explicit
 UI fixtures and must not be interpreted as investment advice or expected
 returns.
+
+## Quick start
+
+1. Choose a test period, starting capital, currency, benchmark, and strategy.
+2. Set the maximum position weight, cash reserve, trading costs, and execution
+   assumptions.
+3. Search for assets, add or remove them, and enter each starting weight.
+4. Use **Equal weight** when you want the invested allocation divided evenly.
+5. Confirm that asset weights equal `100% - cash reserve`.
+6. Select **Run simulation** and review the summary, charts, comparison, and
+   trade history.
+
+Changing an input does not change the displayed result until the simulation is
+run again.
 
 ## Deferred
 
@@ -82,8 +100,23 @@ returns.
 사용합니다. 결과 생성은 `lib/backtests.ts`의 결정적인 순수 함수로 분리하여
 나중에 실제 백테스트 API로 교체해도 화면 구조를 유지할 수 있습니다.
 
+기본 폼 값, fixture 종목군, 전략 key 및 초기 종목 비중은
+`data/backtests.ts`에서 관리합니다. 비중 검증과 동일 비중 계산도 React
+컴포넌트 밖의 순수 함수로 분리했습니다.
+
 현재 수치는 과거 시장 데이터 계산 결과가 아닌 UI fixture입니다. 투자 조언이나
 예상 수익률로 해석하지 않습니다.
+
+### 간단한 이용 방법
+
+1. 기간, 초기자금, 기준 통화, 벤치마크와 전략을 선택합니다.
+2. 최대 종목 비중, 현금 비율, 거래 비용과 체결 조건을 설정합니다.
+3. 종목을 검색해 추가·삭제하고 각 시작 비중을 입력합니다.
+4. 균등하게 나누려면 **동일 비중** 버튼을 사용합니다.
+5. 종목 비중 합계가 `100% - 현금 보유 비율`과 같은지 확인합니다.
+6. **시뮬레이션 실행**을 누르고 성과 요약, 차트, 비교 및 거래 내역을 확인합니다.
+
+입력값을 바꾼 뒤에는 시뮬레이션을 다시 실행해야 결과에 반영됩니다.
 
 ### 후속 작업
 
@@ -127,8 +160,23 @@ returns.
 `BacktestSetup`のみをフォームと銘柄選択状態のClient Component境界とし、
 結果生成は`lib/backtests.ts`の決定論的な純粋関数へ分離しています。
 
+フォーム初期値、fixture銘柄、戦略key、初期銘柄比率は
+`data/backtests.ts`で管理します。比率検証と均等配分計算もReact
+コンポーネント外の純粋関数です。
+
 現在の数値は過去市場データの計算結果ではなくUI fixtureです。投資助言や
 期待収益として扱いません。
+
+### 簡単な使い方
+
+1. 期間、初期資金、基準通貨、ベンチマーク、戦略を選択します。
+2. 最大銘柄比率、現金比率、取引コスト、約定条件を設定します。
+3. 銘柄を検索して追加・削除し、開始比率を入力します。
+4. 均等に配分する場合は**均等配分**ボタンを使用します。
+5. 銘柄比率の合計が`100% - 現金保有比率`と一致することを確認します。
+6. **シミュレーション実行**を押して概要、チャート、比較、取引履歴を確認します。
+
+入力値を変更した後は、再実行するまで表示結果は更新されません。
 
 ### 今後の作業
 

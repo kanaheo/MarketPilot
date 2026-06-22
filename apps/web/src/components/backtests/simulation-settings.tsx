@@ -3,16 +3,8 @@ import { CalendarRange, Coins, Gauge, LineChart } from "lucide-react";
 import { BacktestField } from "@/components/backtests/backtest-field";
 import { Panel } from "@/components/common/panel";
 import { SectionHeader } from "@/components/common/section-header";
-import type {
-  BacktestStrategy,
-  SimulationSettingsProps,
-} from "@/types/backtests";
-
-const strategies: readonly BacktestStrategy[] = [
-  "momentum",
-  "movingAverage",
-  "buyAndHold",
-];
+import { backtestStrategies } from "@/data/backtests";
+import type { SimulationSettingsProps } from "@/types/backtests";
 
 export function SimulationSettings({
   errors,
@@ -117,7 +109,7 @@ export function SimulationSettings({
           <span>{messages.setup.fields.strategy}</span>
         </legend>
         <div className="strategy-preset-grid">
-          {strategies.map((strategy) => {
+          {backtestStrategies.map((strategy) => {
             const strategyMessages = messages.setup.strategies[strategy];
 
             return (

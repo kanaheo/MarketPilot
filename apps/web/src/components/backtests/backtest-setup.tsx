@@ -9,8 +9,15 @@ import { AssetSelection } from "@/components/backtests/asset-selection";
 import { BacktestResults } from "@/components/backtests/backtest-results";
 import { RiskSettings } from "@/components/backtests/risk-settings";
 import { SimulationSettings } from "@/components/backtests/simulation-settings";
-import { defaultSelectedAssets } from "@/data/backtests";
-import { generateBacktestResult } from "@/lib/backtests";
+import {
+  defaultBacktestValues,
+  defaultSelectedAssets,
+} from "@/data/backtests";
+import {
+  equalizeBacktestAssetWeights,
+  generateBacktestResult,
+  getAssetAllocationError,
+} from "@/lib/backtests";
 import { createBacktestSchema } from "@/lib/validation/backtests";
 import type {
   BacktestFormValues,
@@ -18,29 +25,13 @@ import type {
   SelectedBacktestAsset,
 } from "@/types/backtests";
 
-const defaultValues: BacktestFormValues = {
-  startDate: "2021-01-04",
-  endDate: "2025-12-31",
-  initialCapital: 100000,
-  currency: "USD",
-  benchmark: "SPY",
-  strategy: "momentum",
-  maxPositionWeight: 45,
-  cashReserve: 10,
-  stopLoss: 8,
-  rebalanceFrequency: "monthly",
-  feeRate: 0.1,
-  slippageRate: 0.05,
-  executionTiming: "nextOpen",
-};
-
 export function BacktestSetup({ locale, messages }: BacktestSetupProps) {
   const [selectedAssets, setSelectedAssets] = useState<
     readonly SelectedBacktestAsset[]
   >(defaultSelectedAssets);
   const [assetError, setAssetError] = useState("");
   const [result, setResult] = useState(() =>
-    generateBacktestResult(defaultValues, defaultSelectedAssets),
+    generateBacktestResult(defaultBacktestValues, defaultSelectedAssets),
   );
   const [isComplete, setIsComplete] = useState(false);
   const {
@@ -49,7 +40,7 @@ export function BacktestSetup({ locale, messages }: BacktestSetupProps) {
     handleSubmit,
     register,
   } = useForm<BacktestFormValues>({
-    defaultValues,
+    defaultValues: defaultBacktestValues,
     mode: "onBlur",
     reValidateMode: "onChange",
     resolver: zodResolver(createBacktestSchema(messages.validation)),
@@ -87,51 +78,21 @@ export function BacktestSetup({ locale, messages }: BacktestSetupProps) {
   }
 
   function equalizeWeights() {
-    if (selectedAssets.length === 0) {
-      return;
-    }
-
-    const targetWeight = Math.max(0, 100 - cashReserve);
-    const equalWeight = Number(
-      (targetWeight / selectedAssets.length).toFixed(2),
-    );
-    const lastWeight = Number(
-      (targetWeight - equalWeight * (selectedAssets.length - 1)).toFixed(2),
-    );
-
     setAssetError("");
     setSelectedAssets((current) =>
-      current.map((asset, index) => ({
-        ...asset,
-        weight: index === current.length - 1 ? lastWeight : equalWeight,
-      })),
+      equalizeBacktestAssetWeights(current, cashReserve),
     );
   }
 
   async function runBacktest(values: BacktestFormValues) {
-    const selectedWeight = selectedAssets.reduce(
-      (total, asset) => total + asset.weight,
-      0,
+    const allocationError = getAssetAllocationError(
+      selectedAssets,
+      values,
+      messages.validation,
     );
-    const targetWeight = 100 - values.cashReserve;
 
-    if (selectedAssets.length === 0) {
-      setAssetError(messages.validation.assetsRequired);
-      return;
-    }
-
-    if (
-      selectedAssets.some(
-        (asset) =>
-          asset.weight <= 0 || asset.weight > values.maxPositionWeight,
-      )
-    ) {
-      setAssetError(messages.validation.assetWeight);
-      return;
-    }
-
-    if (Math.abs(selectedWeight - targetWeight) > 0.01) {
-      setAssetError(messages.validation.totalWeight);
+    if (allocationError) {
+      setAssetError(allocationError);
       return;
     }
 
@@ -197,7 +158,6 @@ export function BacktestSetup({ locale, messages }: BacktestSetupProps) {
         locale={locale}
         messages={messages}
         result={result}
-        selectedAssets={selectedAssets}
       />
     </form>
   );

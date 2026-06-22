@@ -1,10 +1,11 @@
-import { backtestAssets } from "@/data/backtests";
+import { getBacktestAsset } from "@/data/backtests";
 import type {
   BacktestAsset,
   BacktestBenchmark,
   BacktestFormValues,
   BacktestResult,
   BacktestStrategy,
+  BacktestsMessages,
   SelectedBacktestAsset,
 } from "@/types/backtests";
 
@@ -26,15 +27,62 @@ const benchmarkAnnualReturn: Record<BacktestBenchmark, number> = {
   NIKKEI225: 0.108,
 };
 
-export function getBacktestAsset(symbol: string) {
-  return backtestAssets.find((asset) => asset.symbol === symbol);
-}
-
 function getYears(startDate: string, endDate: string) {
   const start = new Date(`${startDate}T00:00:00Z`).getTime();
   const end = new Date(`${endDate}T00:00:00Z`).getTime();
 
   return Math.max((end - start) / (365.25 * 24 * 60 * 60 * 1000), 1 / 12);
+}
+
+export function equalizeBacktestAssetWeights(
+  selectedAssets: readonly SelectedBacktestAsset[],
+  cashReserve: number,
+) {
+  if (selectedAssets.length === 0) {
+    return selectedAssets;
+  }
+
+  const targetWeight = Math.max(0, 100 - cashReserve);
+  const equalWeight = Number(
+    (targetWeight / selectedAssets.length).toFixed(2),
+  );
+  const lastWeight = Number(
+    (targetWeight - equalWeight * (selectedAssets.length - 1)).toFixed(2),
+  );
+
+  return selectedAssets.map((asset, index) => ({
+    ...asset,
+    weight: index === selectedAssets.length - 1 ? lastWeight : equalWeight,
+  }));
+}
+
+export function getAssetAllocationError(
+  selectedAssets: readonly SelectedBacktestAsset[],
+  values: Pick<BacktestFormValues, "cashReserve" | "maxPositionWeight">,
+  messages: BacktestsMessages["validation"],
+) {
+  if (selectedAssets.length === 0) {
+    return messages.assetsRequired;
+  }
+
+  if (
+    selectedAssets.some(
+      (asset) =>
+        asset.weight <= 0 || asset.weight > values.maxPositionWeight,
+    )
+  ) {
+    return messages.assetWeight;
+  }
+
+  const selectedWeight = selectedAssets.reduce(
+    (total, asset) => total + asset.weight,
+    0,
+  );
+  const targetWeight = 100 - values.cashReserve;
+
+  return Math.abs(selectedWeight - targetWeight) > 0.01
+    ? messages.totalWeight
+    : null;
 }
 
 function getWeightedMetric(
@@ -176,7 +224,6 @@ export function generateBacktestResult(
   const trades = createTrades(values, selectedAssets, totalReturn);
 
   return {
-    generatedAt: "2026-06-22T10:40:00+09:00",
     currency: values.currency,
     totalReturn,
     annualizedReturn,

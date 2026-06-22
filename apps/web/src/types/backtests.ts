@@ -30,8 +30,6 @@ export type BacktestFormValues = {
 export type BacktestAsset = Readonly<{
   symbol: string;
   name: string;
-  country: "us" | "kr" | "jp";
-  currency: BacktestCurrency;
   color: string;
   annualReturn: number;
   volatility: number;
@@ -61,7 +59,6 @@ export type BacktestTrade = Readonly<{
 }>;
 
 export type BacktestResult = Readonly<{
-  generatedAt: string;
   currency: BacktestCurrency;
   totalReturn: number;
   annualizedReturn: number;
@@ -127,5 +124,4 @@ export type BacktestResultsProps = Readonly<{
   locale: Locale;
   messages: BacktestsMessages;
   result: BacktestResult;
-  selectedAssets: readonly SelectedBacktestAsset[];
 }>;

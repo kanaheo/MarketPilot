@@ -6,8 +6,7 @@ import { useMemo, useState } from "react";
 import { AssetMark } from "@/components/common/asset-mark";
 import { Panel } from "@/components/common/panel";
 import { SectionHeader } from "@/components/common/section-header";
-import { backtestAssets } from "@/data/backtests";
-import { getBacktestAsset } from "@/lib/backtests";
+import { backtestAssets, getBacktestAsset } from "@/data/backtests";
 import type { AssetSelectionProps } from "@/types/backtests";
 
 export function AssetSelection({

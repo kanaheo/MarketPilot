@@ -1,11 +1,14 @@
-import type { BacktestAsset, SelectedBacktestAsset } from "@/types/backtests";
+import type {
+  BacktestAsset,
+  BacktestFormValues,
+  BacktestStrategy,
+  SelectedBacktestAsset,
+} from "@/types/backtests";
 
 export const backtestAssets = [
   {
     symbol: "AAPL",
     name: "Apple Inc.",
-    country: "us",
-    currency: "USD",
     color: "#555b62",
     annualReturn: 0.252,
     volatility: 0.284,
@@ -13,8 +16,6 @@ export const backtestAssets = [
   {
     symbol: "NVDA",
     name: "NVIDIA Corp.",
-    country: "us",
-    currency: "USD",
     color: "#76b900",
     annualReturn: 0.468,
     volatility: 0.512,
@@ -22,8 +23,6 @@ export const backtestAssets = [
   {
     symbol: "MSFT",
     name: "Microsoft Corp.",
-    country: "us",
-    currency: "USD",
     color: "#2878d7",
     annualReturn: 0.224,
     volatility: 0.247,
@@ -31,8 +30,6 @@ export const backtestAssets = [
   {
     symbol: "AMZN",
     name: "Amazon.com Inc.",
-    country: "us",
-    currency: "USD",
     color: "#ff9900",
     annualReturn: 0.173,
     volatility: 0.341,
@@ -40,8 +37,6 @@ export const backtestAssets = [
   {
     symbol: "GOOGL",
     name: "Alphabet Inc.",
-    country: "us",
-    currency: "USD",
     color: "#4285f4",
     annualReturn: 0.186,
     volatility: 0.276,
@@ -49,8 +44,6 @@ export const backtestAssets = [
   {
     symbol: "005930",
     name: "Samsung Electronics",
-    country: "kr",
-    currency: "KRW",
     color: "#1f55a5",
     annualReturn: 0.072,
     volatility: 0.238,
@@ -58,8 +51,6 @@ export const backtestAssets = [
   {
     symbol: "000660",
     name: "SK hynix",
-    country: "kr",
-    currency: "KRW",
     color: "#e6532f",
     annualReturn: 0.194,
     volatility: 0.376,
@@ -67,8 +58,6 @@ export const backtestAssets = [
   {
     symbol: "7203",
     name: "Toyota Motor",
-    country: "jp",
-    currency: "JPY",
     color: "#d71920",
     annualReturn: 0.142,
     volatility: 0.221,
@@ -79,3 +68,33 @@ export const defaultSelectedAssets = [
   { symbol: "AAPL", weight: 45 },
   { symbol: "NVDA", weight: 45 },
 ] as const satisfies readonly SelectedBacktestAsset[];
+
+export const defaultBacktestValues = {
+  startDate: "2021-01-04",
+  endDate: "2025-12-31",
+  initialCapital: 100_000,
+  currency: "USD",
+  benchmark: "SPY",
+  strategy: "momentum",
+  maxPositionWeight: 45,
+  cashReserve: 10,
+  stopLoss: 8,
+  rebalanceFrequency: "monthly",
+  feeRate: 0.1,
+  slippageRate: 0.05,
+  executionTiming: "nextOpen",
+} as const satisfies BacktestFormValues;
+
+export const backtestStrategies = [
+  "momentum",
+  "movingAverage",
+  "buyAndHold",
+] as const satisfies readonly BacktestStrategy[];
+
+const backtestAssetBySymbol = new Map<string, BacktestAsset>(
+  backtestAssets.map((asset) => [asset.symbol, asset]),
+);
+
+export function getBacktestAsset(symbol: string) {
+  return backtestAssetBySymbol.get(symbol);
+}
