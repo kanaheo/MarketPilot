@@ -1,0 +1,81 @@
+import type { BacktestAsset, SelectedBacktestAsset } from "@/types/backtests";
+
+export const backtestAssets = [
+  {
+    symbol: "AAPL",
+    name: "Apple Inc.",
+    country: "us",
+    currency: "USD",
+    color: "#555b62",
+    annualReturn: 0.252,
+    volatility: 0.284,
+  },
+  {
+    symbol: "NVDA",
+    name: "NVIDIA Corp.",
+    country: "us",
+    currency: "USD",
+    color: "#76b900",
+    annualReturn: 0.468,
+    volatility: 0.512,
+  },
+  {
+    symbol: "MSFT",
+    name: "Microsoft Corp.",
+    country: "us",
+    currency: "USD",
+    color: "#2878d7",
+    annualReturn: 0.224,
+    volatility: 0.247,
+  },
+  {
+    symbol: "AMZN",
+    name: "Amazon.com Inc.",
+    country: "us",
+    currency: "USD",
+    color: "#ff9900",
+    annualReturn: 0.173,
+    volatility: 0.341,
+  },
+  {
+    symbol: "GOOGL",
+    name: "Alphabet Inc.",
+    country: "us",
+    currency: "USD",
+    color: "#4285f4",
+    annualReturn: 0.186,
+    volatility: 0.276,
+  },
+  {
+    symbol: "005930",
+    name: "Samsung Electronics",
+    country: "kr",
+    currency: "KRW",
+    color: "#1f55a5",
+    annualReturn: 0.072,
+    volatility: 0.238,
+  },
+  {
+    symbol: "000660",
+    name: "SK hynix",
+    country: "kr",
+    currency: "KRW",
+    color: "#e6532f",
+    annualReturn: 0.194,
+    volatility: 0.376,
+  },
+  {
+    symbol: "7203",
+    name: "Toyota Motor",
+    country: "jp",
+    currency: "JPY",
+    color: "#d71920",
+    annualReturn: 0.142,
+    volatility: 0.221,
+  },
+] as const satisfies readonly BacktestAsset[];
+
+export const defaultSelectedAssets = [
+  { symbol: "AAPL", weight: 45 },
+  { symbol: "NVDA", weight: 45 },
+] as const satisfies readonly SelectedBacktestAsset[];

@@ -14,7 +14,7 @@ export default async function BacktestsPage({ params }: BacktestsPageProps) {
   return (
     <div className="backtests-page">
       <BacktestsHeader messages={messages.backtests.header} />
-      <BacktestSetup messages={messages.backtests} />
+      <BacktestSetup locale={locale} messages={messages.backtests} />
     </div>
   );
 }

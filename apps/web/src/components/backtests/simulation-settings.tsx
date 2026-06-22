@@ -4,8 +4,8 @@ import { BacktestField } from "@/components/backtests/backtest-field";
 import { Panel } from "@/components/common/panel";
 import { SectionHeader } from "@/components/common/section-header";
 import type {
-  BacktestFormSectionProps,
   BacktestStrategy,
+  SimulationSettingsProps,
 } from "@/types/backtests";
 
 const strategies: readonly BacktestStrategy[] = [
@@ -18,10 +18,8 @@ export function SimulationSettings({
   errors,
   messages,
   register,
-  watch,
-}: BacktestFormSectionProps) {
-  const selectedStrategy = watch("strategy");
-
+  selectedStrategy,
+}: SimulationSettingsProps) {
   return (
     <Panel className="backtest-settings-panel">
       <SectionHeader

@@ -556,12 +556,79 @@ export type Messages = Readonly<{
         }[];
       };
     };
+    assets: {
+      title: string;
+      description: string;
+      searchLabel: string;
+      searchPlaceholder: string;
+      noResults: string;
+      equalize: string;
+      remove: string;
+      invested: string;
+      cash: string;
+      target: string;
+      columns: {
+        asset: string;
+        weight: string;
+        remove: string;
+      };
+    };
     action: {
       noticeTitle: string;
       noticeDescription: string;
       run: string;
-      validating: string;
-      validated: string;
+      running: string;
+      completed: string;
+    };
+    summary: {
+      title: string;
+      totalReturn: string;
+      annualizedReturn: string;
+      maxDrawdown: string;
+      sharpeRatio: string;
+      benchmark: string;
+      excessReturn: string;
+      riskDetail: string;
+      winRate: string;
+      trades: string;
+      fixture: string;
+    };
+    chart: {
+      title: string;
+      description: string;
+      fixture: string;
+      portfolio: string;
+      benchmark: string;
+      drawdown: string;
+    };
+    comparison: {
+      title: string;
+      description: string;
+      strategy: string;
+      benchmark: string;
+      finalValue: string;
+      excessReturn: string;
+      winRate: string;
+      trades: string;
+      note: string;
+    };
+    trades: {
+      title: string;
+      description: string;
+      countSuffix: string;
+      columns: {
+        date: string;
+        asset: string;
+        side: string;
+        price: string;
+        quantity: string;
+        fee: string;
+        returnRate: string;
+      };
+      sides: {
+        buy: string;
+        sell: string;
+      };
     };
     validation: {
       required: string;
@@ -572,6 +639,9 @@ export type Messages = Readonly<{
       cost: string;
       dateRange: string;
       allocation: string;
+      assetsRequired: string;
+      assetWeight: string;
+      totalWeight: string;
     };
   };
 }>;

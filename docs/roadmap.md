@@ -113,14 +113,12 @@ Exit: The repository clearly demonstrates full-stack, data, ML, and AWS skills.
 
 ## Immediate next milestone
 
-Dashboard, portfolio, and market-explorer fixture screens are complete. Finish
-Phase 1 with the backtest screen:
+Dashboard, portfolio, market-explorer, and strategy-simulation fixture screens
+are complete. Finish the remaining Phase 1 foundation:
 
-1. backtest setup form
-2. strategy and risk presets
-3. fixture performance summary
-4. equity and drawdown chart placeholders
-5. trade list and benchmark comparison
+1. add the PWA manifest and install support
+2. add frontend tests for critical interactions and accessibility
+3. verify the complete authenticated flow on desktop and mobile
 
 ---
 
@@ -234,14 +232,12 @@ Phase 1 with the backtest screen:
 
 ### 바로 다음 목표
 
-대시보드, 포트폴리오 및 시장 탐색 fixture 화면을 완료했습니다. 백테스트 화면으로
-1단계를 마무리합니다.
+대시보드, 포트폴리오, 시장 탐색 및 전략 시뮬레이션 fixture 화면을 완료했습니다.
+남은 1단계 기반 작업을 마무리합니다.
 
-1. 백테스트 설정 폼
-2. 전략 및 위험 프리셋
-3. fixture 성과 요약
-4. 자산 곡선 및 낙폭 차트 자리표시자
-5. 거래 목록 및 벤치마크 비교
+1. PWA 매니페스트 및 설치 지원
+2. 주요 상호작용과 접근성 프론트엔드 테스트
+3. 전체 인증 흐름의 PC 및 모바일 검증
 
 ---
 
@@ -355,11 +351,9 @@ Phase 1 with the backtest screen:
 
 ### 直近のマイルストーン
 
-ダッシュボード、ポートフォリオ、市場検索のfixture画面が完了しました。
-バックテスト画面でフェーズ1を仕上げます。
+ダッシュボード、ポートフォリオ、市場検索、戦略シミュレーションのfixture画面が
+完了しました。残りのフェーズ1基盤作業を仕上げます。
 
-1. バックテスト設定フォーム
-2. 戦略とリスクのプリセット
-3. fixture運用成績サマリー
-4. 資産曲線とドローダウンチャートのプレースホルダー
-5. 取引一覧とベンチマーク比較
+1. PWAマニフェストとインストール対応
+2. 主要操作とアクセシビリティのフロントエンドテスト
+3. 認証フロー全体のPC・モバイル検証

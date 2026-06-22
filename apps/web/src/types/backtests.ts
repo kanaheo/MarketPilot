@@ -1,10 +1,9 @@
 import type {
   FieldErrors,
   UseFormRegister,
-  UseFormWatch,
 } from "react-hook-form";
 
-import type { Messages } from "@/types/i18n";
+import type { Locale, Messages } from "@/types/i18n";
 
 export type BacktestStrategy = "momentum" | "movingAverage" | "buyAndHold";
 export type BacktestCurrency = "USD" | "KRW" | "JPY";
@@ -28,6 +27,55 @@ export type BacktestFormValues = {
   executionTiming: ExecutionTiming;
 };
 
+export type BacktestAsset = Readonly<{
+  symbol: string;
+  name: string;
+  country: "us" | "kr" | "jp";
+  currency: BacktestCurrency;
+  color: string;
+  annualReturn: number;
+  volatility: number;
+}>;
+
+export type SelectedBacktestAsset = Readonly<{
+  symbol: string;
+  weight: number;
+}>;
+
+export type BacktestChartPoint = Readonly<{
+  date: string;
+  portfolio: number;
+  benchmark: number;
+  drawdown: number;
+}>;
+
+export type BacktestTrade = Readonly<{
+  id: string;
+  date: string;
+  symbol: string;
+  side: "buy" | "sell";
+  price: number;
+  quantity: number;
+  fee: number;
+  returnRate: number | null;
+}>;
+
+export type BacktestResult = Readonly<{
+  generatedAt: string;
+  currency: BacktestCurrency;
+  totalReturn: number;
+  annualizedReturn: number;
+  benchmarkReturn: number;
+  excessReturn: number;
+  maxDrawdown: number;
+  sharpeRatio: number;
+  winRate: number;
+  tradeCount: number;
+  finalValue: number;
+  chart: readonly BacktestChartPoint[];
+  trades: readonly BacktestTrade[];
+}>;
+
 export type BacktestsMessages = Messages["backtests"];
 
 export type BacktestsPageProps = Readonly<{
@@ -41,6 +89,7 @@ export type BacktestsHeaderProps = Readonly<{
 }>;
 
 export type BacktestSetupProps = Readonly<{
+  locale: Locale;
   messages: BacktestsMessages;
 }>;
 
@@ -48,8 +97,12 @@ export type BacktestFormSectionProps = Readonly<{
   errors: FieldErrors<BacktestFormValues>;
   messages: BacktestsMessages;
   register: UseFormRegister<BacktestFormValues>;
-  watch: UseFormWatch<BacktestFormValues>;
 }>;
+
+export type SimulationSettingsProps = BacktestFormSectionProps &
+  Readonly<{
+    selectedStrategy: BacktestStrategy;
+  }>;
 
 export type BacktestFieldProps = Readonly<{
   children: React.ReactNode;
@@ -57,4 +110,22 @@ export type BacktestFieldProps = Readonly<{
   hint?: string;
   htmlFor: string;
   label: string;
+}>;
+
+export type AssetSelectionProps = Readonly<{
+  cashReserve: number;
+  error: string;
+  messages: BacktestsMessages["assets"];
+  onAdd: (symbol: string) => void;
+  onEqualize: () => void;
+  onRemove: (symbol: string) => void;
+  onWeightChange: (symbol: string, weight: number) => void;
+  selectedAssets: readonly SelectedBacktestAsset[];
+}>;
+
+export type BacktestResultsProps = Readonly<{
+  locale: Locale;
+  messages: BacktestsMessages;
+  result: BacktestResult;
+  selectedAssets: readonly SelectedBacktestAsset[];
 }>;
