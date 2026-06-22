@@ -35,5 +35,5 @@ export const common = {
   },
 } as const satisfies Omit<
   Messages,
-  "auth" | "dashboard" | "markets" | "portfolio"
+  "auth" | "backtests" | "dashboard" | "markets" | "portfolio"
 >;

@@ -490,6 +490,90 @@ export type Messages = Readonly<{
       };
     };
   };
+  backtests: {
+    header: {
+      eyebrow: string;
+      title: string;
+      description: string;
+      dataBadge: string;
+    };
+    setup: {
+      title: string;
+      description: string;
+      fields: {
+        startDate: string;
+        endDate: string;
+        initialCapital: string;
+        currency: string;
+        benchmark: string;
+        strategy: string;
+      };
+      hints: {
+        initialCapital: string;
+      };
+      options: {
+        currencies: readonly {
+          label: string;
+          value: "USD" | "KRW" | "JPY";
+        }[];
+        benchmarks: readonly {
+          label: string;
+          value: "SPY" | "KOSPI" | "NIKKEI225";
+        }[];
+      };
+      strategies: {
+        momentum: BacktestStrategyMessage;
+        movingAverage: BacktestStrategyMessage;
+        buyAndHold: BacktestStrategyMessage;
+      };
+    };
+    risk: {
+      title: string;
+      description: string;
+      fields: {
+        maxPositionWeight: string;
+        cashReserve: string;
+        stopLoss: string;
+        rebalanceFrequency: string;
+        feeRate: string;
+        slippageRate: string;
+        executionTiming: string;
+      };
+      hints: {
+        maxPositionWeight: string;
+        cashReserve: string;
+        stopLoss: string;
+        executionTiming: string;
+      };
+      options: {
+        rebalanceFrequencies: readonly {
+          label: string;
+          value: "weekly" | "monthly" | "quarterly";
+        }[];
+        executionTimings: readonly {
+          label: string;
+          value: "nextOpen" | "sameClose";
+        }[];
+      };
+    };
+    action: {
+      noticeTitle: string;
+      noticeDescription: string;
+      run: string;
+      validating: string;
+      validated: string;
+    };
+    validation: {
+      required: string;
+      number: string;
+      initialCapital: string;
+      percentage: string;
+      stopLoss: string;
+      cost: string;
+      dateRange: string;
+      allocation: string;
+    };
+  };
 }>;
 
 type FilterMessageOption = Readonly<{
@@ -506,4 +590,9 @@ type AiDiscoveryMessage = Readonly<{
   signal: string;
   evidence: string;
   counterRisk: string;
+}>;
+
+type BacktestStrategyMessage = Readonly<{
+  title: string;
+  description: string;
 }>;
