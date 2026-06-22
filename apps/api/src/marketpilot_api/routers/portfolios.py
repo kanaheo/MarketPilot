@@ -1,17 +1,25 @@
+import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from marketpilot_api.core.user_api_auth import get_current_user
 from marketpilot_api.db.session import get_db_session
 from marketpilot_api.models import User
 from marketpilot_api.repositories.portfolios import (
+    InsufficientCashError,
+    PortfolioNotFoundError,
+    create_cash_transaction,
     create_portfolio_with_initial_deposit,
+    get_portfolio_detail,
     list_portfolios_with_cash,
 )
 from marketpilot_api.schemas.portfolios import (
+    CashTransactionCreateRequest,
+    CashTransactionResponse,
     PortfolioCreateRequest,
+    PortfolioDetailResponse,
     PortfolioResponse,
 )
 
@@ -62,3 +70,66 @@ def list_portfolios(
             user_id=current_user.id,
         )
     ]
+
+
+@router.get(
+    "/{portfolio_id}",
+    response_model=PortfolioDetailResponse,
+)
+def retrieve_portfolio(
+    portfolio_id: uuid.UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[Session, Depends(get_db_session)],
+) -> PortfolioDetailResponse:
+    detail = get_portfolio_detail(
+        session,
+        portfolio_id=portfolio_id,
+        user_id=current_user.id,
+    )
+    if detail is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Portfolio not found",
+        )
+
+    return PortfolioDetailResponse(
+        id=detail.portfolio.id,
+        name=detail.portfolio.name,
+        base_currency=detail.portfolio.base_currency,
+        current_cash=detail.current_cash,
+        created_at=detail.portfolio.created_at,
+        updated_at=detail.portfolio.updated_at,
+        recent_cash_transactions=detail.recent_cash_transactions,
+    )
+
+
+@router.post(
+    "/{portfolio_id}/cash-transactions",
+    response_model=CashTransactionResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def add_cash_transaction(
+    portfolio_id: uuid.UUID,
+    data: CashTransactionCreateRequest,
+    current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[Session, Depends(get_db_session)],
+) -> CashTransactionResponse:
+    try:
+        cash_transaction = create_cash_transaction(
+            session,
+            portfolio_id=portfolio_id,
+            user_id=current_user.id,
+            data=data,
+        )
+    except PortfolioNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Portfolio not found",
+        ) from None
+    except InsufficientCashError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Insufficient cash balance",
+        ) from None
+
+    return CashTransactionResponse.model_validate(cash_transaction)

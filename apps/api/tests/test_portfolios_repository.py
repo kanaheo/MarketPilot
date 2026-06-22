@@ -7,10 +7,17 @@ import pytest
 
 from marketpilot_api.models import CashTransaction, Portfolio
 from marketpilot_api.repositories.portfolios import (
+    InsufficientCashError,
+    PortfolioNotFoundError,
+    create_cash_transaction,
     create_portfolio_with_initial_deposit,
+    get_portfolio_detail,
     list_portfolios_with_cash,
 )
-from marketpilot_api.schemas.portfolios import PortfolioCreateRequest
+from marketpilot_api.schemas.portfolios import (
+    CashTransactionCreateRequest,
+    PortfolioCreateRequest,
+)
 
 
 def test_create_portfolio_adds_initial_deposit_in_one_commit() -> None:
@@ -92,3 +99,124 @@ def test_list_portfolios_filters_by_user_and_maps_cash_balance() -> None:
     assert user_id in compiled.params.values()
     assert result[0].portfolio is portfolio
     assert result[0].current_cash == Decimal("125000.0000")
+
+
+def test_get_portfolio_detail_filters_owner_and_limits_transactions() -> None:
+    session = MagicMock()
+    user_id = uuid.uuid4()
+    portfolio = Portfolio(
+        id=uuid.uuid4(),
+        user_id=user_id,
+        name="My portfolio",
+        base_currency="USD",
+    )
+    transaction = CashTransaction(
+        id=uuid.uuid4(),
+        portfolio_id=portfolio.id,
+        transaction_type="INITIAL_DEPOSIT",
+        amount=Decimal("1000"),
+        currency="USD",
+        occurred_at=datetime.now(timezone.utc),
+    )
+    session.scalar.side_effect = [portfolio, Decimal("1000.0000")]
+    session.scalars.return_value.all.return_value = [transaction]
+
+    result = get_portfolio_detail(
+        session,
+        portfolio_id=portfolio.id,
+        user_id=user_id,
+    )
+
+    portfolio_statement = session.scalar.call_args_list[0].args[0]
+    compiled = portfolio_statement.compile()
+    transaction_statement = session.scalars.call_args.args[0]
+    assert portfolio.id in compiled.params.values()
+    assert user_id in compiled.params.values()
+    assert transaction_statement._limit_clause.value == 20
+    assert result is not None
+    assert result.current_cash == Decimal("1000.0000")
+    assert result.recent_cash_transactions == [transaction]
+
+
+def test_create_deposit_uses_portfolio_currency_and_commits() -> None:
+    session = MagicMock()
+    user_id = uuid.uuid4()
+    portfolio = Portfolio(
+        id=uuid.uuid4(),
+        user_id=user_id,
+        name="Cash portfolio",
+        base_currency="JPY",
+    )
+    session.scalar.return_value = portfolio
+    occurred_at = datetime.now(timezone.utc)
+    data = CashTransactionCreateRequest(
+        transaction_type="DEPOSIT",
+        amount=Decimal("5000"),
+        occurred_at=occurred_at,
+        note="Bonus",
+    )
+
+    result = create_cash_transaction(
+        session,
+        portfolio_id=portfolio.id,
+        user_id=user_id,
+        data=data,
+    )
+
+    statement = session.scalar.call_args.args[0]
+    assert statement._for_update_arg is not None
+    assert result.currency == "JPY"
+    assert result.transaction_type == "DEPOSIT"
+    assert result.occurred_at == occurred_at
+    session.add.assert_called_once_with(result)
+    session.commit.assert_called_once()
+    session.rollback.assert_not_called()
+
+
+def test_create_withdrawal_rejects_insufficient_cash() -> None:
+    session = MagicMock()
+    user_id = uuid.uuid4()
+    portfolio = Portfolio(
+        id=uuid.uuid4(),
+        user_id=user_id,
+        name="Cash portfolio",
+        base_currency="USD",
+    )
+    session.scalar.side_effect = [portfolio, Decimal("50.0000")]
+    data = CashTransactionCreateRequest(
+        transaction_type="WITHDRAWAL",
+        amount=Decimal("50.0001"),
+        occurred_at=datetime.now(timezone.utc),
+    )
+
+    with pytest.raises(InsufficientCashError):
+        create_cash_transaction(
+            session,
+            portfolio_id=portfolio.id,
+            user_id=user_id,
+            data=data,
+        )
+
+    session.add.assert_not_called()
+    session.commit.assert_not_called()
+    session.rollback.assert_called_once()
+
+
+def test_create_cash_transaction_hides_unowned_portfolio() -> None:
+    session = MagicMock()
+    session.scalar.return_value = None
+    data = CashTransactionCreateRequest(
+        transaction_type="DEPOSIT",
+        amount=Decimal("100"),
+        occurred_at=datetime.now(timezone.utc),
+    )
+
+    with pytest.raises(PortfolioNotFoundError):
+        create_cash_transaction(
+            session,
+            portfolio_id=uuid.uuid4(),
+            user_id=uuid.uuid4(),
+            data=data,
+        )
+
+    session.rollback.assert_called_once()
