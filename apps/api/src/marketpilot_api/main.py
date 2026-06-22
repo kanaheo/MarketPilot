@@ -1,10 +1,14 @@
 from fastapi import FastAPI
 
+from marketpilot_api.core.config import get_settings
 from marketpilot_api.schemas.health import HealthResponse
 
+settings = get_settings()
+
 app = FastAPI(
-    title="MarketPilot API",
-    version="0.1.0",
+    debug=settings.debug,
+    title=settings.app_name,
+    version=settings.app_version,
 )
 
 
