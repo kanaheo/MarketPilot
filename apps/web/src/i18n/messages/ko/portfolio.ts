@@ -5,8 +5,16 @@ export const portfolio = {
     title: "포트폴리오",
     description: "자산 배분, 보유 종목, 현금 흐름과 위험을 한곳에서 확인하세요.",
   },
+  pageState: {
+    empty: {
+      title: "아직 포트폴리오가 없습니다",
+      description:
+        "첫 모의투자 포트폴리오를 만들면 현금 활동을 기록할 수 있습니다.",
+    },
+  },
   summary: {
     label: "포트폴리오 요약",
+    unavailable: "아직 계산할 수 없음",
     cards: {
       totalValue: "총 평가금액",
       availableCash: "사용 가능 현금",
@@ -56,18 +64,14 @@ export const portfolio = {
   },
   cashActivity: {
     title: "현금 활동",
-    description: "최근 입금 및 모의매수 내역",
+    description: "최근 현금 원장 내역",
     balance: "사용 가능 현금",
     items: {
-      depositJune: {
-        title: "입금",
-      },
-      applePurchase: {
-        title: "AAPL 20주 매수",
-      },
-      depositMay: {
-        title: "입금",
-      },
+      INITIAL_DEPOSIT: "최초 입금",
+      DEPOSIT: "입금",
+      WITHDRAWAL: "출금",
+      FEE: "수수료",
+      DIVIDEND: "배당",
     },
     empty: {
       title: "현금 활동이 없습니다",

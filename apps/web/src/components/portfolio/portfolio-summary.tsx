@@ -1,42 +1,39 @@
 import { ArrowDown, ArrowUp, TrendingUp, WalletCards } from "lucide-react";
 
 import { SummaryCard } from "@/components/common/summary-card";
-import { portfolioData } from "@/data/portfolio";
-import { formatDollar, formatPercent } from "@/lib/formatters";
+import { formatMarketPrice } from "@/lib/formatters";
 import type { PortfolioSummaryProps } from "@/types/portfolio";
 
-export function PortfolioSummary({ locale, messages }: PortfolioSummaryProps) {
-  const { summary } = portfolioData;
+export function PortfolioSummary({
+  currency,
+  currentCash,
+  locale,
+  messages,
+}: PortfolioSummaryProps) {
   const cards = [
     {
       label: messages.cards.totalValue,
-      value: formatDollar(summary.totalValue.value, locale),
-      detail: `↗ ${formatDollar(summary.totalValue.gain, locale)} (${formatPercent(
-        summary.totalValue.returnRate,
-        locale,
-        { signDisplay: "never" },
-      )})`,
+      value: formatMarketPrice(currentCash, currency, locale),
       icon: TrendingUp,
-      tone: "positive" as const,
+      tone: "neutral" as const,
     },
     {
       label: messages.cards.availableCash,
-      value: formatDollar(summary.availableCash.value, locale),
+      value: formatMarketPrice(currentCash, currency, locale),
       icon: WalletCards,
       tone: "neutral" as const,
     },
     {
       label: messages.cards.totalReturn,
-      value: formatPercent(summary.totalReturn.value, locale),
-      detail: `↗ ${formatDollar(summary.totalReturn.gain, locale)}`,
+      value: messages.unavailable,
       icon: ArrowUp,
-      tone: "positive" as const,
+      tone: "neutral" as const,
     },
     {
       label: messages.cards.maxDrawdown,
-      value: formatPercent(summary.maxDrawdown.value, locale),
+      value: messages.unavailable,
       icon: ArrowDown,
-      tone: "negative" as const,
+      tone: "neutral" as const,
     },
   ];
 

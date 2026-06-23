@@ -6,8 +6,16 @@ export const portfolio = {
     description:
       "資産配分、保有銘柄、キャッシュフロー、リスクを一か所で確認できます。",
   },
+  pageState: {
+    empty: {
+      title: "ポートフォリオがまだありません",
+      description:
+        "最初のペーパーポートフォリオを作成すると、現金活動を記録できます。",
+    },
+  },
   summary: {
     label: "ポートフォリオ概要",
+    unavailable: "まだ計算できません",
     cards: {
       totalValue: "総評価額",
       availableCash: "利用可能な現金",
@@ -58,18 +66,14 @@ export const portfolio = {
   },
   cashActivity: {
     title: "現金アクティビティ",
-    description: "最近の入金とペーパー購入",
+    description: "最近の現金元帳履歴",
     balance: "利用可能な現金",
     items: {
-      depositJune: {
-        title: "入金",
-      },
-      applePurchase: {
-        title: "AAPLを20株購入",
-      },
-      depositMay: {
-        title: "入金",
-      },
+      INITIAL_DEPOSIT: "初回入金",
+      DEPOSIT: "入金",
+      WITHDRAWAL: "出金",
+      FEE: "手数料",
+      DIVIDEND: "配当",
     },
     empty: {
       title: "現金アクティビティはありません",

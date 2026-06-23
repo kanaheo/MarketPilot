@@ -1,20 +1,32 @@
-import { CircleDollarSign, ReceiptText, ShoppingCart } from "lucide-react";
+import {
+  CircleDollarSign,
+  ReceiptText,
+  WalletCards,
+} from "lucide-react";
 
 import { EmptyState } from "@/components/common/empty-state";
 import { Panel } from "@/components/common/panel";
 import { SectionHeader } from "@/components/common/section-header";
 import { TrendValue } from "@/components/common/trend-value";
-import { portfolioData } from "@/data/portfolio";
-import { formatDollar, formatShortDate } from "@/lib/formatters";
+import { formatMarketPrice, formatShortDate } from "@/lib/formatters";
 import type { CashActivityProps } from "@/types/portfolio";
 
 const activityIcons = {
-  deposit: CircleDollarSign,
-  purchase: ShoppingCart,
+  DEPOSIT: CircleDollarSign,
+  DIVIDEND: CircleDollarSign,
+  FEE: WalletCards,
+  INITIAL_DEPOSIT: CircleDollarSign,
+  WITHDRAWAL: WalletCards,
 } as const;
 
-export function CashActivity({ locale, messages }: CashActivityProps) {
-  const hasActivity = portfolioData.cashActivity.length > 0;
+const negativeActivityTypes = new Set(["FEE", "WITHDRAWAL"]);
+
+export function CashActivity({
+  activities,
+  locale,
+  messages,
+}: CashActivityProps) {
+  const hasActivity = activities.length > 0;
 
   return (
     <Panel className="portfolio-detail-panel cash-activity-panel">
@@ -25,25 +37,36 @@ export function CashActivity({ locale, messages }: CashActivityProps) {
 
       {hasActivity ? (
         <div className="cash-activity-list">
-          {portfolioData.cashActivity.map((activity) => {
+          {activities.map((activity) => {
             const Icon = activityIcons[activity.type];
-            const content = messages.items[activity.key];
+            const amount = negativeActivityTypes.has(activity.type)
+              ? -activity.amount
+              : activity.amount;
 
             return (
-              <article className="cash-activity-item" key={activity.key}>
-                <span className={`cash-activity-icon ${activity.type}`}>
+              <article className="cash-activity-item" key={activity.id}>
+                <span
+                  className={`cash-activity-icon ${
+                    amount < 0 ? "purchase" : "deposit"
+                  }`}
+                >
                   <Icon size={17} aria-hidden="true" />
                 </span>
                 <div className="cash-activity-copy">
-                  <strong>{content.title}</strong>
-                  <span>{formatShortDate(activity.date, locale)}</span>
+                  <strong>{messages.items[activity.type]}</strong>
+                  <span>{formatShortDate(activity.occurredAt, locale)}</span>
                 </div>
                 <div className="cash-activity-amount">
-                  <TrendValue value={activity.amount}>
-                    {formatDollar(activity.amount, locale)}
+                  <TrendValue value={amount}>
+                    {formatMarketPrice(amount, activity.currency, locale)}
                   </TrendValue>
                   <small>
-                    {messages.balance} {formatDollar(activity.balance, locale)}
+                    {messages.balance}{" "}
+                    {formatMarketPrice(
+                      activity.balance,
+                      activity.currency,
+                      locale,
+                    )}
                   </small>
                 </div>
               </article>

@@ -5,8 +5,16 @@ export const portfolio = {
     title: "Portfolio",
     description: "Track allocation, holdings, cash flow, and risk in one place.",
   },
+  pageState: {
+    empty: {
+      title: "No portfolio yet",
+      description:
+        "Create your first paper portfolio to start recording cash activity.",
+    },
+  },
   summary: {
     label: "Portfolio summary",
+    unavailable: "Not available yet",
     cards: {
       totalValue: "Total value",
       availableCash: "Available cash",
@@ -57,18 +65,14 @@ export const portfolio = {
   },
   cashActivity: {
     title: "Cash activity",
-    description: "Recent deposits and paper purchases",
+    description: "Recent cash ledger activity",
     balance: "Available cash",
     items: {
-      depositJune: {
-        title: "Deposit",
-      },
-      applePurchase: {
-        title: "Bought AAPL · 20 shares",
-      },
-      depositMay: {
-        title: "Deposit",
-      },
+      INITIAL_DEPOSIT: "Initial deposit",
+      DEPOSIT: "Deposit",
+      WITHDRAWAL: "Withdrawal",
+      FEE: "Fee",
+      DIVIDEND: "Dividend",
     },
     empty: {
       title: "No cash activity yet",

@@ -246,8 +246,15 @@ export type Messages = Readonly<{
       title: string;
       description: string;
     };
+    pageState: {
+      empty: {
+        title: string;
+        description: string;
+      };
+    };
     summary: {
       label: string;
+      unavailable: string;
       cards: {
         totalValue: string;
         availableCash: string;
@@ -298,15 +305,11 @@ export type Messages = Readonly<{
       description: string;
       balance: string;
       items: {
-        depositJune: {
-          title: string;
-        };
-        applePurchase: {
-          title: string;
-        };
-        depositMay: {
-          title: string;
-        };
+        INITIAL_DEPOSIT: string;
+        DEPOSIT: string;
+        WITHDRAWAL: string;
+        FEE: string;
+        DIVIDEND: string;
       };
       empty: {
         title: string;

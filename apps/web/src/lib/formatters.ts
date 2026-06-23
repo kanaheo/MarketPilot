@@ -44,7 +44,7 @@ export function formatShortDate(value: string, locale: Locale) {
     month: "short",
     timeZone: "UTC",
     year: "numeric",
-  }).format(new Date(`${value}T00:00:00Z`));
+  }).format(new Date(value));
 }
 
 export function formatMarketPrice(

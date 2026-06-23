@@ -5,15 +5,15 @@ import { EmptyState } from "@/components/common/empty-state";
 import { Panel } from "@/components/common/panel";
 import { SectionHeader } from "@/components/common/section-header";
 import { TrendValue } from "@/components/common/trend-value";
-import { portfolioData } from "@/data/portfolio";
 import { formatDollar, formatPercent } from "@/lib/formatters";
 import type { PortfolioHoldingsProps } from "@/types/portfolio";
 
 export function PortfolioHoldings({
+  holdings,
   locale,
   messages,
 }: PortfolioHoldingsProps) {
-  const hasHoldings = portfolioData.holdings.length > 0;
+  const hasHoldings = holdings.length > 0;
 
   return (
     <Panel className="portfolio-holdings-panel">
@@ -41,7 +41,7 @@ export function PortfolioHoldings({
             <span role="columnheader">{messages.columns.returnRate}</span>
           </div>
 
-          {portfolioData.holdings.map((holding) => (
+          {holdings.map((holding) => (
             <div
               className="portfolio-holdings-row"
               key={holding.symbol}
