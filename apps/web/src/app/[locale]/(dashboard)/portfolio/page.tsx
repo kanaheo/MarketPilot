@@ -12,38 +12,8 @@ import {
   getPortfolioDetail,
   getPortfolios,
 } from "@/lib/server/portfolio-api";
-import type { PortfolioCashActivity } from "@/types/portfolio";
+import { mapPortfolioPageData } from "@/lib/portfolio/mapper";
 import type { PortfolioPageProps } from "@/types/portfolio";
-
-function createCashActivities(
-  currentCash: number,
-  transactions: Awaited<
-    ReturnType<typeof getPortfolioDetail>
-  >["recent_cash_transactions"],
-): readonly PortfolioCashActivity[] {
-  let balance = currentCash;
-
-  return transactions.map((transaction) => {
-    const amount = Number(transaction.amount);
-    const activity = {
-      id: transaction.id,
-      type: transaction.transaction_type,
-      occurredAt: transaction.occurred_at,
-      amount,
-      balance,
-      currency: transaction.currency,
-      note: transaction.note,
-    };
-
-    balance +=
-      transaction.transaction_type === "WITHDRAWAL" ||
-      transaction.transaction_type === "FEE"
-        ? amount
-        : -amount;
-
-    return activity;
-  });
-}
 
 export default async function PortfolioPage({ params }: PortfolioPageProps) {
   const { locale } = await params;
@@ -66,28 +36,25 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
     );
   }
 
-  const detail = await getPortfolioDetail(portfolios[0].id);
-  const currentCash = Number(detail.current_cash);
-  const cashActivities = createCashActivities(
-    currentCash,
-    detail.recent_cash_transactions,
+  const portfolio = mapPortfolioPageData(
+    await getPortfolioDetail(portfolios[0].id),
   );
 
   return (
     <div className="portfolio-page">
       <PortfolioHeader
         messages={messages.portfolio.header}
-        portfolioName={detail.name}
+        portfolioName={portfolio.name}
       />
       <PortfolioSummary
-        currency={detail.base_currency}
-        currentCash={currentCash}
+        currency={portfolio.currency}
+        currentCash={portfolio.currentCash}
         locale={locale}
         messages={messages.portfolio.summary}
       />
       <AssetAllocation
-        currency={detail.base_currency}
-        currentCash={currentCash}
+        currency={portfolio.currency}
+        currentCash={portfolio.currentCash}
         locale={locale}
         messages={messages.portfolio.allocation}
       />
@@ -97,7 +64,7 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
         messages={messages.portfolio.holdings}
       />
       <CashActivity
-        activities={cashActivities}
+        activities={portfolio.cashActivities}
         locale={locale}
         messages={messages.portfolio.cashActivity}
       />

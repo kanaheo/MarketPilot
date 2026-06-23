@@ -1,4 +1,4 @@
-import type { Messages } from "@/types/i18n";
+import type { PortfolioMessages } from "@/types/i18n/portfolio";
 
 export const portfolio = {
   header: {
@@ -102,4 +102,4 @@ export const portfolio = {
       },
     },
   },
-} as const satisfies Messages["portfolio"];
+} as const satisfies PortfolioMessages;

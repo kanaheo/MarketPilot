@@ -1,4 +1,5 @@
-import type { Locale, Messages } from "@/types/i18n";
+import type { Locale } from "@/types/i18n";
+import type { PortfolioMessages } from "@/types/i18n/portfolio";
 import type {
   CashTransactionType,
   SupportedCurrency,
@@ -9,8 +10,6 @@ export type PortfolioPageProps = Readonly<{
     locale: string;
   }>;
 }>;
-
-export type PortfolioMessages = Messages["portfolio"];
 
 export type PortfolioHeaderProps = Readonly<{
   messages: PortfolioMessages["header"];

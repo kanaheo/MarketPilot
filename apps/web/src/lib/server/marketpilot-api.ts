@@ -10,6 +10,16 @@ type MarketPilotRequestInit = Omit<RequestInit, "headers"> & {
   headers?: HeadersInit;
 };
 
+export class MarketPilotApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+    this.name = "MarketPilotApiError";
+  }
+}
+
 function createUserApiToken(userId: string, signingSecret: string): string {
   const issuedAt = Math.floor(Date.now() / 1000);
   const payload = {
@@ -56,4 +66,20 @@ export async function marketPilotApiFetch(
     cache: init.cache ?? "no-store",
     headers,
   });
+}
+
+export async function marketPilotApiRequest<ResponseBody>(
+  path: `/${string}`,
+  init: MarketPilotRequestInit = {},
+): Promise<ResponseBody> {
+  const response = await marketPilotApiFetch(path, init);
+
+  if (!response.ok) {
+    throw new MarketPilotApiError(
+      `MarketPilot API request failed: ${response.status}`,
+      response.status,
+    );
+  }
+
+  return (await response.json()) as ResponseBody;
 }
