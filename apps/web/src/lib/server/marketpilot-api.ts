@@ -83,3 +83,16 @@ export async function marketPilotApiRequest<ResponseBody>(
 
   return (await response.json()) as ResponseBody;
 }
+
+export async function marketPilotApiPost<RequestBody, ResponseBody>(
+  path: `/${string}`,
+  data: RequestBody,
+): Promise<ResponseBody> {
+  return marketPilotApiRequest<ResponseBody>(path, {
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+  });
+}

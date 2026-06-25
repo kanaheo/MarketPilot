@@ -1,4 +1,7 @@
-import { marketPilotApiRequest } from "@/lib/server/marketpilot-api";
+import {
+  marketPilotApiPost,
+  marketPilotApiRequest,
+} from "@/lib/server/marketpilot-api";
 import type {
   CashTransactionCreateApiRequest,
   CashTransactionApiItem,
@@ -24,28 +27,22 @@ export async function getPortfolioDetail(
 export async function createPortfolio(
   data: PortfolioCreateApiRequest,
 ): Promise<PortfolioApiItem> {
-  return marketPilotApiRequest<PortfolioApiItem>("/portfolios", {
-    body: JSON.stringify(data),
-    headers: {
-      "Content-Type": "application/json",
-    },
-    method: "POST",
-  });
+  return marketPilotApiPost<PortfolioCreateApiRequest, PortfolioApiItem>(
+    "/portfolios",
+    data,
+  );
 }
 
 export async function createCashTransaction(
   portfolioId: string,
   data: CashTransactionCreateApiRequest,
 ): Promise<CashTransactionApiItem> {
-  return marketPilotApiRequest<CashTransactionApiItem>(
+  return marketPilotApiPost<
+    CashTransactionCreateApiRequest,
+    CashTransactionApiItem
+  >(
     `/portfolios/${portfolioId}/cash-transactions`,
-    {
-      body: JSON.stringify(data),
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-    },
+    data,
   );
 }
 
@@ -61,14 +58,8 @@ export async function createOrder(
   portfolioId: string,
   data: OrderCreateApiRequest,
 ): Promise<OrderApiItem> {
-  return marketPilotApiRequest<OrderApiItem>(
+  return marketPilotApiPost<OrderCreateApiRequest, OrderApiItem>(
     `/portfolios/${portfolioId}/orders`,
-    {
-      body: JSON.stringify(data),
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-    },
+    data,
   );
 }
