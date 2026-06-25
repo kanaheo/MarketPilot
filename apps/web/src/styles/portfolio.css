@@ -260,7 +260,8 @@
     minmax(74px, 0.7fr)
     minmax(88px, 0.8fr)
     minmax(62px, 0.6fr)
-    minmax(74px, 0.7fr);
+    minmax(74px, 0.7fr)
+    minmax(58px, 0.55fr);
   min-height: 54px;
   align-items: center;
   gap: 12px;
@@ -314,6 +315,31 @@
 .order-status.cancelled {
   background: #fdeaea;
   color: #d84950;
+}
+
+.order-action-cell {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.order-cancel-button {
+  border: 1px solid #d8dedb;
+  border-radius: 6px;
+  background: #ffffff;
+  padding: 5px 8px;
+  color: var(--color-text-muted);
+  font-size: 10px;
+  font-weight: 720;
+  cursor: pointer;
+}
+
+.order-cancel-button:hover {
+  border-color: #d84950;
+  color: #d84950;
+}
+
+.order-action-placeholder {
+  color: var(--color-text-muted);
 }
 
 .portfolio-summary-grid {

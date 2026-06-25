@@ -231,6 +231,7 @@ export const portfolio = {
       price: "Price",
       status: "Status",
       createdAt: "Recorded",
+      actions: "Action",
     },
     sides: {
       BUY: "Buy",
@@ -247,6 +248,7 @@ export const portfolio = {
       REJECTED: "Rejected",
     },
     marketPrice: "Market",
+    cancel: "Cancel",
     empty: {
       title: "No orders yet",
       description: "Your first paper order will appear here.",

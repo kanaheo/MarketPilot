@@ -8,7 +8,10 @@ from marketpilot_api.core.user_api_auth import get_current_user
 from marketpilot_api.db.session import get_db_session
 from marketpilot_api.models import User
 from marketpilot_api.repositories.orders import (
+    OrderNotFoundError,
+    OrderNotPendingError,
     OrderPortfolioNotFoundError,
+    cancel_order,
     create_order,
     list_orders,
 )
@@ -42,6 +45,37 @@ def submit_order(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Portfolio not found",
+        ) from None
+
+    return OrderResponse.model_validate(order)
+
+
+@router.patch(
+    "/{order_id}/cancel",
+    response_model=OrderResponse,
+)
+def cancel_pending_order(
+    portfolio_id: uuid.UUID,
+    order_id: uuid.UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[Session, Depends(get_db_session)],
+) -> OrderResponse:
+    try:
+        order = cancel_order(
+            session,
+            portfolio_id=portfolio_id,
+            order_id=order_id,
+            user_id=current_user.id,
+        )
+    except (OrderPortfolioNotFoundError, OrderNotFoundError):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Order not found",
+        ) from None
+    except OrderNotPendingError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Only pending orders can be cancelled",
         ) from None
 
     return OrderResponse.model_validate(order)

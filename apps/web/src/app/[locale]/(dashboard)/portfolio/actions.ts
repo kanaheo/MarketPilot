@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { assertLocale } from "@/i18n/config";
 import { getMarketPilotActionFailureReason } from "@/lib/server/action-errors";
 import {
+  cancelOrder,
   createCashTransaction,
   createOrder,
   createPortfolio,
@@ -146,5 +147,20 @@ export async function createCashTransactionAction(
       ok: false,
       reason: getCashTransactionFailureReason(error),
     };
+  }
+}
+
+export async function cancelOrderAction(
+  locale: Locale,
+  portfolioId: string,
+  orderId: string,
+): Promise<void> {
+  assertLocale(locale);
+
+  try {
+    await cancelOrder(portfolioId, orderId);
+    revalidatePath(`/${locale}/portfolio`);
+  } catch {
+    return;
   }
 }

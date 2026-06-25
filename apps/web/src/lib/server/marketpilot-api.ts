@@ -96,3 +96,11 @@ export async function marketPilotApiPost<RequestBody, ResponseBody>(
     method: "POST",
   });
 }
+
+export async function marketPilotApiPatch<ResponseBody>(
+  path: `/${string}`,
+): Promise<ResponseBody> {
+  return marketPilotApiRequest<ResponseBody>(path, {
+    method: "PATCH",
+  });
+}

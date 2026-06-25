@@ -1,4 +1,5 @@
 import {
+  marketPilotApiPatch,
   marketPilotApiPost,
   marketPilotApiRequest,
 } from "@/lib/server/marketpilot-api";
@@ -61,5 +62,14 @@ export async function createOrder(
   return marketPilotApiPost<OrderCreateApiRequest, OrderApiItem>(
     `/portfolios/${portfolioId}/orders`,
     data,
+  );
+}
+
+export async function cancelOrder(
+  portfolioId: string,
+  orderId: string,
+): Promise<OrderApiItem> {
+  return marketPilotApiPatch<OrderApiItem>(
+    `/portfolios/${portfolioId}/orders/${orderId}/cancel`,
   );
 }

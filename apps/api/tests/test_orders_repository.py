@@ -9,7 +9,9 @@ from marketpilot_api.models import Order, Portfolio
 from marketpilot_api.repositories.orders import (
     MANUAL_DECISION_EVIDENCE,
     MANUAL_STRATEGY_VERSION,
+    OrderNotPendingError,
     OrderPortfolioNotFoundError,
+    cancel_order,
     create_order,
     list_orders,
 )
@@ -136,6 +138,74 @@ def test_create_order_rolls_back_when_database_write_fails() -> None:
             data=data,
         )
 
+    session.commit.assert_not_called()
+    session.rollback.assert_called_once()
+
+
+def test_cancel_order_marks_pending_order_cancelled() -> None:
+    session = MagicMock()
+    user_id = uuid.uuid4()
+    portfolio_id = uuid.uuid4()
+    order = Order(
+        id=uuid.uuid4(),
+        portfolio_id=portfolio_id,
+        symbol="AAPL",
+        side="BUY",
+        order_type="MARKET",
+        quantity=Decimal("1"),
+        limit_price=None,
+        currency="USD",
+        status="PENDING",
+        strategy_version=MANUAL_STRATEGY_VERSION,
+        decision_evidence=MANUAL_DECISION_EVIDENCE,
+    )
+    session.scalar.side_effect = [portfolio_id, order]
+
+    result = cancel_order(
+        session,
+        portfolio_id=portfolio_id,
+        order_id=order.id,
+        user_id=user_id,
+    )
+
+    portfolio_statement = session.scalar.call_args_list[0].args[0]
+    order_statement = session.scalar.call_args_list[1].args[0]
+    assert portfolio_id in portfolio_statement.compile().params.values()
+    assert user_id in portfolio_statement.compile().params.values()
+    assert order.id in order_statement.compile().params.values()
+    assert result.status == "CANCELLED"
+    session.flush.assert_called_once()
+    session.refresh.assert_called_once_with(order)
+    session.commit.assert_called_once()
+    session.rollback.assert_not_called()
+
+
+def test_cancel_order_rejects_non_pending_order() -> None:
+    session = MagicMock()
+    order = Order(
+        id=uuid.uuid4(),
+        portfolio_id=uuid.uuid4(),
+        symbol="AAPL",
+        side="BUY",
+        order_type="MARKET",
+        quantity=Decimal("1"),
+        limit_price=None,
+        currency="USD",
+        status="FILLED",
+        strategy_version=MANUAL_STRATEGY_VERSION,
+        decision_evidence=MANUAL_DECISION_EVIDENCE,
+    )
+    session.scalar.side_effect = [order.portfolio_id, order]
+
+    with pytest.raises(OrderNotPendingError):
+        cancel_order(
+            session,
+            portfolio_id=order.portfolio_id,
+            order_id=order.id,
+            user_id=uuid.uuid4(),
+        )
+
+    assert order.status == "FILLED"
     session.commit.assert_not_called()
     session.rollback.assert_called_once()
 

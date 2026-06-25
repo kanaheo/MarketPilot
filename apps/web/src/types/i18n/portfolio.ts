@@ -220,6 +220,7 @@ export type PortfolioMessages = Readonly<{
       price: string;
       status: string;
       createdAt: string;
+      actions: string;
     };
     sides: {
       BUY: string;
@@ -236,6 +237,7 @@ export type PortfolioMessages = Readonly<{
       REJECTED: string;
     };
     marketPrice: string;
+    cancel: string;
     empty: {
       title: string;
       description: string;

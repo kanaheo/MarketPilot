@@ -234,6 +234,7 @@ export const portfolio = {
       price: "価格",
       status: "状態",
       createdAt: "記録日",
+      actions: "操作",
     },
     sides: {
       BUY: "買い",
@@ -250,6 +251,7 @@ export const portfolio = {
       REJECTED: "拒否",
     },
     marketPrice: "成行",
+    cancel: "取消",
     empty: {
       title: "注文はありません",
       description: "最初のペーパー注文を記録すると、ここに表示されます。",

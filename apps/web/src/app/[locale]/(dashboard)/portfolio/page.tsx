@@ -106,6 +106,7 @@ export default async function PortfolioPage({
           locale={locale}
           messages={messages.portfolio.orders}
           orders={orders}
+          portfolioId={selectedPortfolio.id}
         />
       </div>
       <div className="portfolio-details-grid">

@@ -1,5 +1,6 @@
 import { ClipboardList } from "lucide-react";
 
+import { cancelOrderAction } from "@/app/[locale]/(dashboard)/portfolio/actions";
 import { EmptyState } from "@/components/common/empty-state";
 import { Panel } from "@/components/common/panel";
 import { SectionHeader } from "@/components/common/section-header";
@@ -10,6 +11,7 @@ export function PortfolioOrders({
   locale,
   messages,
   orders,
+  portfolioId,
 }: PortfolioOrdersProps) {
   if (orders.length === 0) {
     return (
@@ -39,6 +41,7 @@ export function PortfolioOrders({
           <span>{messages.columns.price}</span>
           <span>{messages.columns.status}</span>
           <span>{messages.columns.createdAt}</span>
+          <span>{messages.columns.actions}</span>
         </div>
         {orders.map((order) => (
           <article className="portfolio-orders-row" key={order.id}>
@@ -59,6 +62,26 @@ export function PortfolioOrders({
               {messages.statuses[order.status]}
             </span>
             <span>{formatShortDate(order.createdAt, locale)}</span>
+            <div className="order-action-cell">
+              {order.status === "PENDING" ? (
+                <form
+                  action={cancelOrderAction.bind(
+                    null,
+                    locale,
+                    portfolioId,
+                    order.id,
+                  )}
+                >
+                  <button className="order-cancel-button" type="submit">
+                    {messages.cancel}
+                  </button>
+                </form>
+              ) : (
+                <span aria-hidden="true" className="order-action-placeholder">
+                  -
+                </span>
+              )}
+            </div>
           </article>
         ))}
       </div>

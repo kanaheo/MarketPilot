@@ -119,6 +119,7 @@ export type PortfolioOrdersProps = Readonly<{
   locale: Locale;
   messages: PortfolioMessages["orders"];
   orders: readonly PortfolioOrder[];
+  portfolioId: string;
 }>;
 
 export type PortfolioSelectorProps = Readonly<{

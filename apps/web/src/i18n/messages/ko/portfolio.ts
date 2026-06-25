@@ -228,6 +228,7 @@ export const portfolio = {
       price: "가격",
       status: "상태",
       createdAt: "기록일",
+      actions: "작업",
     },
     sides: {
       BUY: "매수",
@@ -244,6 +245,7 @@ export const portfolio = {
       REJECTED: "거절",
     },
     marketPrice: "시장가",
+    cancel: "취소",
     empty: {
       title: "주문이 없습니다",
       description: "첫 모의주문을 기록하면 이곳에 표시됩니다.",
