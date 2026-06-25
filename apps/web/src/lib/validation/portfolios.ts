@@ -24,3 +24,22 @@ export function createPortfolioSchema(
 export type PortfolioCreateFormValues = z.infer<
   ReturnType<typeof createPortfolioSchema>
 >;
+
+export function createCashTransactionSchema(
+  messages: PortfolioMessages["cashTransactionForm"]["validation"],
+) {
+  return z.object({
+    amount: z
+      .number(messages.amountRequired)
+      .finite(messages.amountRequired)
+      .positive(messages.amountPositive),
+    note: z.string().trim().max(500, messages.noteLength).optional(),
+    transactionType: z.enum(["DEPOSIT", "WITHDRAWAL"], {
+      error: messages.transactionType,
+    }),
+  });
+}
+
+export type CashTransactionFormValues = z.infer<
+  ReturnType<typeof createCashTransactionSchema>
+>;

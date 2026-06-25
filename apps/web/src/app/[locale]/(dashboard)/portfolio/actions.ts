@@ -4,10 +4,18 @@ import { revalidatePath } from "next/cache";
 
 import { assertLocale } from "@/i18n/config";
 import { MarketPilotApiError } from "@/lib/server/marketpilot-api";
-import { createPortfolio } from "@/lib/server/portfolio-api";
-import type { PortfolioCreateFormValues } from "@/lib/validation/portfolios";
+import {
+  createCashTransaction,
+  createPortfolio,
+} from "@/lib/server/portfolio-api";
+import type {
+  CashTransactionFormValues,
+  PortfolioCreateFormValues,
+} from "@/lib/validation/portfolios";
 import type { Locale } from "@/types/i18n";
 import type {
+  CashTransactionActionResult,
+  CashTransactionFailureReason,
   PortfolioCreateActionResult,
   PortfolioCreateFailureReason,
 } from "@/types/portfolio";
@@ -18,6 +26,30 @@ function getCreatePortfolioFailureReason(
   if (error instanceof MarketPilotApiError) {
     if (error.status === 401 || error.status === 403) {
       return "unauthorized";
+    }
+
+    if (error.status === 409) {
+      return "conflict";
+    }
+
+    if (error.status === 422) {
+      return "invalid";
+    }
+  }
+
+  return "unknown";
+}
+
+function getCashTransactionFailureReason(
+  error: unknown,
+): CashTransactionFailureReason {
+  if (error instanceof MarketPilotApiError) {
+    if (error.status === 401 || error.status === 403) {
+      return "unauthorized";
+    }
+
+    if (error.status === 404) {
+      return "notFound";
     }
 
     if (error.status === 409) {
@@ -50,6 +82,30 @@ export async function createPortfolioAction(
     return {
       ok: false,
       reason: getCreatePortfolioFailureReason(error),
+    };
+  }
+}
+
+export async function createCashTransactionAction(
+  locale: Locale,
+  portfolioId: string,
+  values: CashTransactionFormValues,
+): Promise<CashTransactionActionResult> {
+  assertLocale(locale);
+
+  try {
+    await createCashTransaction(portfolioId, {
+      amount: String(values.amount),
+      note: values.note?.trim() || null,
+      occurred_at: new Date().toISOString(),
+      transaction_type: values.transactionType,
+    });
+    revalidatePath(`/${locale}/portfolio`);
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: getCashTransactionFailureReason(error),
     };
   }
 }

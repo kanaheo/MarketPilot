@@ -51,6 +51,11 @@ export const portfolio = {
       initialCapitalPositive: "초기자금은 0보다 커야 합니다.",
     },
   },
+  selector: {
+    label: "포트폴리오 선택",
+    currentCash: "사용 가능 현금",
+    createAnother: "새 포트폴리오 만들기",
+  },
   summary: {
     label: "포트폴리오 요약",
     unavailable: "아직 계산할 수 없음",
@@ -115,6 +120,43 @@ export const portfolio = {
     empty: {
       title: "현금 활동이 없습니다",
       description: "입금과 모의매수 내역이 이곳에 표시됩니다.",
+    },
+  },
+  cashTransactionForm: {
+    title: "현금 입출금",
+    description: "선택한 포트폴리오의 현금 원장에 입금 또는 출금을 기록합니다.",
+    fields: {
+      transactionType: {
+        label: "거래 유형",
+        options: {
+          deposit: "입금",
+          withdrawal: "출금",
+        },
+      },
+      amount: {
+        label: "금액",
+        placeholder: "100000",
+      },
+      note: {
+        label: "메모",
+        placeholder: "선택 입력",
+      },
+    },
+    submit: "현금 거래 기록",
+    submitting: "기록 중...",
+    success: "현금 거래를 기록했습니다.",
+    errors: {
+      unauthorized: "로그인이 필요합니다. 다시 로그인한 뒤 시도해 주세요.",
+      invalid: "입력값을 확인해 주세요.",
+      conflict: "출금 가능 금액이 부족합니다.",
+      notFound: "포트폴리오를 찾을 수 없습니다.",
+      unknown: "현금 거래를 기록하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+    },
+    validation: {
+      transactionType: "거래 유형을 선택해 주세요.",
+      amountRequired: "금액을 입력해 주세요.",
+      amountPositive: "금액은 0보다 커야 합니다.",
+      noteLength: "메모는 500자 이하로 입력해 주세요.",
     },
   },
   risk: {

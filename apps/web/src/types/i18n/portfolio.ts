@@ -46,6 +46,11 @@ export type PortfolioMessages = Readonly<{
       initialCapitalPositive: string;
     };
   };
+  selector: {
+    label: string;
+    currentCash: string;
+    createAnother: string;
+  };
   summary: {
     label: string;
     unavailable: string;
@@ -108,6 +113,43 @@ export type PortfolioMessages = Readonly<{
     empty: {
       title: string;
       description: string;
+    };
+  };
+  cashTransactionForm: {
+    title: string;
+    description: string;
+    fields: {
+      transactionType: {
+        label: string;
+        options: {
+          deposit: string;
+          withdrawal: string;
+        };
+      };
+      amount: {
+        label: string;
+        placeholder: string;
+      };
+      note: {
+        label: string;
+        placeholder: string;
+      };
+    };
+    submit: string;
+    submitting: string;
+    success: string;
+    errors: {
+      unauthorized: string;
+      invalid: string;
+      conflict: string;
+      notFound: string;
+      unknown: string;
+    };
+    validation: {
+      transactionType: string;
+      amountRequired: string;
+      amountPositive: string;
+      noteLength: string;
     };
   };
   risk: {

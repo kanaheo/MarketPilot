@@ -1,5 +1,7 @@
 import { marketPilotApiRequest } from "@/lib/server/marketpilot-api";
 import type {
+  CashTransactionCreateApiRequest,
+  CashTransactionApiItem,
   PortfolioApiItem,
   PortfolioCreateApiRequest,
   PortfolioDetailApiItem,
@@ -27,4 +29,20 @@ export async function createPortfolio(
     },
     method: "POST",
   });
+}
+
+export async function createCashTransaction(
+  portfolioId: string,
+  data: CashTransactionCreateApiRequest,
+): Promise<CashTransactionApiItem> {
+  return marketPilotApiRequest<CashTransactionApiItem>(
+    `/portfolios/${portfolioId}/cash-transactions`,
+    {
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    },
+  );
 }

@@ -51,6 +51,11 @@ export const portfolio = {
       initialCapitalPositive: "Starting capital must be greater than 0.",
     },
   },
+  selector: {
+    label: "Select portfolio",
+    currentCash: "Available cash",
+    createAnother: "Create another portfolio",
+  },
   summary: {
     label: "Portfolio summary",
     unavailable: "Not available yet",
@@ -116,6 +121,44 @@ export const portfolio = {
     empty: {
       title: "No cash activity yet",
       description: "Deposits and paper purchases will appear here.",
+    },
+  },
+  cashTransactionForm: {
+    title: "Cash deposit / withdrawal",
+    description:
+      "Record a deposit or withdrawal in the selected portfolio cash ledger.",
+    fields: {
+      transactionType: {
+        label: "Transaction type",
+        options: {
+          deposit: "Deposit",
+          withdrawal: "Withdrawal",
+        },
+      },
+      amount: {
+        label: "Amount",
+        placeholder: "100000",
+      },
+      note: {
+        label: "Note",
+        placeholder: "Optional",
+      },
+    },
+    submit: "Record cash transaction",
+    submitting: "Recording...",
+    success: "Cash transaction recorded.",
+    errors: {
+      unauthorized: "Please sign in again before recording cash activity.",
+      invalid: "Please check your inputs.",
+      conflict: "Available cash is not enough for this withdrawal.",
+      notFound: "Portfolio not found.",
+      unknown: "Could not record the cash transaction. Please try again shortly.",
+    },
+    validation: {
+      transactionType: "Choose a transaction type.",
+      amountRequired: "Enter an amount.",
+      amountPositive: "Amount must be greater than 0.",
+      noteLength: "Note must be 500 characters or fewer.",
     },
   },
   risk: {

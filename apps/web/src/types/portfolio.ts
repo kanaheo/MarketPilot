@@ -1,6 +1,9 @@
 import type { Locale } from "@/types/i18n";
 import type { PortfolioMessages } from "@/types/i18n/portfolio";
-import type { PortfolioCreateFormValues } from "@/lib/validation/portfolios";
+import type {
+  CashTransactionFormValues,
+  PortfolioCreateFormValues,
+} from "@/lib/validation/portfolios";
 import type {
   CashTransactionType,
   SupportedCurrency,
@@ -9,6 +12,9 @@ import type {
 export type PortfolioPageProps = Readonly<{
   params: Promise<{
     locale: string;
+  }>;
+  searchParams: Promise<{
+    portfolioId?: string;
   }>;
 }>;
 
@@ -45,6 +51,51 @@ export type PortfolioCreateFormSubmission = Readonly<{
 export type PortfolioCreateSubmitHandler = (
   values: PortfolioCreateFormValues,
 ) => Promise<void>;
+
+export type CashTransactionFailureReason =
+  | "conflict"
+  | "invalid"
+  | "notFound"
+  | "unauthorized"
+  | "unknown";
+
+export type CashTransactionActionResult =
+  | Readonly<{
+      ok: true;
+    }>
+  | Readonly<{
+      ok: false;
+      reason: CashTransactionFailureReason;
+    }>;
+
+export type CashTransactionFormProps = Readonly<{
+  locale: Locale;
+  messages: PortfolioMessages["cashTransactionForm"];
+  portfolioId: string;
+}>;
+
+export type CashTransactionFormSubmission = Readonly<{
+  message: string;
+  status: "error" | "idle" | "success";
+}>;
+
+export type CashTransactionSubmitHandler = (
+  values: CashTransactionFormValues,
+) => Promise<void>;
+
+export type PortfolioSelectorProps = Readonly<{
+  locale: Locale;
+  messages: PortfolioMessages["selector"];
+  portfolios: readonly PortfolioSelectorItem[];
+  selectedPortfolioId: string;
+}>;
+
+export type PortfolioSelectorItem = Readonly<{
+  currentCash: number;
+  currency: SupportedCurrency;
+  id: string;
+  name: string;
+}>;
 
 export type PortfolioSummaryProps = Readonly<{
   currency: SupportedCurrency;

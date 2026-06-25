@@ -7,6 +7,8 @@ export type CashTransactionType =
   | "FEE"
   | "DIVIDEND";
 
+export type UserCashTransactionType = "DEPOSIT" | "WITHDRAWAL";
+
 export type PortfolioApiItem = Readonly<{
   id: string;
   name: string;
@@ -30,11 +32,18 @@ export type PortfolioDetailApiItem = PortfolioApiItem &
   Readonly<{
     recent_cash_transactions: readonly CashTransactionApiItem[];
     holdings: readonly unknown[];
-  orders: readonly unknown[];
-}>;
+    orders: readonly unknown[];
+  }>;
 
 export type PortfolioCreateApiRequest = Readonly<{
   name: string;
   base_currency: SupportedCurrency;
   initial_capital: string;
+}>;
+
+export type CashTransactionCreateApiRequest = Readonly<{
+  transaction_type: UserCashTransactionType;
+  amount: string;
+  occurred_at: string;
+  note: string | null;
 }>;

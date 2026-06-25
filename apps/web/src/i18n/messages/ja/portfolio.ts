@@ -53,6 +53,11 @@ export const portfolio = {
       initialCapitalPositive: "初期資金は0より大きい必要があります。",
     },
   },
+  selector: {
+    label: "ポートフォリオを選択",
+    currentCash: "利用可能な現金",
+    createAnother: "別のポートフォリオを作成",
+  },
   summary: {
     label: "ポートフォリオ概要",
     unavailable: "まだ計算できません",
@@ -118,6 +123,45 @@ export const portfolio = {
     empty: {
       title: "現金アクティビティはありません",
       description: "入金とペーパー購入の履歴がここに表示されます。",
+    },
+  },
+  cashTransactionForm: {
+    title: "現金の入出金",
+    description:
+      "選択中のポートフォリオの現金元帳に入金または出金を記録します。",
+    fields: {
+      transactionType: {
+        label: "取引種別",
+        options: {
+          deposit: "入金",
+          withdrawal: "出金",
+        },
+      },
+      amount: {
+        label: "金額",
+        placeholder: "100000",
+      },
+      note: {
+        label: "メモ",
+        placeholder: "任意",
+      },
+    },
+    submit: "現金取引を記録",
+    submitting: "記録中...",
+    success: "現金取引を記録しました。",
+    errors: {
+      unauthorized: "ログインが必要です。再度ログインしてからお試しください。",
+      invalid: "入力内容を確認してください。",
+      conflict: "出金可能な現金が不足しています。",
+      notFound: "ポートフォリオが見つかりません。",
+      unknown:
+        "現金取引を記録できませんでした。しばらくしてからもう一度お試しください。",
+    },
+    validation: {
+      transactionType: "取引種別を選択してください。",
+      amountRequired: "金額を入力してください。",
+      amountPositive: "金額は0より大きい必要があります。",
+      noteLength: "メモは500文字以内で入力してください。",
     },
   },
   risk: {
