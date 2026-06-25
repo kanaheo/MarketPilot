@@ -152,6 +152,95 @@ export type PortfolioMessages = Readonly<{
       noteLength: string;
     };
   };
+  orderForm: {
+    title: string;
+    description: string;
+    fields: {
+      symbol: {
+        label: string;
+        placeholder: string;
+      };
+      side: {
+        label: string;
+        options: {
+          buy: string;
+          sell: string;
+        };
+      };
+      orderType: {
+        label: string;
+        options: {
+          market: string;
+          limit: string;
+        };
+      };
+      quantity: {
+        label: string;
+        placeholder: string;
+      };
+      limitPrice: {
+        label: string;
+        placeholder: string;
+      };
+      decisionEvidence: {
+        label: string;
+        placeholder: string;
+      };
+    };
+    submit: string;
+    submitting: string;
+    success: string;
+    errors: {
+      unauthorized: string;
+      invalid: string;
+      notFound: string;
+      unknown: string;
+    };
+    validation: {
+      decisionEvidenceLength: string;
+      limitPricePositive: string;
+      limitPriceRequired: string;
+      marketLimitPrice: string;
+      orderType: string;
+      quantityPositive: string;
+      quantityRequired: string;
+      side: string;
+      symbolFormat: string;
+      symbolRequired: string;
+    };
+  };
+  orders: {
+    title: string;
+    description: string;
+    columns: {
+      symbol: string;
+      side: string;
+      type: string;
+      quantity: string;
+      price: string;
+      status: string;
+      createdAt: string;
+    };
+    sides: {
+      BUY: string;
+      SELL: string;
+    };
+    types: {
+      LIMIT: string;
+      MARKET: string;
+    };
+    statuses: {
+      CANCELLED: string;
+      FILLED: string;
+      PENDING: string;
+      REJECTED: string;
+    };
+    marketPrice: string;
+    empty: {
+      title: string;
+      description: string;
+    };
+  };
   risk: {
     title: string;
     description: string;

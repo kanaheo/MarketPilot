@@ -159,6 +159,96 @@ export const portfolio = {
       noteLength: "메모는 500자 이하로 입력해 주세요.",
     },
   },
+  orderForm: {
+    title: "모의주문 기록",
+    description:
+      "선택한 포트폴리오에 시장가 또는 지정가 주문을 대기 상태로 기록합니다.",
+    fields: {
+      symbol: {
+        label: "종목 심볼",
+        placeholder: "예: AAPL",
+      },
+      side: {
+        label: "매수/매도",
+        options: {
+          buy: "매수",
+          sell: "매도",
+        },
+      },
+      orderType: {
+        label: "주문 유형",
+        options: {
+          market: "시장가",
+          limit: "지정가",
+        },
+      },
+      quantity: {
+        label: "수량",
+        placeholder: "10",
+      },
+      limitPrice: {
+        label: "지정가",
+        placeholder: "시장가는 비워두기",
+      },
+      decisionEvidence: {
+        label: "판단 근거",
+        placeholder: "선택 입력",
+      },
+    },
+    submit: "주문 기록",
+    submitting: "기록 중...",
+    success: "주문을 기록했습니다.",
+    errors: {
+      unauthorized: "로그인이 필요합니다. 다시 로그인한 뒤 시도해 주세요.",
+      invalid: "주문 입력값을 확인해 주세요.",
+      notFound: "포트폴리오를 찾을 수 없습니다.",
+      unknown: "주문을 기록하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+    },
+    validation: {
+      decisionEvidenceLength: "판단 근거는 2000자 이하로 입력해 주세요.",
+      limitPricePositive: "지정가는 0보다 커야 합니다.",
+      limitPriceRequired: "지정가 주문은 지정가가 필요합니다.",
+      marketLimitPrice: "시장가 주문은 지정가를 입력하지 않습니다.",
+      orderType: "주문 유형을 선택해 주세요.",
+      quantityPositive: "수량은 0보다 커야 합니다.",
+      quantityRequired: "수량을 입력해 주세요.",
+      side: "매수 또는 매도를 선택해 주세요.",
+      symbolFormat: "종목 심볼 형식을 확인해 주세요.",
+      symbolRequired: "종목 심볼을 입력해 주세요.",
+    },
+  },
+  orders: {
+    title: "최근 주문",
+    description: "선택한 포트폴리오의 최근 모의주문 내역",
+    columns: {
+      symbol: "종목",
+      side: "구분",
+      type: "유형",
+      quantity: "수량",
+      price: "가격",
+      status: "상태",
+      createdAt: "기록일",
+    },
+    sides: {
+      BUY: "매수",
+      SELL: "매도",
+    },
+    types: {
+      LIMIT: "지정가",
+      MARKET: "시장가",
+    },
+    statuses: {
+      CANCELLED: "취소",
+      FILLED: "체결",
+      PENDING: "대기",
+      REJECTED: "거절",
+    },
+    marketPrice: "시장가",
+    empty: {
+      title: "주문이 없습니다",
+      description: "첫 모의주문을 기록하면 이곳에 표시됩니다.",
+    },
+  },
   risk: {
     title: "위험 요약",
     description: "현재 포트폴리오 위험 지표",

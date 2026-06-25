@@ -2,6 +2,8 @@ import { marketPilotApiRequest } from "@/lib/server/marketpilot-api";
 import type {
   CashTransactionCreateApiRequest,
   CashTransactionApiItem,
+  OrderApiItem,
+  OrderCreateApiRequest,
   PortfolioApiItem,
   PortfolioCreateApiRequest,
   PortfolioDetailApiItem,
@@ -37,6 +39,30 @@ export async function createCashTransaction(
 ): Promise<CashTransactionApiItem> {
   return marketPilotApiRequest<CashTransactionApiItem>(
     `/portfolios/${portfolioId}/cash-transactions`,
+    {
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    },
+  );
+}
+
+export async function getOrders(
+  portfolioId: string,
+): Promise<readonly OrderApiItem[]> {
+  return marketPilotApiRequest<OrderApiItem[]>(
+    `/portfolios/${portfolioId}/orders`,
+  );
+}
+
+export async function createOrder(
+  portfolioId: string,
+  data: OrderCreateApiRequest,
+): Promise<OrderApiItem> {
+  return marketPilotApiRequest<OrderApiItem>(
+    `/portfolios/${portfolioId}/orders`,
     {
       body: JSON.stringify(data),
       headers: {

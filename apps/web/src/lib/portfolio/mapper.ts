@@ -1,5 +1,11 @@
-import type { PortfolioDetailApiItem } from "@/types/marketpilot-api";
-import type { PortfolioCashActivity } from "@/types/portfolio";
+import type {
+  OrderApiItem,
+  PortfolioDetailApiItem,
+} from "@/types/marketpilot-api";
+import type {
+  PortfolioCashActivity,
+  PortfolioOrder,
+} from "@/types/portfolio";
 
 export type PortfolioPageData = Readonly<{
   name: string;
@@ -50,4 +56,21 @@ export function mapPortfolioPageData(
       detail.recent_cash_transactions,
     ),
   };
+}
+
+export function mapPortfolioOrders(
+  orders: readonly OrderApiItem[],
+): readonly PortfolioOrder[] {
+  return orders.map((order) => ({
+    createdAt: order.created_at,
+    currency: order.currency,
+    id: order.id,
+    limitPrice:
+      order.limit_price === null ? null : Number(order.limit_price),
+    orderType: order.order_type,
+    quantity: Number(order.quantity),
+    side: order.side,
+    status: order.status,
+    symbol: order.symbol,
+  }));
 }

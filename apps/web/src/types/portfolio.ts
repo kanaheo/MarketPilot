@@ -2,10 +2,14 @@ import type { Locale } from "@/types/i18n";
 import type { PortfolioMessages } from "@/types/i18n/portfolio";
 import type {
   CashTransactionFormValues,
+  OrderFormValues,
   PortfolioCreateFormValues,
 } from "@/lib/validation/portfolios";
 import type {
   CashTransactionType,
+  OrderSide,
+  OrderStatus,
+  OrderType,
   SupportedCurrency,
 } from "@/types/marketpilot-api";
 
@@ -83,6 +87,40 @@ export type CashTransactionSubmitHandler = (
   values: CashTransactionFormValues,
 ) => Promise<void>;
 
+export type OrderFailureReason =
+  | "invalid"
+  | "notFound"
+  | "unauthorized"
+  | "unknown";
+
+export type OrderActionResult =
+  | Readonly<{
+      ok: true;
+    }>
+  | Readonly<{
+      ok: false;
+      reason: OrderFailureReason;
+    }>;
+
+export type OrderFormProps = Readonly<{
+  locale: Locale;
+  messages: PortfolioMessages["orderForm"];
+  portfolioId: string;
+}>;
+
+export type OrderFormSubmission = Readonly<{
+  message: string;
+  status: "error" | "idle" | "success";
+}>;
+
+export type OrderSubmitHandler = (values: OrderFormValues) => Promise<void>;
+
+export type PortfolioOrdersProps = Readonly<{
+  locale: Locale;
+  messages: PortfolioMessages["orders"];
+  orders: readonly PortfolioOrder[];
+}>;
+
 export type PortfolioSelectorProps = Readonly<{
   locale: Locale;
   messages: PortfolioMessages["selector"];
@@ -152,4 +190,16 @@ export type PortfolioCashActivity = Readonly<{
   balance: number;
   currency: SupportedCurrency;
   note: string | null;
+}>;
+
+export type PortfolioOrder = Readonly<{
+  createdAt: string;
+  currency: SupportedCurrency;
+  id: string;
+  limitPrice: number | null;
+  orderType: OrderType;
+  quantity: number;
+  side: OrderSide;
+  status: OrderStatus;
+  symbol: string;
 }>;

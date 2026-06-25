@@ -164,6 +164,97 @@ export const portfolio = {
       noteLength: "メモは500文字以内で入力してください。",
     },
   },
+  orderForm: {
+    title: "ペーパー注文を記録",
+    description:
+      "選択中のポートフォリオに市場注文または指値注文を待機状態で記録します。",
+    fields: {
+      symbol: {
+        label: "銘柄シンボル",
+        placeholder: "例: AAPL",
+      },
+      side: {
+        label: "売買区分",
+        options: {
+          buy: "買い",
+          sell: "売り",
+        },
+      },
+      orderType: {
+        label: "注文種別",
+        options: {
+          market: "成行",
+          limit: "指値",
+        },
+      },
+      quantity: {
+        label: "数量",
+        placeholder: "10",
+      },
+      limitPrice: {
+        label: "指値価格",
+        placeholder: "成行の場合は空欄",
+      },
+      decisionEvidence: {
+        label: "判断根拠",
+        placeholder: "任意",
+      },
+    },
+    submit: "注文を記録",
+    submitting: "記録中...",
+    success: "注文を記録しました。",
+    errors: {
+      unauthorized: "ログインが必要です。再度ログインしてからお試しください。",
+      invalid: "注文の入力内容を確認してください。",
+      notFound: "ポートフォリオが見つかりません。",
+      unknown:
+        "注文を記録できませんでした。しばらくしてからもう一度お試しください。",
+    },
+    validation: {
+      decisionEvidenceLength: "判断根拠は2000文字以内で入力してください。",
+      limitPricePositive: "指値価格は0より大きい必要があります。",
+      limitPriceRequired: "指値注文には指値価格が必要です。",
+      marketLimitPrice: "成行注文では指値価格を入力しません。",
+      orderType: "注文種別を選択してください。",
+      quantityPositive: "数量は0より大きい必要があります。",
+      quantityRequired: "数量を入力してください。",
+      side: "買いまたは売りを選択してください。",
+      symbolFormat: "銘柄シンボルの形式を確認してください。",
+      symbolRequired: "銘柄シンボルを入力してください。",
+    },
+  },
+  orders: {
+    title: "最近の注文",
+    description: "選択中のポートフォリオの最近のペーパー注文履歴",
+    columns: {
+      symbol: "銘柄",
+      side: "区分",
+      type: "種別",
+      quantity: "数量",
+      price: "価格",
+      status: "状態",
+      createdAt: "記録日",
+    },
+    sides: {
+      BUY: "買い",
+      SELL: "売り",
+    },
+    types: {
+      LIMIT: "指値",
+      MARKET: "成行",
+    },
+    statuses: {
+      CANCELLED: "取消",
+      FILLED: "約定",
+      PENDING: "待機",
+      REJECTED: "拒否",
+    },
+    marketPrice: "成行",
+    empty: {
+      title: "注文はありません",
+      description: "最初のペーパー注文を記録すると、ここに表示されます。",
+    },
+  },
   risk: {
     title: "リスク概要",
     description: "現在のポートフォリオリスク指標",

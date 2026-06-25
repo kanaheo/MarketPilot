@@ -43,3 +43,52 @@ export function createCashTransactionSchema(
 export type CashTransactionFormValues = z.infer<
   ReturnType<typeof createCashTransactionSchema>
 >;
+
+export function createOrderSchema(
+  messages: PortfolioMessages["orderForm"]["validation"],
+) {
+  return z
+    .object({
+      decisionEvidence: z
+        .string()
+        .trim()
+        .max(2000, messages.decisionEvidenceLength)
+        .optional(),
+      limitPrice: z.number().positive(messages.limitPricePositive).optional(),
+      orderType: z.enum(["MARKET", "LIMIT"], {
+        error: messages.orderType,
+      }),
+      quantity: z
+        .number(messages.quantityRequired)
+        .finite(messages.quantityRequired)
+        .positive(messages.quantityPositive),
+      side: z.enum(["BUY", "SELL"], {
+        error: messages.side,
+      }),
+      symbol: z
+        .string()
+        .trim()
+        .min(1, messages.symbolRequired)
+        .max(32, messages.symbolFormat)
+        .regex(/^[A-Za-z0-9][A-Za-z0-9.-]{0,31}$/, messages.symbolFormat),
+    })
+    .superRefine((values, context) => {
+      if (values.orderType === "MARKET" && values.limitPrice !== undefined) {
+        context.addIssue({
+          code: "custom",
+          message: messages.marketLimitPrice,
+          path: ["limitPrice"],
+        });
+      }
+
+      if (values.orderType === "LIMIT" && values.limitPrice === undefined) {
+        context.addIssue({
+          code: "custom",
+          message: messages.limitPriceRequired,
+          path: ["limitPrice"],
+        });
+      }
+    });
+}
+
+export type OrderFormValues = z.infer<ReturnType<typeof createOrderSchema>>;

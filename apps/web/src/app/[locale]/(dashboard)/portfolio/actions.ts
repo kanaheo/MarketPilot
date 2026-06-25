@@ -6,16 +6,20 @@ import { assertLocale } from "@/i18n/config";
 import { MarketPilotApiError } from "@/lib/server/marketpilot-api";
 import {
   createCashTransaction,
+  createOrder,
   createPortfolio,
 } from "@/lib/server/portfolio-api";
 import type {
   CashTransactionFormValues,
+  OrderFormValues,
   PortfolioCreateFormValues,
 } from "@/lib/validation/portfolios";
 import type { Locale } from "@/types/i18n";
 import type {
   CashTransactionActionResult,
   CashTransactionFailureReason,
+  OrderActionResult,
+  OrderFailureReason,
   PortfolioCreateActionResult,
   PortfolioCreateFailureReason,
 } from "@/types/portfolio";
@@ -64,6 +68,24 @@ function getCashTransactionFailureReason(
   return "unknown";
 }
 
+function getOrderFailureReason(error: unknown): OrderFailureReason {
+  if (error instanceof MarketPilotApiError) {
+    if (error.status === 401 || error.status === 403) {
+      return "unauthorized";
+    }
+
+    if (error.status === 404) {
+      return "notFound";
+    }
+
+    if (error.status === 422) {
+      return "invalid";
+    }
+  }
+
+  return "unknown";
+}
+
 export async function createPortfolioAction(
   locale: Locale,
   values: PortfolioCreateFormValues,
@@ -82,6 +104,35 @@ export async function createPortfolioAction(
     return {
       ok: false,
       reason: getCreatePortfolioFailureReason(error),
+    };
+  }
+}
+
+export async function createOrderAction(
+  locale: Locale,
+  portfolioId: string,
+  values: OrderFormValues,
+): Promise<OrderActionResult> {
+  assertLocale(locale);
+
+  try {
+    await createOrder(portfolioId, {
+      decision_evidence: values.decisionEvidence?.trim() || null,
+      limit_price:
+        values.orderType === "LIMIT" && values.limitPrice !== undefined
+          ? String(values.limitPrice)
+          : null,
+      order_type: values.orderType,
+      quantity: String(values.quantity),
+      side: values.side,
+      symbol: values.symbol.trim().toUpperCase(),
+    });
+    revalidatePath(`/${locale}/portfolio`);
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: getOrderFailureReason(error),
     };
   }
 }

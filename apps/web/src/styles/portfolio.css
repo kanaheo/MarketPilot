@@ -197,6 +197,12 @@
   gap: 18px;
 }
 
+.order-form-panel {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+}
+
 .cash-transaction-type-group {
   display: flex;
   flex-wrap: wrap;
@@ -233,6 +239,81 @@
   width: 100%;
   color: #d84950;
   font-size: 10px;
+}
+
+.portfolio-orders-panel {
+  min-height: 286px;
+  padding: 18px;
+}
+
+.portfolio-orders-table {
+  margin-top: 14px;
+  border-top: 1px solid var(--color-border);
+}
+
+.portfolio-orders-row {
+  display: grid;
+  grid-template-columns:
+    minmax(76px, 0.8fr)
+    minmax(48px, 0.5fr)
+    minmax(58px, 0.55fr)
+    minmax(74px, 0.7fr)
+    minmax(88px, 0.8fr)
+    minmax(62px, 0.6fr)
+    minmax(74px, 0.7fr);
+  min-height: 54px;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #edf0ee;
+  font-size: 11px;
+}
+
+.portfolio-orders-row.header {
+  min-height: 34px;
+  color: var(--color-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.portfolio-orders-row > :not(:first-child) {
+  text-align: right;
+}
+
+.portfolio-orders-row strong {
+  font-size: 12px;
+}
+
+.portfolio-orders-row span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.order-status {
+  justify-self: end;
+  border-radius: 999px;
+  background: var(--color-surface-muted);
+  padding: 4px 8px;
+  color: var(--color-text-muted);
+  font-size: 10px;
+  font-weight: 760;
+}
+
+.order-status.filled {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.order-status.pending {
+  background: #fff5df;
+  color: #a86616;
+}
+
+.order-status.rejected,
+.order-status.cancelled {
+  background: #fdeaea;
+  color: #d84950;
 }
 
 .portfolio-summary-grid {

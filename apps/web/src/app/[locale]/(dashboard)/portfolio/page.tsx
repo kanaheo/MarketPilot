@@ -4,15 +4,21 @@ import { EmptyState } from "@/components/common/empty-state";
 import { AssetAllocation } from "@/components/portfolio/asset-allocation";
 import { CashActivity } from "@/components/portfolio/cash-activity";
 import { CashTransactionForm } from "@/components/portfolio/cash-transaction-form";
+import { OrderForm } from "@/components/portfolio/order-form";
 import { PortfolioCreateForm } from "@/components/portfolio/portfolio-create-form";
 import { PortfolioHeader } from "@/components/portfolio/portfolio-header";
 import { PortfolioHoldings } from "@/components/portfolio/portfolio-holdings";
+import { PortfolioOrders } from "@/components/portfolio/portfolio-orders";
 import { PortfolioSelector } from "@/components/portfolio/portfolio-selector";
 import { PortfolioSummary } from "@/components/portfolio/portfolio-summary";
 import { assertLocale } from "@/i18n/config";
 import { getMessages } from "@/i18n/messages";
-import { mapPortfolioPageData } from "@/lib/portfolio/mapper";
 import {
+  mapPortfolioOrders,
+  mapPortfolioPageData,
+} from "@/lib/portfolio/mapper";
+import {
+  getOrders,
   getPortfolioDetail,
   getPortfolios,
 } from "@/lib/server/portfolio-api";
@@ -53,6 +59,7 @@ export default async function PortfolioPage({
   const portfolio = mapPortfolioPageData(
     await getPortfolioDetail(selectedPortfolio.id),
   );
+  const orders = mapPortfolioOrders(await getOrders(selectedPortfolio.id));
   const selectorItems = portfolios.map((portfolioItem) => ({
     currentCash: Number(portfolioItem.current_cash),
     currency: portfolioItem.base_currency,
@@ -89,6 +96,18 @@ export default async function PortfolioPage({
         locale={locale}
         messages={messages.portfolio.holdings}
       />
+      <div className="portfolio-details-grid">
+        <OrderForm
+          locale={locale}
+          messages={messages.portfolio.orderForm}
+          portfolioId={selectedPortfolio.id}
+        />
+        <PortfolioOrders
+          locale={locale}
+          messages={messages.portfolio.orders}
+          orders={orders}
+        />
+      </div>
       <div className="portfolio-details-grid">
         <CashActivity
           activities={portfolio.cashActivities}

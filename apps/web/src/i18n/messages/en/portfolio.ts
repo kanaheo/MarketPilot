@@ -161,6 +161,97 @@ export const portfolio = {
       noteLength: "Note must be 500 characters or fewer.",
     },
   },
+  orderForm: {
+    title: "Record paper order",
+    description:
+      "Record a market or limit order for the selected portfolio as pending.",
+    fields: {
+      symbol: {
+        label: "Symbol",
+        placeholder: "Example: AAPL",
+      },
+      side: {
+        label: "Side",
+        options: {
+          buy: "Buy",
+          sell: "Sell",
+        },
+      },
+      orderType: {
+        label: "Order type",
+        options: {
+          market: "Market",
+          limit: "Limit",
+        },
+      },
+      quantity: {
+        label: "Quantity",
+        placeholder: "10",
+      },
+      limitPrice: {
+        label: "Limit price",
+        placeholder: "Leave blank for market",
+      },
+      decisionEvidence: {
+        label: "Decision evidence",
+        placeholder: "Optional",
+      },
+    },
+    submit: "Record order",
+    submitting: "Recording...",
+    success: "Order recorded.",
+    errors: {
+      unauthorized: "Please sign in again before recording an order.",
+      invalid: "Please check your order inputs.",
+      notFound: "Portfolio not found.",
+      unknown: "Could not record the order. Please try again shortly.",
+    },
+    validation: {
+      decisionEvidenceLength:
+        "Decision evidence must be 2000 characters or fewer.",
+      limitPricePositive: "Limit price must be greater than 0.",
+      limitPriceRequired: "Limit orders require a limit price.",
+      marketLimitPrice: "Market orders must not include a limit price.",
+      orderType: "Choose an order type.",
+      quantityPositive: "Quantity must be greater than 0.",
+      quantityRequired: "Enter a quantity.",
+      side: "Choose buy or sell.",
+      symbolFormat: "Check the symbol format.",
+      symbolRequired: "Enter a symbol.",
+    },
+  },
+  orders: {
+    title: "Recent orders",
+    description: "Recent paper orders for the selected portfolio",
+    columns: {
+      symbol: "Symbol",
+      side: "Side",
+      type: "Type",
+      quantity: "Quantity",
+      price: "Price",
+      status: "Status",
+      createdAt: "Recorded",
+    },
+    sides: {
+      BUY: "Buy",
+      SELL: "Sell",
+    },
+    types: {
+      LIMIT: "Limit",
+      MARKET: "Market",
+    },
+    statuses: {
+      CANCELLED: "Cancelled",
+      FILLED: "Filled",
+      PENDING: "Pending",
+      REJECTED: "Rejected",
+    },
+    marketPrice: "Market",
+    empty: {
+      title: "No orders yet",
+      description: "Your first paper order will appear here.",
+    },
+  },
   risk: {
     title: "Risk overview",
     description: "Current portfolio risk indicators",
