@@ -30,5 +30,11 @@ export type PortfolioDetailApiItem = PortfolioApiItem &
   Readonly<{
     recent_cash_transactions: readonly CashTransactionApiItem[];
     holdings: readonly unknown[];
-    orders: readonly unknown[];
-  }>;
+  orders: readonly unknown[];
+}>;
+
+export type PortfolioCreateApiRequest = Readonly<{
+  name: string;
+  base_currency: SupportedCurrency;
+  initial_capital: string;
+}>;

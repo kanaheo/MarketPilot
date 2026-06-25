@@ -18,6 +18,136 @@
   line-height: 1.5;
 }
 
+.portfolio-create-panel {
+  display: grid;
+  gap: 18px;
+  padding: 18px;
+}
+
+.portfolio-create-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.portfolio-create-heading > span {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.portfolio-create-heading h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 760;
+  letter-spacing: -0.035em;
+}
+
+.portfolio-create-heading p {
+  max-width: 620px;
+  margin: 6px 0 0;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.portfolio-create-form {
+  display: grid;
+  gap: 14px;
+}
+
+.portfolio-create-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.portfolio-create-form label {
+  display: grid;
+  gap: 7px;
+  color: var(--color-text);
+  font-size: 11px;
+  font-weight: 720;
+}
+
+.portfolio-create-form input,
+.portfolio-create-form select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  padding: 0 12px;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 12px;
+  outline: none;
+}
+
+.portfolio-create-form input:focus,
+.portfolio-create-form select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(17, 103, 95, 0.1);
+}
+
+.portfolio-create-form input[aria-invalid="true"],
+.portfolio-create-form select[aria-invalid="true"] {
+  border-color: #d84950;
+}
+
+.portfolio-create-form small,
+.portfolio-create-message.error {
+  color: #d84950;
+}
+
+.portfolio-create-form small {
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.portfolio-create-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 2px;
+}
+
+.portfolio-create-message {
+  min-height: 16px;
+  margin: 0;
+  color: var(--color-primary);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.portfolio-create-actions button {
+  min-height: 40px;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-control);
+  background: var(--color-primary);
+  padding: 0 15px;
+  color: white;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.portfolio-create-actions button:hover {
+  border-color: var(--color-primary-strong);
+  background: var(--color-primary-strong);
+}
+
+.portfolio-create-actions button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
 .portfolio-summary-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

@@ -12,6 +12,45 @@ export const portfolio = {
         "첫 모의투자 포트폴리오를 만들면 현금 활동을 기록할 수 있습니다.",
     },
   },
+  createForm: {
+    title: "첫 포트폴리오 만들기",
+    description:
+      "이름, 기준 통화, 초기자금을 입력하면 포트폴리오와 최초 입금 내역이 함께 생성됩니다.",
+    fields: {
+      name: {
+        label: "포트폴리오 이름",
+        placeholder: "예: 장기 성장 포트폴리오",
+      },
+      baseCurrency: {
+        label: "기준 통화",
+      },
+      initialCapital: {
+        label: "초기자금",
+        placeholder: "10000",
+      },
+    },
+    currencies: [
+      { label: "미국 달러 (USD)", value: "USD" },
+      { label: "한국 원 (KRW)", value: "KRW" },
+      { label: "일본 엔 (JPY)", value: "JPY" },
+    ],
+    submit: "포트폴리오 생성",
+    submitting: "생성 중...",
+    success: "포트폴리오를 생성했습니다.",
+    errors: {
+      unauthorized: "로그인이 필요합니다. 다시 로그인한 뒤 시도해 주세요.",
+      invalid: "입력값을 확인해 주세요.",
+      conflict: "요청을 처리할 수 없습니다. 입력값을 확인해 주세요.",
+      unknown: "포트폴리오를 생성하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+    },
+    validation: {
+      nameRequired: "포트폴리오 이름을 입력해 주세요.",
+      nameLength: "포트폴리오 이름은 120자 이하로 입력해 주세요.",
+      currency: "지원하는 통화를 선택해 주세요.",
+      initialCapitalRequired: "초기자금을 입력해 주세요.",
+      initialCapitalPositive: "초기자금은 0보다 커야 합니다.",
+    },
+  },
   summary: {
     label: "포트폴리오 요약",
     unavailable: "아직 계산할 수 없음",

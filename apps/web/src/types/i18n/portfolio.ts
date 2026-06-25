@@ -9,6 +9,43 @@ export type PortfolioMessages = Readonly<{
       description: string;
     };
   };
+  createForm: {
+    title: string;
+    description: string;
+    fields: {
+      name: {
+        label: string;
+        placeholder: string;
+      };
+      baseCurrency: {
+        label: string;
+      };
+      initialCapital: {
+        label: string;
+        placeholder: string;
+      };
+    };
+    currencies: readonly {
+      label: string;
+      value: "USD" | "KRW" | "JPY";
+    }[];
+    submit: string;
+    submitting: string;
+    success: string;
+    errors: {
+      unauthorized: string;
+      invalid: string;
+      conflict: string;
+      unknown: string;
+    };
+    validation: {
+      nameRequired: string;
+      nameLength: string;
+      currency: string;
+      initialCapitalRequired: string;
+      initialCapitalPositive: string;
+    };
+  };
   summary: {
     label: string;
     unavailable: string;

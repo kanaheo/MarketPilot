@@ -1,5 +1,6 @@
 import type { Locale } from "@/types/i18n";
 import type { PortfolioMessages } from "@/types/i18n/portfolio";
+import type { PortfolioCreateFormValues } from "@/lib/validation/portfolios";
 import type {
   CashTransactionType,
   SupportedCurrency,
@@ -15,6 +16,35 @@ export type PortfolioHeaderProps = Readonly<{
   messages: PortfolioMessages["header"];
   portfolioName?: string;
 }>;
+
+export type PortfolioCreateFailureReason =
+  | "conflict"
+  | "invalid"
+  | "unauthorized"
+  | "unknown";
+
+export type PortfolioCreateActionResult =
+  | Readonly<{
+      ok: true;
+    }>
+  | Readonly<{
+      ok: false;
+      reason: PortfolioCreateFailureReason;
+    }>;
+
+export type PortfolioCreateFormProps = Readonly<{
+  locale: Locale;
+  messages: PortfolioMessages["createForm"];
+}>;
+
+export type PortfolioCreateFormSubmission = Readonly<{
+  message: string;
+  status: "error" | "idle" | "success";
+}>;
+
+export type PortfolioCreateSubmitHandler = (
+  values: PortfolioCreateFormValues,
+) => Promise<void>;
 
 export type PortfolioSummaryProps = Readonly<{
   currency: SupportedCurrency;

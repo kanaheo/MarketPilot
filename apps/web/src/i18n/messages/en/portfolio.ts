@@ -12,6 +12,45 @@ export const portfolio = {
         "Create your first paper portfolio to start recording cash activity.",
     },
   },
+  createForm: {
+    title: "Create your first portfolio",
+    description:
+      "Enter a name, base currency, and starting capital to create the portfolio and its initial deposit together.",
+    fields: {
+      name: {
+        label: "Portfolio name",
+        placeholder: "Example: Long-term growth portfolio",
+      },
+      baseCurrency: {
+        label: "Base currency",
+      },
+      initialCapital: {
+        label: "Starting capital",
+        placeholder: "10000",
+      },
+    },
+    currencies: [
+      { label: "US dollar (USD)", value: "USD" },
+      { label: "Korean won (KRW)", value: "KRW" },
+      { label: "Japanese yen (JPY)", value: "JPY" },
+    ],
+    submit: "Create portfolio",
+    submitting: "Creating...",
+    success: "Portfolio created.",
+    errors: {
+      unauthorized: "Please sign in again before creating a portfolio.",
+      invalid: "Please check your inputs.",
+      conflict: "The request could not be processed. Please check your inputs.",
+      unknown: "Could not create the portfolio. Please try again shortly.",
+    },
+    validation: {
+      nameRequired: "Enter a portfolio name.",
+      nameLength: "Portfolio name must be 120 characters or fewer.",
+      currency: "Choose a supported currency.",
+      initialCapitalRequired: "Enter starting capital.",
+      initialCapitalPositive: "Starting capital must be greater than 0.",
+    },
+  },
   summary: {
     label: "Portfolio summary",
     unavailable: "Not available yet",

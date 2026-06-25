@@ -13,6 +13,46 @@ export const portfolio = {
         "最初のペーパーポートフォリオを作成すると、現金活動を記録できます。",
     },
   },
+  createForm: {
+    title: "最初のポートフォリオを作成",
+    description:
+      "名前、基準通貨、初期資金を入力すると、ポートフォリオと初回入金が一緒に作成されます。",
+    fields: {
+      name: {
+        label: "ポートフォリオ名",
+        placeholder: "例: 長期成長ポートフォリオ",
+      },
+      baseCurrency: {
+        label: "基準通貨",
+      },
+      initialCapital: {
+        label: "初期資金",
+        placeholder: "10000",
+      },
+    },
+    currencies: [
+      { label: "米ドル (USD)", value: "USD" },
+      { label: "韓国ウォン (KRW)", value: "KRW" },
+      { label: "日本円 (JPY)", value: "JPY" },
+    ],
+    submit: "ポートフォリオを作成",
+    submitting: "作成中...",
+    success: "ポートフォリオを作成しました。",
+    errors: {
+      unauthorized: "ログインが必要です。再度ログインしてからお試しください。",
+      invalid: "入力内容を確認してください。",
+      conflict: "リクエストを処理できません。入力内容を確認してください。",
+      unknown:
+        "ポートフォリオを作成できませんでした。しばらくしてからもう一度お試しください。",
+    },
+    validation: {
+      nameRequired: "ポートフォリオ名を入力してください。",
+      nameLength: "ポートフォリオ名は120文字以内で入力してください。",
+      currency: "対応している通貨を選択してください。",
+      initialCapitalRequired: "初期資金を入力してください。",
+      initialCapitalPositive: "初期資金は0より大きい必要があります。",
+    },
+  },
   summary: {
     label: "ポートフォリオ概要",
     unavailable: "まだ計算できません",

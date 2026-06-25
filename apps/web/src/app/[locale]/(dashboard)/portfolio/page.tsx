@@ -3,6 +3,7 @@ import { WalletCards } from "lucide-react";
 import { EmptyState } from "@/components/common/empty-state";
 import { AssetAllocation } from "@/components/portfolio/asset-allocation";
 import { CashActivity } from "@/components/portfolio/cash-activity";
+import { PortfolioCreateForm } from "@/components/portfolio/portfolio-create-form";
 import { PortfolioHeader } from "@/components/portfolio/portfolio-header";
 import { PortfolioHoldings } from "@/components/portfolio/portfolio-holdings";
 import { PortfolioSummary } from "@/components/portfolio/portfolio-summary";
@@ -31,6 +32,10 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
           description={messages.portfolio.pageState.empty.description}
           icon={WalletCards}
           title={messages.portfolio.pageState.empty.title}
+        />
+        <PortfolioCreateForm
+          locale={locale}
+          messages={messages.portfolio.createForm}
         />
       </div>
     );
