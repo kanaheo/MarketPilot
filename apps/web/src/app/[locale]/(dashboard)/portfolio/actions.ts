@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { assertLocale } from "@/i18n/config";
-import { MarketPilotApiError } from "@/lib/server/marketpilot-api";
+import { getMarketPilotActionFailureReason } from "@/lib/server/action-errors";
 import {
   createCashTransaction,
   createOrder,
@@ -24,66 +24,54 @@ import type {
   PortfolioCreateFailureReason,
 } from "@/types/portfolio";
 
+const CREATE_PORTFOLIO_FAILURE_REASONS = {
+  401: "unauthorized",
+  403: "unauthorized",
+  409: "conflict",
+  422: "invalid",
+} as const satisfies Readonly<Partial<Record<number, PortfolioCreateFailureReason>>>;
+
+const CASH_TRANSACTION_FAILURE_REASONS = {
+  401: "unauthorized",
+  403: "unauthorized",
+  404: "notFound",
+  409: "conflict",
+  422: "invalid",
+} as const satisfies Readonly<Partial<Record<number, CashTransactionFailureReason>>>;
+
+const ORDER_FAILURE_REASONS = {
+  401: "unauthorized",
+  403: "unauthorized",
+  404: "notFound",
+  422: "invalid",
+} as const satisfies Readonly<Partial<Record<number, OrderFailureReason>>>;
+
 function getCreatePortfolioFailureReason(
   error: unknown,
 ): PortfolioCreateFailureReason {
-  if (error instanceof MarketPilotApiError) {
-    if (error.status === 401 || error.status === 403) {
-      return "unauthorized";
-    }
-
-    if (error.status === 409) {
-      return "conflict";
-    }
-
-    if (error.status === 422) {
-      return "invalid";
-    }
-  }
-
-  return "unknown";
+  return getMarketPilotActionFailureReason(
+    error,
+    CREATE_PORTFOLIO_FAILURE_REASONS,
+    "unknown",
+  );
 }
 
 function getCashTransactionFailureReason(
   error: unknown,
 ): CashTransactionFailureReason {
-  if (error instanceof MarketPilotApiError) {
-    if (error.status === 401 || error.status === 403) {
-      return "unauthorized";
-    }
-
-    if (error.status === 404) {
-      return "notFound";
-    }
-
-    if (error.status === 409) {
-      return "conflict";
-    }
-
-    if (error.status === 422) {
-      return "invalid";
-    }
-  }
-
-  return "unknown";
+  return getMarketPilotActionFailureReason(
+    error,
+    CASH_TRANSACTION_FAILURE_REASONS,
+    "unknown",
+  );
 }
 
 function getOrderFailureReason(error: unknown): OrderFailureReason {
-  if (error instanceof MarketPilotApiError) {
-    if (error.status === 401 || error.status === 403) {
-      return "unauthorized";
-    }
-
-    if (error.status === 404) {
-      return "notFound";
-    }
-
-    if (error.status === 422) {
-      return "invalid";
-    }
-  }
-
-  return "unknown";
+  return getMarketPilotActionFailureReason(
+    error,
+    ORDER_FAILURE_REASONS,
+    "unknown",
+  );
 }
 
 export async function createPortfolioAction(
