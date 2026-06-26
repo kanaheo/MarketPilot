@@ -64,6 +64,7 @@ export function PortfolioOrders({
             <span>{formatShortDate(order.createdAt, locale)}</span>
             <div className="order-action-cell">
               <PortfolioOrderActions
+                key={`${order.id}-${order.quantity}-${order.status}`}
                 locale={locale}
                 messages={messages}
                 order={order}

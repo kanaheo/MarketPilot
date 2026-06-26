@@ -10,6 +10,7 @@ import {
   createOrder,
   createPortfolio,
   executeOrder,
+  updateOrder,
 } from "@/lib/server/portfolio-api";
 import type {
   CashTransactionFormValues,
@@ -24,6 +25,8 @@ import type {
   OrderExecuteActionResult,
   OrderExecuteFailureReason,
   OrderFailureReason,
+  OrderUpdateActionResult,
+  OrderUpdateFailureReason,
   PortfolioCreateActionResult,
   PortfolioCreateFailureReason,
 } from "@/types/portfolio";
@@ -57,6 +60,14 @@ const ORDER_EXECUTE_FAILURE_REASONS = {
   409: "conflict",
   422: "invalid",
 } as const satisfies Readonly<Partial<Record<number, OrderExecuteFailureReason>>>;
+
+const ORDER_UPDATE_FAILURE_REASONS = {
+  401: "unauthorized",
+  403: "unauthorized",
+  404: "notFound",
+  409: "conflict",
+  422: "invalid",
+} as const satisfies Readonly<Partial<Record<number, OrderUpdateFailureReason>>>;
 
 function getCreatePortfolioFailureReason(
   error: unknown,
@@ -92,6 +103,14 @@ function getOrderExecuteFailureReason(
   return getMarketPilotActionFailureReason(
     error,
     ORDER_EXECUTE_FAILURE_REASONS,
+    "unknown",
+  );
+}
+
+function getOrderUpdateFailureReason(error: unknown): OrderUpdateFailureReason {
+  return getMarketPilotActionFailureReason(
+    error,
+    ORDER_UPDATE_FAILURE_REASONS,
     "unknown",
   );
 }
@@ -231,4 +250,35 @@ export async function executeOrderFormAction(
     previousState,
     formData,
   );
+}
+
+export async function updateOrderAction(
+  locale: Locale,
+  portfolioId: string,
+  orderId: string,
+  _previousState: OrderUpdateActionResult,
+  formData: FormData,
+): Promise<OrderUpdateActionResult> {
+  assertLocale(locale);
+
+  const quantity = Number(formData.get("quantity"));
+  if (!Number.isFinite(quantity) || quantity <= 0) {
+    return {
+      ok: false,
+      reason: "invalid",
+    };
+  }
+
+  try {
+    await updateOrder(portfolioId, orderId, {
+      quantity: String(quantity),
+    });
+    revalidatePath(`/${locale}/portfolio`);
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: getOrderUpdateFailureReason(error),
+    };
+  }
 }

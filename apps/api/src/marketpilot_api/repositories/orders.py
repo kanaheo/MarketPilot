@@ -7,7 +7,11 @@ from sqlalchemy.orm import Session
 from marketpilot_api.models import CashTransaction, Order, OrderExecution, Portfolio
 from marketpilot_api.repositories.cash_ledger import get_current_cash
 from marketpilot_api.repositories.positions import get_available_position_quantity
-from marketpilot_api.schemas.orders import OrderCreateRequest, OrderExecuteRequest
+from marketpilot_api.schemas.orders import (
+    OrderCreateRequest,
+    OrderExecuteRequest,
+    OrderUpdateRequest,
+)
 
 MANUAL_STRATEGY_VERSION = "manual-v1"
 MANUAL_DECISION_EVIDENCE = "Manual paper order"
@@ -177,6 +181,58 @@ def execute_order(
         order.status = "FILLED"
         session.add(execution)
         session.add(cash_transaction)
+        session.flush()
+        session.refresh(order)
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
+
+    return order
+
+
+def update_order(
+    session: Session,
+    *,
+    portfolio_id: uuid.UUID,
+    order_id: uuid.UUID,
+    user_id: uuid.UUID,
+    data: OrderUpdateRequest,
+) -> Order:
+    try:
+        portfolio_exists = session.scalar(
+            select(Portfolio.id).where(
+                Portfolio.id == portfolio_id,
+                Portfolio.user_id == user_id,
+            )
+        )
+        if portfolio_exists is None:
+            raise OrderPortfolioNotFoundError
+
+        order = session.scalar(
+            select(Order)
+            .where(
+                Order.id == order_id,
+                Order.portfolio_id == portfolio_id,
+            )
+            .with_for_update()
+        )
+        if order is None:
+            raise OrderNotFoundError
+
+        if order.status != "PENDING":
+            raise OrderNotPendingError
+
+        if order.side == "SELL":
+            available_quantity = get_available_position_quantity(
+                session,
+                portfolio_id=portfolio_id,
+                symbol=order.symbol,
+            )
+            if data.quantity > available_quantity:
+                raise OrderInsufficientPositionError
+
+        order.quantity = data.quantity
         session.flush()
         session.refresh(order)
         session.commit()

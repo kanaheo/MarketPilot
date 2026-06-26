@@ -239,6 +239,15 @@ export type PortfolioMessages = Readonly<{
       REJECTED: string;
     };
     marketPrice: string;
+    update: string;
+    updateQuantityLabel: string;
+    updateErrors: {
+      unauthorized: string;
+      invalid: string;
+      conflict: string;
+      notFound: string;
+      unknown: string;
+    };
     execute: string;
     executePriceLabel: string;
     executePricePlaceholder: string;

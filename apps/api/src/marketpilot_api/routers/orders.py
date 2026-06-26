@@ -18,11 +18,13 @@ from marketpilot_api.repositories.orders import (
     create_order,
     execute_order,
     list_orders,
+    update_order,
 )
 from marketpilot_api.schemas.orders import (
     OrderCreateRequest,
     OrderExecuteRequest,
     OrderResponse,
+    OrderUpdateRequest,
 )
 
 router = APIRouter(
@@ -101,6 +103,44 @@ def execute_pending_order(
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Execution price does not satisfy the limit order",
+        ) from None
+
+    return OrderResponse.model_validate(order)
+
+
+@router.patch(
+    "/{order_id}",
+    response_model=OrderResponse,
+)
+def update_pending_order(
+    portfolio_id: uuid.UUID,
+    order_id: uuid.UUID,
+    data: OrderUpdateRequest,
+    current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[Session, Depends(get_db_session)],
+) -> OrderResponse:
+    try:
+        order = update_order(
+            session,
+            portfolio_id=portfolio_id,
+            order_id=order_id,
+            user_id=current_user.id,
+            data=data,
+        )
+    except (OrderPortfolioNotFoundError, OrderNotFoundError):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Order not found",
+        ) from None
+    except OrderNotPendingError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Only pending orders can be updated",
+        ) from None
+    except OrderInsufficientPositionError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Insufficient position quantity",
         ) from None
 
     return OrderResponse.model_validate(order)

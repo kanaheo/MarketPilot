@@ -92,3 +92,7 @@ export type OrderExecuteApiRequest = Readonly<{
   price: string;
   executed_at?: string;
 }>;
+
+export type OrderUpdateApiRequest = Readonly<{
+  quantity: string;
+}>;

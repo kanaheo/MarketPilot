@@ -261,7 +261,7 @@
     minmax(72px, 0.66fr)
     minmax(54px, 0.52fr)
     minmax(78px, 0.72fr)
-    minmax(160px, 1fr);
+    minmax(260px, 1.35fr);
   min-height: 54px;
   align-items: center;
   gap: 8px;
@@ -334,13 +334,15 @@
   text-align: right;
 }
 
-.order-execute-form {
+.order-execute-form,
+.order-update-form {
   display: flex;
   justify-content: flex-end;
   gap: 4px;
 }
 
-.order-execute-form input {
+.order-execute-form input,
+.order-update-form input {
   width: 68px;
   min-width: 0;
   border: 1px solid #d8dedb;
@@ -352,7 +354,8 @@
 }
 
 .order-cancel-button,
-.order-execute-button {
+.order-execute-button,
+.order-update-button {
   border: 1px solid #d8dedb;
   border-radius: 6px;
   background: #ffffff;
@@ -361,6 +364,11 @@
   font-size: 10px;
   font-weight: 720;
   cursor: pointer;
+}
+
+.order-update-button {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 .order-execute-button {
@@ -372,6 +380,10 @@
 .order-execute-button:hover {
   background: #0d504a;
   border-color: #0d504a;
+}
+
+.order-update-button:hover {
+  background: var(--color-primary-soft);
 }
 
 .order-cancel-button:hover {

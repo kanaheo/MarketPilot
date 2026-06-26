@@ -313,6 +313,100 @@ def test_execute_pending_order_rejects_limit_price_miss(monkeypatch) -> None:
     )
 
 
+def test_update_pending_order_returns_updated_order(monkeypatch) -> None:
+    user = User(
+        id=uuid.uuid4(),
+        auth_provider="google",
+        auth_subject="google-user-1",
+    )
+    session = MagicMock()
+    portfolio_id = uuid.uuid4()
+    now = datetime.now(timezone.utc)
+    order = Order(
+        id=uuid.uuid4(),
+        portfolio_id=portfolio_id,
+        symbol="AAPL",
+        side="SELL",
+        order_type="MARKET",
+        quantity=Decimal("1.00000000"),
+        limit_price=None,
+        currency="USD",
+        status="PENDING",
+        strategy_version="manual-v1",
+        decision_evidence="Manual paper order",
+        created_at=now,
+        updated_at=now,
+    )
+    update_mock = MagicMock(return_value=order)
+    monkeypatch.setattr(orders_router, "update_order", update_mock)
+    app.dependency_overrides[get_current_user] = (
+        override_authenticated_user(user)
+    )
+    app.dependency_overrides[get_db_session] = override_session(session)
+
+    with TestClient(app) as client:
+        response = client.patch(
+            f"/portfolios/{portfolio_id}/orders/{order.id}",
+            json={"quantity": "1"},
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 200
+    assert response.json()["quantity"] == "1.00000000"
+    assert update_mock.call_args.kwargs["user_id"] == user.id
+    assert update_mock.call_args.kwargs["data"].quantity == Decimal("1")
+
+
+def test_update_pending_order_rejects_non_pending_order(monkeypatch) -> None:
+    user = User(
+        id=uuid.uuid4(),
+        auth_provider="google",
+        auth_subject="google-user-1",
+    )
+    update_mock = MagicMock(side_effect=OrderNotPendingError)
+    monkeypatch.setattr(orders_router, "update_order", update_mock)
+    app.dependency_overrides[get_current_user] = (
+        override_authenticated_user(user)
+    )
+    app.dependency_overrides[get_db_session] = override_session(MagicMock())
+
+    with TestClient(app) as client:
+        response = client.patch(
+            f"/portfolios/{uuid.uuid4()}/orders/{uuid.uuid4()}",
+            json={"quantity": "1"},
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Only pending orders can be updated"
+
+
+def test_update_pending_order_rejects_insufficient_position(
+    monkeypatch,
+) -> None:
+    user = User(
+        id=uuid.uuid4(),
+        auth_provider="google",
+        auth_subject="google-user-1",
+    )
+    update_mock = MagicMock(side_effect=OrderInsufficientPositionError)
+    monkeypatch.setattr(orders_router, "update_order", update_mock)
+    app.dependency_overrides[get_current_user] = (
+        override_authenticated_user(user)
+    )
+    app.dependency_overrides[get_db_session] = override_session(MagicMock())
+
+    with TestClient(app) as client:
+        response = client.patch(
+            f"/portfolios/{uuid.uuid4()}/orders/{uuid.uuid4()}",
+            json={"quantity": "3"},
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Insufficient position quantity"
+
+
 def test_cancel_pending_order_returns_cancelled_order(monkeypatch) -> None:
     user = User(
         id=uuid.uuid4(),
