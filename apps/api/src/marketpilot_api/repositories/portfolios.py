@@ -42,6 +42,37 @@ class PortfolioHolding:
     currency: str
 
 
+@dataclass
+class HoldingAccumulator:
+    symbol: str
+    currency: str
+    quantity: Decimal = Decimal("0")
+    cost_basis: Decimal = Decimal("0")
+
+    def apply_execution(self, execution: OrderExecution) -> None:
+        if execution.side == "BUY":
+            self.quantity += execution.quantity
+            self.cost_basis += execution.gross_amount
+            return
+
+        if self.quantity <= 0:
+            return
+
+        average_price = self.average_price
+        sold_quantity = min(execution.quantity, self.quantity)
+        self.quantity -= sold_quantity
+        self.cost_basis -= average_price * sold_quantity
+        if self.quantity == 0:
+            self.cost_basis = Decimal("0")
+
+    @property
+    def average_price(self) -> Decimal:
+        if self.quantity <= 0:
+            return Decimal("0")
+
+        return self.cost_basis / self.quantity
+
+
 class PortfolioNotFoundError(Exception):
     pass
 
@@ -66,63 +97,36 @@ def _get_portfolio_holdings(
             )
         ).all()
     )
-    holdings_by_symbol: dict[str, dict[str, Decimal | str]] = {}
+    holdings_by_symbol: dict[str, HoldingAccumulator] = {}
 
     for execution in executions:
-        holding = holdings_by_symbol.setdefault(
+        accumulator = holdings_by_symbol.setdefault(
             execution.symbol,
-            {
-                "average_price": Decimal("0"),
-                "buy_cost": Decimal("0"),
-                "buy_quantity": Decimal("0"),
-                "currency": execution.currency,
-                "quantity": Decimal("0"),
-            },
+            HoldingAccumulator(
+                symbol=execution.symbol,
+                currency=execution.currency,
+            ),
         )
-
-        if execution.side == "BUY":
-            holding["buy_cost"] = (
-                holding["buy_cost"] + execution.gross_amount
-            )
-            holding["buy_quantity"] = (
-                holding["buy_quantity"] + execution.quantity
-            )
-            holding["quantity"] = holding["quantity"] + execution.quantity
-        else:
-            holding["quantity"] = holding["quantity"] - execution.quantity
+        accumulator.apply_execution(execution)
 
     holdings: list[PortfolioHolding] = []
-    for symbol, holding in holdings_by_symbol.items():
-        quantity = holding["quantity"]
-        buy_quantity = holding["buy_quantity"]
-        buy_cost = holding["buy_cost"]
-        if not isinstance(quantity, Decimal):
-            continue
-        if not isinstance(buy_quantity, Decimal):
-            continue
-        if not isinstance(buy_cost, Decimal):
-            continue
-        if quantity <= 0:
+    for accumulator in holdings_by_symbol.values():
+        if accumulator.quantity <= 0:
             continue
 
-        average_price = (
-            buy_cost / buy_quantity if buy_quantity > 0 else Decimal("0")
-        )
+        average_price = accumulator.average_price
         current_price = average_price
-        market_value = quantity * current_price
-        currency = holding["currency"]
-        if not isinstance(currency, str):
-            continue
+        market_value = accumulator.quantity * current_price
 
         holdings.append(
             PortfolioHolding(
-                symbol=symbol,
-                quantity=quantity,
+                symbol=accumulator.symbol,
+                quantity=accumulator.quantity,
                 average_price=average_price,
                 current_price=current_price,
                 market_value=market_value,
                 return_rate=Decimal("0"),
-                currency=currency,
+                currency=accumulator.currency,
             )
         )
 

@@ -162,6 +162,78 @@ def test_get_portfolio_detail_filters_owner_and_limits_transactions() -> None:
     ]
 
 
+def test_get_portfolio_detail_resets_average_price_after_closed_position() -> None:
+    session = MagicMock()
+    user_id = uuid.uuid4()
+    portfolio = Portfolio(
+        id=uuid.uuid4(),
+        user_id=user_id,
+        name="My portfolio",
+        base_currency="USD",
+    )
+    session.scalar.side_effect = [portfolio, Decimal("800.0000")]
+    session.scalars.return_value.all.side_effect = [
+        [],
+        [
+            OrderExecution(
+                id=uuid.uuid4(),
+                order_id=uuid.uuid4(),
+                portfolio_id=portfolio.id,
+                symbol="AAPL",
+                side="BUY",
+                quantity=Decimal("1.00000000"),
+                price=Decimal("100.0000"),
+                gross_amount=Decimal("100.0000"),
+                currency="USD",
+                executed_at=datetime(2026, 1, 1, tzinfo=timezone.utc),
+            ),
+            OrderExecution(
+                id=uuid.uuid4(),
+                order_id=uuid.uuid4(),
+                portfolio_id=portfolio.id,
+                symbol="AAPL",
+                side="SELL",
+                quantity=Decimal("1.00000000"),
+                price=Decimal("110.0000"),
+                gross_amount=Decimal("110.0000"),
+                currency="USD",
+                executed_at=datetime(2026, 1, 2, tzinfo=timezone.utc),
+            ),
+            OrderExecution(
+                id=uuid.uuid4(),
+                order_id=uuid.uuid4(),
+                portfolio_id=portfolio.id,
+                symbol="AAPL",
+                side="BUY",
+                quantity=Decimal("1.00000000"),
+                price=Decimal("200.0000"),
+                gross_amount=Decimal("200.0000"),
+                currency="USD",
+                executed_at=datetime(2026, 1, 3, tzinfo=timezone.utc),
+            ),
+        ],
+    ]
+
+    result = get_portfolio_detail(
+        session,
+        portfolio_id=portfolio.id,
+        user_id=user_id,
+    )
+
+    assert result is not None
+    assert result.holdings == [
+        PortfolioHolding(
+            symbol="AAPL",
+            quantity=Decimal("1.00000000"),
+            average_price=Decimal("200.0000"),
+            current_price=Decimal("200.0000"),
+            market_value=Decimal("200.000000000000"),
+            return_rate=Decimal("0"),
+            currency="USD",
+        )
+    ]
+
+
 def test_create_deposit_uses_portfolio_currency_and_commits() -> None:
     session = MagicMock()
     user_id = uuid.uuid4()
