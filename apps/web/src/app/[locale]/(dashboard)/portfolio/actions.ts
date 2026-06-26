@@ -21,6 +21,8 @@ import type {
   CashTransactionActionResult,
   CashTransactionFailureReason,
   OrderActionResult,
+  OrderExecuteActionResult,
+  OrderExecuteFailureReason,
   OrderFailureReason,
   PortfolioCreateActionResult,
   PortfolioCreateFailureReason,
@@ -48,6 +50,14 @@ const ORDER_FAILURE_REASONS = {
   422: "invalid",
 } as const satisfies Readonly<Partial<Record<number, OrderFailureReason>>>;
 
+const ORDER_EXECUTE_FAILURE_REASONS = {
+  401: "unauthorized",
+  403: "unauthorized",
+  404: "notFound",
+  409: "conflict",
+  422: "invalid",
+} as const satisfies Readonly<Partial<Record<number, OrderExecuteFailureReason>>>;
+
 function getCreatePortfolioFailureReason(
   error: unknown,
 ): PortfolioCreateFailureReason {
@@ -72,6 +82,16 @@ function getOrderFailureReason(error: unknown): OrderFailureReason {
   return getMarketPilotActionFailureReason(
     error,
     ORDER_FAILURE_REASONS,
+    "unknown",
+  );
+}
+
+function getOrderExecuteFailureReason(
+  error: unknown,
+): OrderExecuteFailureReason {
+  return getMarketPilotActionFailureReason(
+    error,
+    ORDER_EXECUTE_FAILURE_REASONS,
     "unknown",
   );
 }
@@ -170,13 +190,17 @@ export async function executeOrderAction(
   locale: Locale,
   portfolioId: string,
   orderId: string,
+  _previousState: OrderExecuteActionResult,
   formData: FormData,
-): Promise<void> {
+): Promise<OrderExecuteActionResult> {
   assertLocale(locale);
 
   const price = Number(formData.get("price"));
   if (!Number.isFinite(price) || price <= 0) {
-    return;
+    return {
+      ok: false,
+      reason: "invalid",
+    };
   }
 
   try {
@@ -184,7 +208,27 @@ export async function executeOrderAction(
       price: String(price),
     });
     revalidatePath(`/${locale}/portfolio`);
-  } catch {
-    return;
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: getOrderExecuteFailureReason(error),
+    };
   }
+}
+
+export async function executeOrderFormAction(
+  locale: Locale,
+  portfolioId: string,
+  orderId: string,
+  previousState: OrderExecuteActionResult,
+  formData: FormData,
+): Promise<OrderExecuteActionResult> {
+  return executeOrderAction(
+    locale,
+    portfolioId,
+    orderId,
+    previousState,
+    formData,
+  );
 }

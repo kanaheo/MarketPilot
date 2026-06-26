@@ -256,6 +256,14 @@ export const portfolio = {
     execute: "約定",
     executePriceLabel: "約定価格",
     executePricePlaceholder: "約定価格",
+    executeErrors: {
+      unauthorized: "ログインが必要です。再度ログインしてからお試しください。",
+      invalid: "約定価格を確認してください。",
+      conflict:
+        "約定できませんでした。現金、保有数量、注文状態を確認してください。",
+      notFound: "注文が見つかりません。",
+      unknown: "注文を約定できませんでした。しばらくしてからもう一度お試しください。",
+    },
     cancel: "取消",
     empty: {
       title: "注文はありません",

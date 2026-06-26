@@ -1,11 +1,8 @@
 import { ClipboardList } from "lucide-react";
 
-import {
-  cancelOrderAction,
-  executeOrderAction,
-} from "@/app/[locale]/(dashboard)/portfolio/actions";
 import { EmptyState } from "@/components/common/empty-state";
 import { Panel } from "@/components/common/panel";
+import { PortfolioOrderActions } from "@/components/portfolio/portfolio-order-actions";
 import { SectionHeader } from "@/components/common/section-header";
 import { formatMarketPrice, formatShortDate } from "@/lib/formatters";
 import type { PortfolioOrdersProps } from "@/types/portfolio";
@@ -66,48 +63,12 @@ export function PortfolioOrders({
             </span>
             <span>{formatShortDate(order.createdAt, locale)}</span>
             <div className="order-action-cell">
-              {order.status === "PENDING" ? (
-                <>
-                  <form
-                    action={executeOrderAction.bind(
-                      null,
-                      locale,
-                      portfolioId,
-                      order.id,
-                    )}
-                    className="order-execute-form"
-                  >
-                    <input
-                      aria-label={messages.executePriceLabel}
-                      defaultValue={order.limitPrice ?? ""}
-                      min="0.0001"
-                      name="price"
-                      placeholder={messages.executePricePlaceholder}
-                      step="0.0001"
-                      type="number"
-                    />
-                    <button className="order-execute-button" type="submit">
-                      {messages.execute}
-                    </button>
-                  </form>
-                  <form
-                    action={cancelOrderAction.bind(
-                      null,
-                      locale,
-                      portfolioId,
-                      order.id,
-                    )}
-                  >
-                    <button className="order-cancel-button" type="submit">
-                      {messages.cancel}
-                    </button>
-                  </form>
-                </>
-              ) : (
-                <span aria-hidden="true" className="order-action-placeholder">
-                  -
-                </span>
-              )}
+              <PortfolioOrderActions
+                locale={locale}
+                messages={messages}
+                order={order}
+                portfolioId={portfolioId}
+              />
             </div>
           </article>
         ))}

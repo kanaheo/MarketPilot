@@ -242,6 +242,13 @@ export type PortfolioMessages = Readonly<{
     execute: string;
     executePriceLabel: string;
     executePricePlaceholder: string;
+    executeErrors: {
+      unauthorized: string;
+      invalid: string;
+      conflict: string;
+      notFound: string;
+      unknown: string;
+    };
     cancel: string;
     empty: {
       title: string;

@@ -250,6 +250,13 @@ export const portfolio = {
     execute: "체결",
     executePriceLabel: "체결가",
     executePricePlaceholder: "체결가",
+    executeErrors: {
+      unauthorized: "로그인이 필요합니다. 다시 로그인한 뒤 시도해 주세요.",
+      invalid: "체결가를 확인해 주세요.",
+      conflict: "체결할 수 없습니다. 현금, 보유 수량, 주문 상태를 확인해 주세요.",
+      notFound: "주문을 찾을 수 없습니다.",
+      unknown: "주문을 체결하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+    },
     cancel: "취소",
     empty: {
       title: "주문이 없습니다",

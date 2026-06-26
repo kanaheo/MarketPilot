@@ -253,6 +253,14 @@ export const portfolio = {
     execute: "Fill",
     executePriceLabel: "Execution price",
     executePricePlaceholder: "Price",
+    executeErrors: {
+      unauthorized: "Please sign in again before filling an order.",
+      invalid: "Check the execution price.",
+      conflict:
+        "Could not fill the order. Check cash, position quantity, or order status.",
+      notFound: "Order not found.",
+      unknown: "Could not fill the order. Please try again shortly.",
+    },
     cancel: "Cancel",
     empty: {
       title: "No orders yet",

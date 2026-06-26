@@ -102,6 +102,22 @@ export type OrderActionResult =
       reason: OrderFailureReason;
     }>;
 
+export type OrderExecuteFailureReason =
+  | "conflict"
+  | "invalid"
+  | "notFound"
+  | "unauthorized"
+  | "unknown";
+
+export type OrderExecuteActionResult =
+  | Readonly<{
+      ok: true;
+    }>
+  | Readonly<{
+      ok: false;
+      reason: OrderExecuteFailureReason;
+    }>;
+
 export type OrderFormProps = Readonly<{
   locale: Locale;
   messages: PortfolioMessages["orderForm"];
