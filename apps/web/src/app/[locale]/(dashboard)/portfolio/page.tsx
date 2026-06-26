@@ -92,7 +92,7 @@ export default async function PortfolioPage({
         messages={messages.portfolio.allocation}
       />
       <PortfolioHoldings
-        holdings={[]}
+        holdings={portfolio.holdings}
         locale={locale}
         messages={messages.portfolio.holdings}
       />

@@ -100,6 +100,7 @@ def retrieve_portfolio(
         created_at=detail.portfolio.created_at,
         updated_at=detail.portfolio.updated_at,
         recent_cash_transactions=detail.recent_cash_transactions,
+        holdings=detail.holdings,
     )
 
 

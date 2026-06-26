@@ -175,6 +175,7 @@ export type RiskOverviewProps = Readonly<{
 export type PortfolioHolding = Readonly<{
   symbol: string;
   name: string;
+  currency: SupportedCurrency;
   quantity: number;
   averagePrice: number;
   currentPrice: number;

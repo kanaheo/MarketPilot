@@ -33,10 +33,20 @@ export type CashTransactionApiItem = Readonly<{
   created_at: string;
 }>;
 
+export type PortfolioHoldingApiItem = Readonly<{
+  symbol: string;
+  quantity: string;
+  average_price: string;
+  current_price: string;
+  market_value: string;
+  return_rate: string;
+  currency: SupportedCurrency;
+}>;
+
 export type PortfolioDetailApiItem = PortfolioApiItem &
   Readonly<{
     recent_cash_transactions: readonly CashTransactionApiItem[];
-    holdings: readonly unknown[];
+    holdings: readonly PortfolioHoldingApiItem[];
     orders: readonly unknown[];
   }>;
 

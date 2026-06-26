@@ -4,15 +4,28 @@ import type {
 } from "@/types/marketpilot-api";
 import type {
   PortfolioCashActivity,
+  PortfolioHolding,
   PortfolioOrder,
 } from "@/types/portfolio";
+
+const HOLDING_COLORS = ["#0f766e", "#d97706", "#4f46e5", "#be123c", "#15803d"];
 
 export type PortfolioPageData = Readonly<{
   name: string;
   currency: PortfolioDetailApiItem["base_currency"];
   currentCash: number;
   cashActivities: readonly PortfolioCashActivity[];
+  holdings: readonly PortfolioHolding[];
 }>;
+
+function getHoldingColor(symbol: string): string {
+  const colorIndex = Array.from(symbol).reduce(
+    (sum, character) => sum + character.charCodeAt(0),
+    0,
+  );
+
+  return HOLDING_COLORS[colorIndex % HOLDING_COLORS.length];
+}
 
 function mapCashActivities(
   currentCash: number,
@@ -56,6 +69,17 @@ export function mapPortfolioPageData(
       currentCash,
       detail.recent_cash_transactions,
     ),
+    holdings: detail.holdings.map((holding) => ({
+      averagePrice: Number(holding.average_price),
+      color: getHoldingColor(holding.symbol),
+      currency: holding.currency,
+      currentPrice: Number(holding.current_price),
+      marketValue: Number(holding.market_value),
+      name: holding.symbol,
+      quantity: Number(holding.quantity),
+      returnRate: Number(holding.return_rate),
+      symbol: holding.symbol,
+    })),
   };
 }
 
