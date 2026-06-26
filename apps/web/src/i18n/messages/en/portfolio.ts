@@ -117,6 +117,8 @@ export const portfolio = {
       WITHDRAWAL: "Withdrawal",
       FEE: "Fee",
       DIVIDEND: "Dividend",
+      TRADE_BUY: "Buy trade",
+      TRADE_SELL: "Sell trade",
     },
     empty: {
       title: "No cash activity yet",

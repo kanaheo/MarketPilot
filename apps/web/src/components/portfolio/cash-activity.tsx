@@ -9,17 +9,24 @@ import { Panel } from "@/components/common/panel";
 import { SectionHeader } from "@/components/common/section-header";
 import { TrendValue } from "@/components/common/trend-value";
 import { formatMarketPrice, formatShortDate } from "@/lib/formatters";
+import type { CashTransactionType } from "@/types/marketpilot-api";
 import type { CashActivityProps } from "@/types/portfolio";
 
-const activityIcons = {
+const activityIcons: Record<CashTransactionType, typeof CircleDollarSign> = {
   DEPOSIT: CircleDollarSign,
   DIVIDEND: CircleDollarSign,
   FEE: WalletCards,
   INITIAL_DEPOSIT: CircleDollarSign,
+  TRADE_BUY: WalletCards,
+  TRADE_SELL: CircleDollarSign,
   WITHDRAWAL: WalletCards,
-} as const;
+};
 
-const negativeActivityTypes = new Set(["FEE", "WITHDRAWAL"]);
+const negativeActivityTypes = new Set<CashTransactionType>([
+  "FEE",
+  "TRADE_BUY",
+  "WITHDRAWAL",
+]);
 
 export function CashActivity({
   activities,

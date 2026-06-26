@@ -116,6 +116,8 @@ export const portfolio = {
       WITHDRAWAL: "출금",
       FEE: "수수료",
       DIVIDEND: "배당",
+      TRADE_BUY: "매수 체결",
+      TRADE_SELL: "매도 체결",
     },
     empty: {
       title: "현금 활동이 없습니다",

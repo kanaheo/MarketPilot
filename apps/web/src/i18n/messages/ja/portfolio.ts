@@ -119,6 +119,8 @@ export const portfolio = {
       WITHDRAWAL: "出金",
       FEE: "手数料",
       DIVIDEND: "配当",
+      TRADE_BUY: "買い約定",
+      TRADE_SELL: "売り約定",
     },
     empty: {
       title: "現金アクティビティはありません",

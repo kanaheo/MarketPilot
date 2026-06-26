@@ -109,6 +109,8 @@ export type PortfolioMessages = Readonly<{
       WITHDRAWAL: string;
       FEE: string;
       DIVIDEND: string;
+      TRADE_BUY: string;
+      TRADE_SELL: string;
     };
     empty: {
       title: string;

@@ -34,7 +34,8 @@ function mapCashActivities(
 
     balance +=
       transaction.transaction_type === "WITHDRAWAL" ||
-      transaction.transaction_type === "FEE"
+      transaction.transaction_type === "FEE" ||
+      transaction.transaction_type === "TRADE_BUY"
         ? amount
         : -amount;
 

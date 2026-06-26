@@ -5,7 +5,9 @@ export type CashTransactionType =
   | "DEPOSIT"
   | "WITHDRAWAL"
   | "FEE"
-  | "DIVIDEND";
+  | "DIVIDEND"
+  | "TRADE_BUY"
+  | "TRADE_SELL";
 
 export type UserCashTransactionType = "DEPOSIT" | "WITHDRAWAL";
 export type OrderSide = "BUY" | "SELL";
