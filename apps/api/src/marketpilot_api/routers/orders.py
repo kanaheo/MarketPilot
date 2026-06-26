@@ -8,14 +8,21 @@ from marketpilot_api.core.user_api_auth import get_current_user
 from marketpilot_api.db.session import get_db_session
 from marketpilot_api.models import User
 from marketpilot_api.repositories.orders import (
+    OrderExecutionPriceError,
+    OrderInsufficientCashError,
     OrderNotFoundError,
     OrderNotPendingError,
     OrderPortfolioNotFoundError,
     cancel_order,
     create_order,
+    execute_order,
     list_orders,
 )
-from marketpilot_api.schemas.orders import OrderCreateRequest, OrderResponse
+from marketpilot_api.schemas.orders import (
+    OrderCreateRequest,
+    OrderExecuteRequest,
+    OrderResponse,
+)
 
 router = APIRouter(
     prefix="/portfolios/{portfolio_id}/orders",
@@ -45,6 +52,49 @@ def submit_order(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Portfolio not found",
+        ) from None
+
+    return OrderResponse.model_validate(order)
+
+
+@router.patch(
+    "/{order_id}/execute",
+    response_model=OrderResponse,
+)
+def execute_pending_order(
+    portfolio_id: uuid.UUID,
+    order_id: uuid.UUID,
+    data: OrderExecuteRequest,
+    current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[Session, Depends(get_db_session)],
+) -> OrderResponse:
+    try:
+        order = execute_order(
+            session,
+            portfolio_id=portfolio_id,
+            order_id=order_id,
+            user_id=current_user.id,
+            data=data,
+        )
+    except (OrderPortfolioNotFoundError, OrderNotFoundError):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Order not found",
+        ) from None
+    except OrderNotPendingError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Only pending orders can be executed",
+        ) from None
+    except OrderInsufficientCashError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Insufficient cash balance",
+        ) from None
+    except OrderExecutionPriceError:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="Execution price does not satisfy the limit order",
         ) from None
 
     return OrderResponse.model_validate(order)

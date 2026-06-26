@@ -3,10 +3,14 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from decimal import Decimal
 
-from sqlalchemy import case, func, select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from marketpilot_api.models import CashTransaction, Portfolio
+from marketpilot_api.repositories.cash_ledger import (
+    get_current_cash,
+    signed_cash_amount,
+)
 from marketpilot_api.schemas.portfolios import (
     CashTransactionCreateRequest,
     PortfolioCreateRequest,
@@ -32,33 +36,6 @@ class PortfolioNotFoundError(Exception):
 
 class InsufficientCashError(Exception):
     pass
-
-
-def _signed_cash_amount():
-    return case(
-        (
-            CashTransaction.transaction_type.in_(
-                ("WITHDRAWAL", "FEE"),
-            ),
-            -CashTransaction.amount,
-        ),
-        else_=CashTransaction.amount,
-    )
-
-
-def _get_current_cash(
-    session: Session,
-    *,
-    portfolio_id: uuid.UUID,
-) -> Decimal:
-    return session.scalar(
-        select(
-            func.coalesce(
-                func.sum(_signed_cash_amount()),
-                Decimal("0"),
-            )
-        ).where(CashTransaction.portfolio_id == portfolio_id)
-    )
 
 
 def create_portfolio_with_initial_deposit(
@@ -107,7 +84,7 @@ def list_portfolios_with_cash(
         select(
             Portfolio,
             func.coalesce(
-                func.sum(_signed_cash_amount()),
+                func.sum(signed_cash_amount()),
                 Decimal("0"),
             ).label("current_cash"),
         )
@@ -145,7 +122,7 @@ def get_portfolio_detail(
     if portfolio is None:
         return None
 
-    current_cash = _get_current_cash(
+    current_cash = get_current_cash(
         session,
         portfolio_id=portfolio.id,
     )
@@ -189,7 +166,7 @@ def create_cash_transaction(
             raise PortfolioNotFoundError
 
         if data.transaction_type == "WITHDRAWAL":
-            current_cash = _get_current_cash(
+            current_cash = get_current_cash(
                 session,
                 portfolio_id=portfolio.id,
             )
