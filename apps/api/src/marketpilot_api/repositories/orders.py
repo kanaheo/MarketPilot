@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from marketpilot_api.models import CashTransaction, Order, OrderExecution, Portfolio
 from marketpilot_api.repositories.cash_ledger import get_current_cash
+from marketpilot_api.repositories.positions import get_available_position_quantity
 from marketpilot_api.schemas.orders import OrderCreateRequest, OrderExecuteRequest
 
 MANUAL_STRATEGY_VERSION = "manual-v1"
@@ -26,6 +27,10 @@ class OrderNotPendingError(Exception):
 
 
 class OrderInsufficientCashError(Exception):
+    pass
+
+
+class OrderInsufficientPositionError(Exception):
     pass
 
 
@@ -132,6 +137,14 @@ def execute_order(
             current_cash = get_current_cash(session, portfolio_id=portfolio.id)
             if gross_amount > current_cash:
                 raise OrderInsufficientCashError
+        else:
+            available_quantity = get_available_position_quantity(
+                session,
+                portfolio_id=portfolio.id,
+                symbol=order.symbol,
+            )
+            if order.quantity > available_quantity:
+                raise OrderInsufficientPositionError
 
         executed_at = data.executed_at
         if executed_at is None:

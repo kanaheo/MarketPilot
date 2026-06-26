@@ -10,6 +10,7 @@ from marketpilot_api.models import User
 from marketpilot_api.repositories.orders import (
     OrderExecutionPriceError,
     OrderInsufficientCashError,
+    OrderInsufficientPositionError,
     OrderNotFoundError,
     OrderNotPendingError,
     OrderPortfolioNotFoundError,
@@ -90,6 +91,11 @@ def execute_pending_order(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Insufficient cash balance",
+        ) from None
+    except OrderInsufficientPositionError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Insufficient position quantity",
         ) from None
     except OrderExecutionPriceError:
         raise HTTPException(

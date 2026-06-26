@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ClipboardList } from "lucide-react";
 import { useRouter } from "next/navigation";
+import type { ChangeEvent } from "react";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
@@ -30,11 +31,13 @@ export function OrderForm({
   const [submission, setSubmission] =
     useState<OrderFormSubmission>(DEFAULT_SUBMISSION);
   const {
+    clearErrors,
     control,
     formState: { errors, isSubmitting },
     handleSubmit,
     register,
     reset,
+    setValue,
   } = useForm<OrderFormValues>({
     defaultValues: {
       decisionEvidence: "",
@@ -49,6 +52,16 @@ export function OrderForm({
     resolver: zodResolver(createOrderSchema(messages.validation)),
   });
   const orderType = useWatch({ control, name: "orderType" });
+  const orderTypeRegistration = register("orderType");
+
+  function selectMarketOrder(event: ChangeEvent<HTMLInputElement>) {
+    orderTypeRegistration.onChange(event);
+    setValue("limitPrice", undefined, {
+      shouldDirty: true,
+      shouldValidate: false,
+    });
+    clearErrors("limitPrice");
+  }
 
   async function submitOrder(values: OrderFormValues) {
     setSubmission(DEFAULT_SUBMISSION);
@@ -123,14 +136,19 @@ export function OrderForm({
             <span>{messages.fields.orderType.label}</span>
             <label>
               <input
-                {...register("orderType")}
+                {...orderTypeRegistration}
+                onChange={selectMarketOrder}
                 type="radio"
                 value="MARKET"
               />
               {messages.fields.orderType.options.market}
             </label>
             <label>
-              <input {...register("orderType")} type="radio" value="LIMIT" />
+              <input
+                {...orderTypeRegistration}
+                type="radio"
+                value="LIMIT"
+              />
               {messages.fields.orderType.options.limit}
             </label>
             {errors.orderType ? (
@@ -155,24 +173,25 @@ export function OrderForm({
             ) : null}
           </label>
 
-          <label>
-            <span>{messages.fields.limitPrice.label}</span>
-            <input
-              {...register("limitPrice", {
-                setValueAs: (value: string) =>
-                  value === "" ? undefined : Number(value),
-              })}
-              aria-invalid={errors.limitPrice ? "true" : "false"}
-              disabled={orderType === "MARKET"}
-              min="0.0001"
-              placeholder={messages.fields.limitPrice.placeholder}
-              step="0.0001"
-              type="number"
-            />
-            {errors.limitPrice ? (
-              <small>{errors.limitPrice.message}</small>
-            ) : null}
-          </label>
+          {orderType === "LIMIT" ? (
+            <label>
+              <span>{messages.fields.limitPrice.label}</span>
+              <input
+                {...register("limitPrice", {
+                  setValueAs: (value: string) =>
+                    value === "" ? undefined : Number(value),
+                })}
+                aria-invalid={errors.limitPrice ? "true" : "false"}
+                min="0.0001"
+                placeholder={messages.fields.limitPrice.placeholder}
+                step="0.0001"
+                type="number"
+              />
+              {errors.limitPrice ? (
+                <small>{errors.limitPrice.message}</small>
+              ) : null}
+            </label>
+          ) : null}
         </div>
 
         <label>

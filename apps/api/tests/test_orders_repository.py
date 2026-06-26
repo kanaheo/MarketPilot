@@ -5,12 +5,13 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from marketpilot_api.models import Order, Portfolio
+from marketpilot_api.models import Order, OrderExecution, Portfolio
 from marketpilot_api.repositories.orders import (
     MANUAL_DECISION_EVIDENCE,
     MANUAL_STRATEGY_VERSION,
     OrderExecutionPriceError,
     OrderInsufficientCashError,
+    OrderInsufficientPositionError,
     OrderNotPendingError,
     OrderPortfolioNotFoundError,
     cancel_order,
@@ -219,6 +220,20 @@ def test_execute_sell_order_records_cash_inflow() -> None:
         decision_evidence=MANUAL_DECISION_EVIDENCE,
     )
     session.scalar.side_effect = [portfolio, order]
+    session.scalars.return_value.all.return_value = [
+        OrderExecution(
+            id=uuid.uuid4(),
+            order_id=uuid.uuid4(),
+            portfolio_id=portfolio.id,
+            symbol="7203",
+            side="BUY",
+            quantity=Decimal("5.00000000"),
+            price=Decimal("2700.0000"),
+            gross_amount=Decimal("13500.0000"),
+            currency="JPY",
+            executed_at=datetime.now(timezone.utc),
+        )
+    ]
 
     result = execute_order(
         session,
@@ -233,6 +248,58 @@ def test_execute_sell_order_records_cash_inflow() -> None:
     assert cash_transaction.transaction_type == "TRADE_SELL"
     assert cash_transaction.amount == Decimal("8430.0000")
     session.commit.assert_called_once()
+
+
+def test_execute_sell_order_rejects_insufficient_position() -> None:
+    session = MagicMock()
+    portfolio = Portfolio(
+        id=uuid.uuid4(),
+        user_id=uuid.uuid4(),
+        name="Paper portfolio",
+        base_currency="USD",
+    )
+    order = Order(
+        id=uuid.uuid4(),
+        portfolio_id=portfolio.id,
+        symbol="AAPL",
+        side="SELL",
+        order_type="MARKET",
+        quantity=Decimal("2.00000000"),
+        limit_price=None,
+        currency="USD",
+        status="PENDING",
+        strategy_version=MANUAL_STRATEGY_VERSION,
+        decision_evidence=MANUAL_DECISION_EVIDENCE,
+    )
+    session.scalar.side_effect = [portfolio, order]
+    session.scalars.return_value.all.return_value = [
+        OrderExecution(
+            id=uuid.uuid4(),
+            order_id=uuid.uuid4(),
+            portfolio_id=portfolio.id,
+            symbol="AAPL",
+            side="BUY",
+            quantity=Decimal("1.00000000"),
+            price=Decimal("100.0000"),
+            gross_amount=Decimal("100.0000"),
+            currency="USD",
+            executed_at=datetime.now(timezone.utc),
+        )
+    ]
+
+    with pytest.raises(OrderInsufficientPositionError):
+        execute_order(
+            session,
+            portfolio_id=portfolio.id,
+            order_id=order.id,
+            user_id=portfolio.user_id,
+            data=OrderExecuteRequest(price=Decimal("110.0000")),
+        )
+
+    assert order.status == "PENDING"
+    session.add.assert_not_called()
+    session.commit.assert_not_called()
+    session.rollback.assert_called_once()
 
 
 def test_execute_order_rejects_insufficient_cash() -> None:

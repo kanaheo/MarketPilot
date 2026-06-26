@@ -6,10 +6,14 @@ from decimal import Decimal
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from marketpilot_api.models import CashTransaction, OrderExecution, Portfolio
+from marketpilot_api.models import CashTransaction, Portfolio
 from marketpilot_api.repositories.cash_ledger import (
     get_current_cash,
     signed_cash_amount,
+)
+from marketpilot_api.repositories.positions import (
+    PortfolioHolding,
+    list_portfolio_holdings,
 )
 from marketpilot_api.schemas.portfolios import (
     CashTransactionCreateRequest,
@@ -31,106 +35,12 @@ class PortfolioDetail:
     holdings: list["PortfolioHolding"]
 
 
-@dataclass(frozen=True)
-class PortfolioHolding:
-    symbol: str
-    quantity: Decimal
-    average_price: Decimal
-    current_price: Decimal
-    market_value: Decimal
-    return_rate: Decimal
-    currency: str
-
-
-@dataclass
-class HoldingAccumulator:
-    symbol: str
-    currency: str
-    quantity: Decimal = Decimal("0")
-    cost_basis: Decimal = Decimal("0")
-
-    def apply_execution(self, execution: OrderExecution) -> None:
-        if execution.side == "BUY":
-            self.quantity += execution.quantity
-            self.cost_basis += execution.gross_amount
-            return
-
-        if self.quantity <= 0:
-            return
-
-        average_price = self.average_price
-        sold_quantity = min(execution.quantity, self.quantity)
-        self.quantity -= sold_quantity
-        self.cost_basis -= average_price * sold_quantity
-        if self.quantity == 0:
-            self.cost_basis = Decimal("0")
-
-    @property
-    def average_price(self) -> Decimal:
-        if self.quantity <= 0:
-            return Decimal("0")
-
-        return self.cost_basis / self.quantity
-
-
 class PortfolioNotFoundError(Exception):
     pass
 
 
 class InsufficientCashError(Exception):
     pass
-
-
-def _get_portfolio_holdings(
-    session: Session,
-    *,
-    portfolio_id: uuid.UUID,
-) -> list[PortfolioHolding]:
-    executions = list(
-        session.scalars(
-            select(OrderExecution)
-            .where(OrderExecution.portfolio_id == portfolio_id)
-            .order_by(
-                OrderExecution.symbol.asc(),
-                OrderExecution.executed_at.asc(),
-                OrderExecution.id.asc(),
-            )
-        ).all()
-    )
-    holdings_by_symbol: dict[str, HoldingAccumulator] = {}
-
-    for execution in executions:
-        accumulator = holdings_by_symbol.setdefault(
-            execution.symbol,
-            HoldingAccumulator(
-                symbol=execution.symbol,
-                currency=execution.currency,
-            ),
-        )
-        accumulator.apply_execution(execution)
-
-    holdings: list[PortfolioHolding] = []
-    for accumulator in holdings_by_symbol.values():
-        if accumulator.quantity <= 0:
-            continue
-
-        average_price = accumulator.average_price
-        current_price = average_price
-        market_value = accumulator.quantity * current_price
-
-        holdings.append(
-            PortfolioHolding(
-                symbol=accumulator.symbol,
-                quantity=accumulator.quantity,
-                average_price=average_price,
-                current_price=current_price,
-                market_value=market_value,
-                return_rate=Decimal("0"),
-                currency=accumulator.currency,
-            )
-        )
-
-    return holdings
 
 
 def create_portfolio_with_initial_deposit(
@@ -233,7 +143,7 @@ def get_portfolio_detail(
             .limit(recent_transaction_limit)
         ).all()
     )
-    holdings = _get_portfolio_holdings(session, portfolio_id=portfolio.id)
+    holdings = list_portfolio_holdings(session, portfolio_id=portfolio.id)
 
     return PortfolioDetail(
         portfolio=portfolio,

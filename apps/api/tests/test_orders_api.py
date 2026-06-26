@@ -12,6 +12,7 @@ from marketpilot_api.models import Order, User
 from marketpilot_api.repositories.orders import (
     OrderExecutionPriceError,
     OrderInsufficientCashError,
+    OrderInsufficientPositionError,
     OrderNotPendingError,
     OrderPortfolioNotFoundError,
 )
@@ -257,6 +258,32 @@ def test_execute_pending_order_rejects_insufficient_cash(monkeypatch) -> None:
     clear_dependency_overrides()
     assert response.status_code == 409
     assert response.json()["detail"] == "Insufficient cash balance"
+
+
+def test_execute_pending_order_rejects_insufficient_position(
+    monkeypatch,
+) -> None:
+    user = User(
+        id=uuid.uuid4(),
+        auth_provider="google",
+        auth_subject="google-user-1",
+    )
+    execute_mock = MagicMock(side_effect=OrderInsufficientPositionError)
+    monkeypatch.setattr(orders_router, "execute_order", execute_mock)
+    app.dependency_overrides[get_current_user] = (
+        override_authenticated_user(user)
+    )
+    app.dependency_overrides[get_db_session] = override_session(MagicMock())
+
+    with TestClient(app) as client:
+        response = client.patch(
+            f"/portfolios/{uuid.uuid4()}/orders/{uuid.uuid4()}/execute",
+            json={"price": "100"},
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Insufficient position quantity"
 
 
 def test_execute_pending_order_rejects_limit_price_miss(monkeypatch) -> None:
