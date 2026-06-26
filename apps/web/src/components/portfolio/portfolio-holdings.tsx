@@ -5,15 +5,15 @@ import { EmptyState } from "@/components/common/empty-state";
 import { Panel } from "@/components/common/panel";
 import { SectionHeader } from "@/components/common/section-header";
 import { TrendValue } from "@/components/common/trend-value";
-import { portfolioData } from "@/data/portfolio";
-import { formatDollar, formatPercent } from "@/lib/formatters";
+import { formatMarketPrice, formatPercent } from "@/lib/formatters";
 import type { PortfolioHoldingsProps } from "@/types/portfolio";
 
 export function PortfolioHoldings({
+  holdings,
   locale,
   messages,
 }: PortfolioHoldingsProps) {
-  const hasHoldings = portfolioData.holdings.length > 0;
+  const hasHoldings = holdings.length > 0;
 
   return (
     <Panel className="portfolio-holdings-panel">
@@ -41,7 +41,7 @@ export function PortfolioHoldings({
             <span role="columnheader">{messages.columns.returnRate}</span>
           </div>
 
-          {portfolioData.holdings.map((holding) => (
+          {holdings.map((holding) => (
             <div
               className="portfolio-holdings-row"
               key={holding.symbol}
@@ -59,13 +59,25 @@ export function PortfolioHoldings({
                 {messages.shareUnit}
               </span>
               <span className="numeric-cell average-price" role="cell">
-                {formatDollar(holding.averagePrice, locale)}
+                {formatMarketPrice(
+                  holding.averagePrice,
+                  holding.currency,
+                  locale,
+                )}
               </span>
               <span className="numeric-cell current-price" role="cell">
-                {formatDollar(holding.currentPrice, locale)}
+                {formatMarketPrice(
+                  holding.currentPrice,
+                  holding.currency,
+                  locale,
+                )}
               </span>
               <strong className="numeric-cell" role="cell">
-                {formatDollar(holding.marketValue, locale)}
+                {formatMarketPrice(
+                  holding.marketValue,
+                  holding.currency,
+                  locale,
+                )}
               </strong>
               <span role="cell">
                 <TrendValue value={holding.returnRate}>

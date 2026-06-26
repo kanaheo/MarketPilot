@@ -9,7 +9,12 @@ from marketpilot_api.core.user_api_auth import get_current_user
 from marketpilot_api.db.session import get_db_session
 from marketpilot_api.main import app
 from marketpilot_api.models import Order, User
-from marketpilot_api.repositories.orders import OrderPortfolioNotFoundError
+from marketpilot_api.repositories.orders import (
+    OrderExecutionPriceError,
+    OrderInsufficientCashError,
+    OrderNotPendingError,
+    OrderPortfolioNotFoundError,
+)
 from marketpilot_api.routers import orders as orders_router
 
 
@@ -181,6 +186,174 @@ def test_submit_order_hides_unowned_portfolio(monkeypatch) -> None:
     clear_dependency_overrides()
     assert response.status_code == 404
     assert response.json()["detail"] == "Portfolio not found"
+
+
+def test_execute_pending_order_returns_filled_order(monkeypatch) -> None:
+    user = User(
+        id=uuid.uuid4(),
+        auth_provider="google",
+        auth_subject="google-user-1",
+    )
+    session = MagicMock()
+    portfolio_id = uuid.uuid4()
+    now = datetime.now(timezone.utc)
+    order = Order(
+        id=uuid.uuid4(),
+        portfolio_id=portfolio_id,
+        symbol="AAPL",
+        side="BUY",
+        order_type="MARKET",
+        quantity=Decimal("1.00000000"),
+        limit_price=None,
+        currency="USD",
+        status="FILLED",
+        strategy_version="manual-v1",
+        decision_evidence="Manual paper order",
+        created_at=now,
+        updated_at=now,
+    )
+    execute_mock = MagicMock(return_value=order)
+    monkeypatch.setattr(orders_router, "execute_order", execute_mock)
+    app.dependency_overrides[get_current_user] = (
+        override_authenticated_user(user)
+    )
+    app.dependency_overrides[get_db_session] = override_session(session)
+
+    with TestClient(app) as client:
+        response = client.patch(
+            f"/portfolios/{portfolio_id}/orders/{order.id}/execute",
+            json={
+                "price": "185.2500",
+                "executed_at": now.isoformat(),
+            },
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 200
+    assert response.json()["status"] == "FILLED"
+    assert execute_mock.call_args.kwargs["user_id"] == user.id
+    assert execute_mock.call_args.kwargs["data"].price == Decimal("185.2500")
+
+
+def test_execute_pending_order_rejects_insufficient_cash(monkeypatch) -> None:
+    user = User(
+        id=uuid.uuid4(),
+        auth_provider="google",
+        auth_subject="google-user-1",
+    )
+    execute_mock = MagicMock(side_effect=OrderInsufficientCashError)
+    monkeypatch.setattr(orders_router, "execute_order", execute_mock)
+    app.dependency_overrides[get_current_user] = (
+        override_authenticated_user(user)
+    )
+    app.dependency_overrides[get_db_session] = override_session(MagicMock())
+
+    with TestClient(app) as client:
+        response = client.patch(
+            f"/portfolios/{uuid.uuid4()}/orders/{uuid.uuid4()}/execute",
+            json={"price": "100"},
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Insufficient cash balance"
+
+
+def test_execute_pending_order_rejects_limit_price_miss(monkeypatch) -> None:
+    user = User(
+        id=uuid.uuid4(),
+        auth_provider="google",
+        auth_subject="google-user-1",
+    )
+    execute_mock = MagicMock(side_effect=OrderExecutionPriceError)
+    monkeypatch.setattr(orders_router, "execute_order", execute_mock)
+    app.dependency_overrides[get_current_user] = (
+        override_authenticated_user(user)
+    )
+    app.dependency_overrides[get_db_session] = override_session(MagicMock())
+
+    with TestClient(app) as client:
+        response = client.patch(
+            f"/portfolios/{uuid.uuid4()}/orders/{uuid.uuid4()}/execute",
+            json={"price": "100"},
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 422
+    assert (
+        response.json()["detail"]
+        == "Execution price does not satisfy the limit order"
+    )
+
+
+def test_cancel_pending_order_returns_cancelled_order(monkeypatch) -> None:
+    user = User(
+        id=uuid.uuid4(),
+        auth_provider="google",
+        auth_subject="google-user-1",
+    )
+    session = MagicMock()
+    portfolio_id = uuid.uuid4()
+    now = datetime.now(timezone.utc)
+    order = Order(
+        id=uuid.uuid4(),
+        portfolio_id=portfolio_id,
+        symbol="AAPL",
+        side="BUY",
+        order_type="MARKET",
+        quantity=Decimal("1.00000000"),
+        limit_price=None,
+        currency="USD",
+        status="CANCELLED",
+        strategy_version="manual-v1",
+        decision_evidence="Manual paper order",
+        created_at=now,
+        updated_at=now,
+    )
+    cancel_mock = MagicMock(return_value=order)
+    monkeypatch.setattr(orders_router, "cancel_order", cancel_mock)
+    app.dependency_overrides[get_current_user] = (
+        override_authenticated_user(user)
+    )
+    app.dependency_overrides[get_db_session] = override_session(session)
+
+    with TestClient(app) as client:
+        response = client.patch(
+            f"/portfolios/{portfolio_id}/orders/{order.id}/cancel",
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 200
+    assert response.json()["status"] == "CANCELLED"
+    cancel_mock.assert_called_once_with(
+        session,
+        portfolio_id=portfolio_id,
+        order_id=order.id,
+        user_id=user.id,
+    )
+
+
+def test_cancel_pending_order_rejects_non_pending_order(monkeypatch) -> None:
+    user = User(
+        id=uuid.uuid4(),
+        auth_provider="google",
+        auth_subject="google-user-1",
+    )
+    cancel_mock = MagicMock(side_effect=OrderNotPendingError)
+    monkeypatch.setattr(orders_router, "cancel_order", cancel_mock)
+    app.dependency_overrides[get_current_user] = (
+        override_authenticated_user(user)
+    )
+    app.dependency_overrides[get_db_session] = override_session(MagicMock())
+
+    with TestClient(app) as client:
+        response = client.patch(
+            f"/portfolios/{uuid.uuid4()}/orders/{uuid.uuid4()}/cancel",
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Only pending orders can be cancelled"
 
 
 def test_retrieve_orders_returns_owner_orders(monkeypatch) -> None:

@@ -18,6 +18,361 @@
   line-height: 1.5;
 }
 
+.portfolio-create-panel {
+  display: grid;
+  gap: 18px;
+  padding: 18px;
+}
+
+.portfolio-create-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.portfolio-create-heading > span {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.portfolio-create-heading h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 760;
+  letter-spacing: -0.035em;
+}
+
+.portfolio-create-heading p {
+  max-width: 620px;
+  margin: 6px 0 0;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.portfolio-create-form {
+  display: grid;
+  gap: 14px;
+}
+
+.portfolio-create-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.portfolio-create-form label {
+  display: grid;
+  gap: 7px;
+  color: var(--color-text);
+  font-size: 11px;
+  font-weight: 720;
+}
+
+.portfolio-create-form input,
+.portfolio-create-form select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  padding: 0 12px;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 12px;
+  outline: none;
+}
+
+.portfolio-create-form input:focus,
+.portfolio-create-form select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(17, 103, 95, 0.1);
+}
+
+.portfolio-create-form input[aria-invalid="true"],
+.portfolio-create-form select[aria-invalid="true"] {
+  border-color: #d84950;
+}
+
+.portfolio-create-form small,
+.portfolio-create-message.error {
+  color: #d84950;
+}
+
+.portfolio-create-form small {
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.portfolio-create-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 2px;
+}
+
+.portfolio-create-message {
+  min-height: 16px;
+  margin: 0;
+  color: var(--color-primary);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.portfolio-create-actions button {
+  min-height: 40px;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-control);
+  background: var(--color-primary);
+  padding: 0 15px;
+  color: white;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.portfolio-create-actions button:hover {
+  border-color: var(--color-primary-strong);
+  background: var(--color-primary-strong);
+}
+
+.portfolio-create-actions button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.portfolio-selector {
+  overflow-x: auto;
+}
+
+.portfolio-selector-list {
+  display: flex;
+  gap: 10px;
+  min-width: max-content;
+}
+
+.portfolio-selector-list a {
+  display: grid;
+  min-width: 220px;
+  gap: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+  padding: 13px 14px;
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.portfolio-selector-list a:hover {
+  background: var(--color-surface-muted);
+}
+
+.portfolio-selector-list a.active {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(17, 103, 95, 0.1);
+}
+
+.portfolio-selector-list strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.portfolio-selector-list span {
+  color: var(--color-text-muted);
+  font-size: 10px;
+}
+
+.cash-transaction-panel {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+}
+
+.order-form-panel {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+}
+
+.cash-transaction-type-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+  color: var(--color-text);
+  font-size: 11px;
+  font-weight: 720;
+}
+
+.cash-transaction-type-group > span {
+  width: 100%;
+}
+
+.cash-transaction-type-group label {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  padding: 0 12px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.cash-transaction-type-group input {
+  width: auto;
+  min-height: auto;
+  margin: 0 7px 0 0;
+}
+
+.cash-transaction-type-group small {
+  width: 100%;
+  color: #d84950;
+  font-size: 10px;
+}
+
+.portfolio-orders-panel {
+  min-height: 286px;
+  padding: 18px;
+}
+
+.portfolio-orders-table {
+  margin-top: 14px;
+  border-top: 1px solid var(--color-border);
+}
+
+.portfolio-orders-row {
+  display: grid;
+  grid-template-columns:
+    minmax(76px, 0.8fr)
+    minmax(48px, 0.5fr)
+    minmax(58px, 0.55fr)
+    minmax(74px, 0.7fr)
+    minmax(88px, 0.8fr)
+    minmax(62px, 0.6fr)
+    minmax(74px, 0.7fr)
+    minmax(188px, 1.3fr);
+  min-height: 54px;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #edf0ee;
+  font-size: 11px;
+}
+
+.portfolio-orders-row.header {
+  min-height: 34px;
+  color: var(--color-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.portfolio-orders-row > :not(:first-child) {
+  text-align: right;
+}
+
+.portfolio-orders-row strong {
+  font-size: 12px;
+}
+
+.portfolio-orders-row span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.order-status {
+  justify-self: end;
+  border-radius: 999px;
+  background: var(--color-surface-muted);
+  padding: 4px 8px;
+  color: var(--color-text-muted);
+  font-size: 10px;
+  font-weight: 760;
+}
+
+.order-status.filled {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.order-status.pending {
+  background: #fff5df;
+  color: #a86616;
+}
+
+.order-status.rejected,
+.order-status.cancelled {
+  background: #fdeaea;
+  color: #d84950;
+}
+
+.order-action-cell {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.order-execute-form {
+  display: flex;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.order-execute-form input {
+  width: 76px;
+  min-width: 0;
+  border: 1px solid #d8dedb;
+  border-radius: 6px;
+  background: #ffffff;
+  padding: 5px 7px;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.order-cancel-button,
+.order-execute-button {
+  border: 1px solid #d8dedb;
+  border-radius: 6px;
+  background: #ffffff;
+  padding: 5px 8px;
+  color: var(--color-text-muted);
+  font-size: 10px;
+  font-weight: 720;
+  cursor: pointer;
+}
+
+.order-execute-button {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #ffffff;
+}
+
+.order-execute-button:hover {
+  background: #0d504a;
+  border-color: #0d504a;
+}
+
+.order-cancel-button:hover {
+  border-color: #d84950;
+  color: #d84950;
+}
+
+.order-action-placeholder {
+  color: var(--color-text-muted);
+}
+
 .portfolio-summary-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

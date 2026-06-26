@@ -32,6 +32,7 @@
 
   .dashboard-primary-grid,
   .dashboard-secondary-grid,
+  .portfolio-create-fields,
   .portfolio-insights-grid,
   .portfolio-details-grid {
     grid-template-columns: 1fr;

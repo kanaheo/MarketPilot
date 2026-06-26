@@ -12,6 +12,7 @@ from marketpilot_api.models import CashTransaction, Portfolio, User
 from marketpilot_api.repositories.portfolios import (
     InsufficientCashError,
     PortfolioDetail,
+    PortfolioHolding,
     PortfolioNotFoundError,
     PortfolioWithCash,
 )
@@ -228,6 +229,17 @@ def test_retrieve_portfolio_returns_detail_for_owner(monkeypatch) -> None:
             portfolio=portfolio,
             current_cash=Decimal("10250.0000"),
             recent_cash_transactions=[cash_transaction],
+            holdings=[
+                PortfolioHolding(
+                    symbol="AAPL",
+                    quantity=Decimal("2.00000000"),
+                    average_price=Decimal("100.0000"),
+                    current_price=Decimal("100.0000"),
+                    market_value=Decimal("200.0000"),
+                    return_rate=Decimal("0"),
+                    currency="USD",
+                )
+            ],
         )
     )
     monkeypatch.setattr(
@@ -249,7 +261,9 @@ def test_retrieve_portfolio_returns_detail_for_owner(monkeypatch) -> None:
     assert response.json()["recent_cash_transactions"][0]["note"] == (
         "Extra cash"
     )
-    assert response.json()["holdings"] == []
+    assert response.json()["holdings"][0]["symbol"] == "AAPL"
+    assert response.json()["holdings"][0]["quantity"] == "2.00000000"
+    assert response.json()["holdings"][0]["market_value"] == "200.0000"
     assert response.json()["orders"] == []
     detail_mock.assert_called_once_with(
         session,

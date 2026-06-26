@@ -3,10 +3,14 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from decimal import Decimal
 
-from sqlalchemy import case, func, select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from marketpilot_api.models import CashTransaction, Portfolio
+from marketpilot_api.models import CashTransaction, OrderExecution, Portfolio
+from marketpilot_api.repositories.cash_ledger import (
+    get_current_cash,
+    signed_cash_amount,
+)
 from marketpilot_api.schemas.portfolios import (
     CashTransactionCreateRequest,
     PortfolioCreateRequest,
@@ -24,6 +28,49 @@ class PortfolioDetail:
     portfolio: Portfolio
     current_cash: Decimal
     recent_cash_transactions: list[CashTransaction]
+    holdings: list["PortfolioHolding"]
+
+
+@dataclass(frozen=True)
+class PortfolioHolding:
+    symbol: str
+    quantity: Decimal
+    average_price: Decimal
+    current_price: Decimal
+    market_value: Decimal
+    return_rate: Decimal
+    currency: str
+
+
+@dataclass
+class HoldingAccumulator:
+    symbol: str
+    currency: str
+    quantity: Decimal = Decimal("0")
+    cost_basis: Decimal = Decimal("0")
+
+    def apply_execution(self, execution: OrderExecution) -> None:
+        if execution.side == "BUY":
+            self.quantity += execution.quantity
+            self.cost_basis += execution.gross_amount
+            return
+
+        if self.quantity <= 0:
+            return
+
+        average_price = self.average_price
+        sold_quantity = min(execution.quantity, self.quantity)
+        self.quantity -= sold_quantity
+        self.cost_basis -= average_price * sold_quantity
+        if self.quantity == 0:
+            self.cost_basis = Decimal("0")
+
+    @property
+    def average_price(self) -> Decimal:
+        if self.quantity <= 0:
+            return Decimal("0")
+
+        return self.cost_basis / self.quantity
 
 
 class PortfolioNotFoundError(Exception):
@@ -34,31 +81,56 @@ class InsufficientCashError(Exception):
     pass
 
 
-def _signed_cash_amount():
-    return case(
-        (
-            CashTransaction.transaction_type.in_(
-                ("WITHDRAWAL", "FEE"),
-            ),
-            -CashTransaction.amount,
-        ),
-        else_=CashTransaction.amount,
-    )
-
-
-def _get_current_cash(
+def _get_portfolio_holdings(
     session: Session,
     *,
     portfolio_id: uuid.UUID,
-) -> Decimal:
-    return session.scalar(
-        select(
-            func.coalesce(
-                func.sum(_signed_cash_amount()),
-                Decimal("0"),
+) -> list[PortfolioHolding]:
+    executions = list(
+        session.scalars(
+            select(OrderExecution)
+            .where(OrderExecution.portfolio_id == portfolio_id)
+            .order_by(
+                OrderExecution.symbol.asc(),
+                OrderExecution.executed_at.asc(),
+                OrderExecution.id.asc(),
             )
-        ).where(CashTransaction.portfolio_id == portfolio_id)
+        ).all()
     )
+    holdings_by_symbol: dict[str, HoldingAccumulator] = {}
+
+    for execution in executions:
+        accumulator = holdings_by_symbol.setdefault(
+            execution.symbol,
+            HoldingAccumulator(
+                symbol=execution.symbol,
+                currency=execution.currency,
+            ),
+        )
+        accumulator.apply_execution(execution)
+
+    holdings: list[PortfolioHolding] = []
+    for accumulator in holdings_by_symbol.values():
+        if accumulator.quantity <= 0:
+            continue
+
+        average_price = accumulator.average_price
+        current_price = average_price
+        market_value = accumulator.quantity * current_price
+
+        holdings.append(
+            PortfolioHolding(
+                symbol=accumulator.symbol,
+                quantity=accumulator.quantity,
+                average_price=average_price,
+                current_price=current_price,
+                market_value=market_value,
+                return_rate=Decimal("0"),
+                currency=accumulator.currency,
+            )
+        )
+
+    return holdings
 
 
 def create_portfolio_with_initial_deposit(
@@ -107,7 +179,7 @@ def list_portfolios_with_cash(
         select(
             Portfolio,
             func.coalesce(
-                func.sum(_signed_cash_amount()),
+                func.sum(signed_cash_amount()),
                 Decimal("0"),
             ).label("current_cash"),
         )
@@ -145,7 +217,7 @@ def get_portfolio_detail(
     if portfolio is None:
         return None
 
-    current_cash = _get_current_cash(
+    current_cash = get_current_cash(
         session,
         portfolio_id=portfolio.id,
     )
@@ -161,11 +233,13 @@ def get_portfolio_detail(
             .limit(recent_transaction_limit)
         ).all()
     )
+    holdings = _get_portfolio_holdings(session, portfolio_id=portfolio.id)
 
     return PortfolioDetail(
         portfolio=portfolio,
         current_cash=current_cash,
         recent_cash_transactions=recent_transactions,
+        holdings=holdings,
     )
 
 
@@ -189,7 +263,7 @@ def create_cash_transaction(
             raise PortfolioNotFoundError
 
         if data.transaction_type == "WITHDRAWAL":
-            current_cash = _get_current_cash(
+            current_cash = get_current_cash(
                 session,
                 portfolio_id=portfolio.id,
             )

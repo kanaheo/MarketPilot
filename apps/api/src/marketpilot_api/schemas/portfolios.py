@@ -76,7 +76,19 @@ class CashTransactionResponse(BaseModel):
     created_at: datetime
 
 
+class PortfolioHoldingResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    symbol: str
+    quantity: Decimal
+    average_price: Decimal
+    current_price: Decimal
+    market_value: Decimal
+    return_rate: Decimal
+    currency: SupportedCurrency
+
+
 class PortfolioDetailResponse(PortfolioResponse):
     recent_cash_transactions: list[CashTransactionResponse]
-    holdings: list[object] = Field(default_factory=list)
+    holdings: list[PortfolioHoldingResponse] = Field(default_factory=list)
     orders: list[object] = Field(default_factory=list)

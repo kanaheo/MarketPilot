@@ -1,6 +1,6 @@
 import re
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Literal
 
@@ -46,6 +46,29 @@ class OrderCreateRequest(BaseModel):
         if self.decision_evidence is not None:
             evidence = self.decision_evidence.strip()
             self.decision_evidence = evidence or None
+
+        return self
+
+
+class OrderExecuteRequest(BaseModel):
+    price: Decimal = Field(
+        gt=0,
+        max_digits=20,
+        decimal_places=4,
+    )
+    executed_at: datetime | None = None
+
+    @model_validator(mode="after")
+    def validate_execution(self) -> "OrderExecuteRequest":
+        if self.executed_at is None:
+            self.executed_at = datetime.now(timezone.utc)
+            return self
+
+        if (
+            self.executed_at.tzinfo is None
+            or self.executed_at.utcoffset() is None
+        ):
+            raise ValueError("Executed at must include a timezone")
 
         return self
 

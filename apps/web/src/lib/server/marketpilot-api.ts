@@ -10,6 +10,16 @@ type MarketPilotRequestInit = Omit<RequestInit, "headers"> & {
   headers?: HeadersInit;
 };
 
+export class MarketPilotApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+    this.name = "MarketPilotApiError";
+  }
+}
+
 function createUserApiToken(userId: string, signingSecret: string): string {
   const issuedAt = Math.floor(Date.now() / 1000);
   const payload = {
@@ -55,5 +65,53 @@ export async function marketPilotApiFetch(
     ...init,
     cache: init.cache ?? "no-store",
     headers,
+  });
+}
+
+export async function marketPilotApiRequest<ResponseBody>(
+  path: `/${string}`,
+  init: MarketPilotRequestInit = {},
+): Promise<ResponseBody> {
+  const response = await marketPilotApiFetch(path, init);
+
+  if (!response.ok) {
+    throw new MarketPilotApiError(
+      `MarketPilot API request failed: ${response.status}`,
+      response.status,
+    );
+  }
+
+  return (await response.json()) as ResponseBody;
+}
+
+export async function marketPilotApiPost<RequestBody, ResponseBody>(
+  path: `/${string}`,
+  data: RequestBody,
+): Promise<ResponseBody> {
+  return marketPilotApiRequest<ResponseBody>(path, {
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+  });
+}
+
+export async function marketPilotApiPatch<RequestBody, ResponseBody>(
+  path: `/${string}`,
+  data?: RequestBody,
+): Promise<ResponseBody> {
+  if (data === undefined) {
+    return marketPilotApiRequest<ResponseBody>(path, {
+      method: "PATCH",
+    });
+  }
+
+  return marketPilotApiRequest<ResponseBody>(path, {
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "PATCH",
   });
 }

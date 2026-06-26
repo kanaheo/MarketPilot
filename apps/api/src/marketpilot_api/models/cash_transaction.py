@@ -13,7 +13,8 @@ class CashTransaction(CreatedAtMixin, Base):
     __table_args__ = (
         CheckConstraint(
             "transaction_type IN "
-            "('INITIAL_DEPOSIT', 'DEPOSIT', 'WITHDRAWAL', 'FEE', 'DIVIDEND')",
+            "('INITIAL_DEPOSIT', 'DEPOSIT', 'WITHDRAWAL', 'FEE', "
+            "'DIVIDEND', 'TRADE_BUY', 'TRADE_SELL')",
             name="cash_transaction_type",
         ),
         CheckConstraint("amount > 0", name="cash_transaction_positive_amount"),
