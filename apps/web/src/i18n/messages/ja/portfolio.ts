@@ -253,6 +253,9 @@ export const portfolio = {
       REJECTED: "拒否",
     },
     marketPrice: "成行",
+    execute: "約定",
+    executePriceLabel: "約定価格",
+    executePricePlaceholder: "約定価格",
     cancel: "取消",
     empty: {
       title: "注文はありません",

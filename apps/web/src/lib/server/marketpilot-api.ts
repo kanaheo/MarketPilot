@@ -97,10 +97,21 @@ export async function marketPilotApiPost<RequestBody, ResponseBody>(
   });
 }
 
-export async function marketPilotApiPatch<ResponseBody>(
+export async function marketPilotApiPatch<RequestBody, ResponseBody>(
   path: `/${string}`,
+  data?: RequestBody,
 ): Promise<ResponseBody> {
+  if (data === undefined) {
+    return marketPilotApiRequest<ResponseBody>(path, {
+      method: "PATCH",
+    });
+  }
+
   return marketPilotApiRequest<ResponseBody>(path, {
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
+    },
     method: "PATCH",
   });
 }

@@ -247,6 +247,9 @@ export const portfolio = {
       REJECTED: "거절",
     },
     marketPrice: "시장가",
+    execute: "체결",
+    executePriceLabel: "체결가",
+    executePricePlaceholder: "체결가",
     cancel: "취소",
     empty: {
       title: "주문이 없습니다",

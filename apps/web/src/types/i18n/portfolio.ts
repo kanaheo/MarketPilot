@@ -239,6 +239,9 @@ export type PortfolioMessages = Readonly<{
       REJECTED: string;
     };
     marketPrice: string;
+    execute: string;
+    executePriceLabel: string;
+    executePricePlaceholder: string;
     cancel: string;
     empty: {
       title: string;

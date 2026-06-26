@@ -8,6 +8,7 @@ import type {
   CashTransactionApiItem,
   OrderApiItem,
   OrderCreateApiRequest,
+  OrderExecuteApiRequest,
   PortfolioApiItem,
   PortfolioCreateApiRequest,
   PortfolioDetailApiItem,
@@ -69,7 +70,18 @@ export async function cancelOrder(
   portfolioId: string,
   orderId: string,
 ): Promise<OrderApiItem> {
-  return marketPilotApiPatch<OrderApiItem>(
+  return marketPilotApiPatch<undefined, OrderApiItem>(
     `/portfolios/${portfolioId}/orders/${orderId}/cancel`,
+  );
+}
+
+export async function executeOrder(
+  portfolioId: string,
+  orderId: string,
+  data: OrderExecuteApiRequest,
+): Promise<OrderApiItem> {
+  return marketPilotApiPatch<OrderExecuteApiRequest, OrderApiItem>(
+    `/portfolios/${portfolioId}/orders/${orderId}/execute`,
+    data,
   );
 }

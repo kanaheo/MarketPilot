@@ -9,6 +9,7 @@ import {
   createCashTransaction,
   createOrder,
   createPortfolio,
+  executeOrder,
 } from "@/lib/server/portfolio-api";
 import type {
   CashTransactionFormValues,
@@ -159,6 +160,29 @@ export async function cancelOrderAction(
 
   try {
     await cancelOrder(portfolioId, orderId);
+    revalidatePath(`/${locale}/portfolio`);
+  } catch {
+    return;
+  }
+}
+
+export async function executeOrderAction(
+  locale: Locale,
+  portfolioId: string,
+  orderId: string,
+  formData: FormData,
+): Promise<void> {
+  assertLocale(locale);
+
+  const price = Number(formData.get("price"));
+  if (!Number.isFinite(price) || price <= 0) {
+    return;
+  }
+
+  try {
+    await executeOrder(portfolioId, orderId, {
+      price: String(price),
+    });
     revalidatePath(`/${locale}/portfolio`);
   } catch {
     return;

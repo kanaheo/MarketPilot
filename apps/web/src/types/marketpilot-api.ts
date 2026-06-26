@@ -77,3 +77,8 @@ export type OrderCreateApiRequest = Readonly<{
   limit_price: string | null;
   decision_evidence: string | null;
 }>;
+
+export type OrderExecuteApiRequest = Readonly<{
+  price: string;
+  executed_at?: string;
+}>;

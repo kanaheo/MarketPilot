@@ -250,6 +250,9 @@ export const portfolio = {
       REJECTED: "Rejected",
     },
     marketPrice: "Market",
+    execute: "Fill",
+    executePriceLabel: "Execution price",
+    executePricePlaceholder: "Price",
     cancel: "Cancel",
     empty: {
       title: "No orders yet",
