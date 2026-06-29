@@ -10,16 +10,24 @@ import type { AssetAllocationProps } from "@/types/portfolio";
 export function AssetAllocation({
   currency,
   currentCash,
+  investedValue,
   locale,
   messages,
+  totalValue,
 }: AssetAllocationProps) {
   const allocation = [
+    {
+      key: "stocks" as const,
+      value: investedValue,
+      color: "#0f766e",
+    },
     {
       key: "cash" as const,
       value: currentCash,
       color: "#b9d9b0",
     },
-  ];
+  ].filter((item) => item.value > 0);
+  const safeTotalValue = totalValue > 0 ? totalValue : 0;
 
   return (
     <Panel className="asset-allocation-panel">
@@ -59,7 +67,7 @@ export function AssetAllocation({
           </div>
           <div className="allocation-chart-center">
             <strong>
-              {formatMarketPrice(currentCash, currency, locale)}
+              {formatMarketPrice(totalValue, currency, locale)}
             </strong>
             <span>{messages.totalValue}</span>
           </div>
@@ -78,11 +86,15 @@ export function AssetAllocation({
               </span>
               <span className="allocation-values">
                 <strong>
-                  {formatPercent(currentCash > 0 ? 1 : 0, locale, {
-                    maximumFractionDigits: 0,
-                    minimumFractionDigits: 0,
-                    signDisplay: "never",
-                  })}
+                  {formatPercent(
+                    safeTotalValue > 0 ? item.value / safeTotalValue : 0,
+                    locale,
+                    {
+                      maximumFractionDigits: 0,
+                      minimumFractionDigits: 0,
+                      signDisplay: "never",
+                    },
+                  )}
                 </strong>
                 <small>
                   {formatMarketPrice(item.value, currency, locale)}

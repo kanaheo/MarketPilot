@@ -14,6 +14,8 @@ export type PortfolioPageData = Readonly<{
   name: string;
   currency: PortfolioDetailApiItem["base_currency"];
   currentCash: number;
+  investedValue: number;
+  totalValue: number;
   cashActivities: readonly PortfolioCashActivity[];
   holdings: readonly PortfolioHolding[];
 }>;
@@ -60,26 +62,33 @@ export function mapPortfolioPageData(
   detail: PortfolioDetailApiItem,
 ): PortfolioPageData {
   const currentCash = Number(detail.current_cash);
+  const holdings = detail.holdings.map((holding) => ({
+    averagePrice: Number(holding.average_price),
+    color: getHoldingColor(holding.symbol),
+    currency: holding.currency,
+    currentPrice: Number(holding.current_price),
+    marketValue: Number(holding.market_value),
+    name: holding.symbol,
+    quantity: Number(holding.quantity),
+    returnRate: Number(holding.return_rate),
+    symbol: holding.symbol,
+  }));
+  const investedValue = holdings.reduce(
+    (total, holding) => total + holding.marketValue,
+    0,
+  );
 
   return {
     name: detail.name,
     currency: detail.base_currency,
     currentCash,
+    investedValue,
+    totalValue: currentCash + investedValue,
     cashActivities: mapCashActivities(
       currentCash,
       detail.recent_cash_transactions,
     ),
-    holdings: detail.holdings.map((holding) => ({
-      averagePrice: Number(holding.average_price),
-      color: getHoldingColor(holding.symbol),
-      currency: holding.currency,
-      currentPrice: Number(holding.current_price),
-      marketValue: Number(holding.market_value),
-      name: holding.symbol,
-      quantity: Number(holding.quantity),
-      returnRate: Number(holding.return_rate),
-      symbol: holding.symbol,
-    })),
+    holdings,
   };
 }
 

@@ -173,6 +173,7 @@ export type PortfolioSummaryProps = Readonly<{
   currentCash: number;
   locale: Locale;
   messages: PortfolioMessages["summary"];
+  totalValue: number;
 }>;
 
 export type PortfolioValueChartProps = Readonly<{
@@ -183,8 +184,10 @@ export type PortfolioValueChartProps = Readonly<{
 export type AssetAllocationProps = Readonly<{
   currency: SupportedCurrency;
   currentCash: number;
+  investedValue: number;
   locale: Locale;
   messages: PortfolioMessages["allocation"];
+  totalValue: number;
 }>;
 
 export type PortfolioHoldingsProps = Readonly<{

@@ -8,6 +8,11 @@ import { TrendValue } from "@/components/common/trend-value";
 import { formatMarketPrice, formatPercent } from "@/lib/formatters";
 import type { PortfolioHoldingsProps } from "@/types/portfolio";
 
+const HOLDING_QUANTITY_FORMAT_OPTIONS = {
+  maximumFractionDigits: 8,
+  minimumFractionDigits: 0,
+} as const satisfies Intl.NumberFormatOptions;
+
 export function PortfolioHoldings({
   holdings,
   locale,
@@ -55,7 +60,10 @@ export function PortfolioHoldings({
                 </span>
               </div>
               <span className="numeric-cell" role="cell">
-                {holding.quantity}
+                {holding.quantity.toLocaleString(
+                  locale,
+                  HOLDING_QUANTITY_FORMAT_OPTIONS,
+                )}
                 {messages.shareUnit}
               </span>
               <span className="numeric-cell average-price" role="cell">

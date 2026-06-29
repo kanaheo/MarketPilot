@@ -9,11 +9,12 @@ export function PortfolioSummary({
   currentCash,
   locale,
   messages,
+  totalValue,
 }: PortfolioSummaryProps) {
   const cards = [
     {
       label: messages.cards.totalValue,
-      value: formatMarketPrice(currentCash, currency, locale),
+      value: formatMarketPrice(totalValue, currency, locale),
       icon: TrendingUp,
       tone: "neutral" as const,
     },
