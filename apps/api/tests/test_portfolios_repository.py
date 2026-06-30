@@ -131,7 +131,11 @@ def test_get_portfolio_detail_filters_owner_and_limits_transactions() -> None:
         currency="USD",
         executed_at=datetime.now(timezone.utc),
     )
-    session.scalar.side_effect = [portfolio, Decimal("1000.0000")]
+    session.scalar.side_effect = [
+        portfolio,
+        Decimal("1000.0000"),
+        Decimal("1000.0000"),
+    ]
     session.scalars.return_value.all.side_effect = [[transaction], [execution]]
 
     result = get_portfolio_detail(
@@ -148,6 +152,7 @@ def test_get_portfolio_detail_filters_owner_and_limits_transactions() -> None:
     assert transaction_statement._limit_clause.value == 20
     assert result is not None
     assert result.current_cash == Decimal("1000.0000")
+    assert result.net_contributions == Decimal("1000.0000")
     assert result.recent_cash_transactions == [transaction]
     assert result.holdings == [
         PortfolioHolding(
@@ -171,7 +176,11 @@ def test_get_portfolio_detail_resets_average_price_after_closed_position() -> No
         name="My portfolio",
         base_currency="USD",
     )
-    session.scalar.side_effect = [portfolio, Decimal("800.0000")]
+    session.scalar.side_effect = [
+        portfolio,
+        Decimal("800.0000"),
+        Decimal("1000.0000"),
+    ]
     session.scalars.return_value.all.side_effect = [
         [],
         [
@@ -221,6 +230,7 @@ def test_get_portfolio_detail_resets_average_price_after_closed_position() -> No
     )
 
     assert result is not None
+    assert result.net_contributions == Decimal("1000.0000")
     assert result.holdings == [
         PortfolioHolding(
             symbol="AAPL",

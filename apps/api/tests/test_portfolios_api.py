@@ -228,6 +228,7 @@ def test_retrieve_portfolio_returns_detail_for_owner(monkeypatch) -> None:
         return_value=PortfolioDetail(
             portfolio=portfolio,
             current_cash=Decimal("10250.0000"),
+            net_contributions=Decimal("10000.0000"),
             recent_cash_transactions=[cash_transaction],
             holdings=[
                 PortfolioHolding(
@@ -258,6 +259,7 @@ def test_retrieve_portfolio_returns_detail_for_owner(monkeypatch) -> None:
     clear_dependency_overrides()
     assert response.status_code == 200
     assert response.json()["current_cash"] == "10250.0000"
+    assert response.json()["net_contributions"] == "10000.0000"
     assert response.json()["recent_cash_transactions"][0]["note"] == (
         "Extra cash"
     )

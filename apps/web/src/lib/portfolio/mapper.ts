@@ -15,6 +15,9 @@ export type PortfolioPageData = Readonly<{
   currency: PortfolioDetailApiItem["base_currency"];
   currentCash: number;
   investedValue: number;
+  netContributions: number;
+  totalProfitLoss: number;
+  totalReturnRate: number;
   totalValue: number;
   cashActivities: readonly PortfolioCashActivity[];
   holdings: readonly PortfolioHolding[];
@@ -62,6 +65,7 @@ export function mapPortfolioPageData(
   detail: PortfolioDetailApiItem,
 ): PortfolioPageData {
   const currentCash = Number(detail.current_cash);
+  const netContributions = Number(detail.net_contributions);
   const holdings = detail.holdings.map((holding) => ({
     averagePrice: Number(holding.average_price),
     color: getHoldingColor(holding.symbol),
@@ -77,13 +81,20 @@ export function mapPortfolioPageData(
     (total, holding) => total + holding.marketValue,
     0,
   );
+  const totalValue = currentCash + investedValue;
+  const totalProfitLoss = totalValue - netContributions;
+  const totalReturnRate =
+    netContributions > 0 ? totalProfitLoss / netContributions : 0;
 
   return {
     name: detail.name,
     currency: detail.base_currency,
     currentCash,
     investedValue,
-    totalValue: currentCash + investedValue,
+    netContributions,
+    totalProfitLoss,
+    totalReturnRate,
+    totalValue,
     cashActivities: mapCashActivities(
       currentCash,
       detail.recent_cash_transactions,

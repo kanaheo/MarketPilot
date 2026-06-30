@@ -173,6 +173,8 @@ export type PortfolioSummaryProps = Readonly<{
   currentCash: number;
   locale: Locale;
   messages: PortfolioMessages["summary"];
+  totalProfitLoss: number;
+  totalReturnRate: number;
   totalValue: number;
 }>;
 

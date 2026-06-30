@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from marketpilot_api.models import CashTransaction, Portfolio
 from marketpilot_api.repositories.cash_ledger import (
     get_current_cash,
+    get_net_contributions,
     signed_cash_amount,
 )
 from marketpilot_api.repositories.positions import (
@@ -31,6 +32,7 @@ class PortfolioWithCash:
 class PortfolioDetail:
     portfolio: Portfolio
     current_cash: Decimal
+    net_contributions: Decimal
     recent_cash_transactions: list[CashTransaction]
     holdings: list["PortfolioHolding"]
 
@@ -131,6 +133,10 @@ def get_portfolio_detail(
         session,
         portfolio_id=portfolio.id,
     )
+    net_contributions = get_net_contributions(
+        session,
+        portfolio_id=portfolio.id,
+    )
     recent_transactions = list(
         session.scalars(
             select(CashTransaction)
@@ -148,6 +154,7 @@ def get_portfolio_detail(
     return PortfolioDetail(
         portfolio=portfolio,
         current_cash=current_cash,
+        net_contributions=net_contributions,
         recent_cash_transactions=recent_transactions,
         holdings=holdings,
     )

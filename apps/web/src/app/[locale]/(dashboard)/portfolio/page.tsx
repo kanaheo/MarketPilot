@@ -84,6 +84,8 @@ export default async function PortfolioPage({
         currentCash={portfolio.currentCash}
         locale={locale}
         messages={messages.portfolio.summary}
+        totalProfitLoss={portfolio.totalProfitLoss}
+        totalReturnRate={portfolio.totalReturnRate}
         totalValue={portfolio.totalValue}
       />
       <AssetAllocation

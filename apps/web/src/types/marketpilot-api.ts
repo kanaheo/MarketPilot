@@ -45,6 +45,7 @@ export type PortfolioHoldingApiItem = Readonly<{
 
 export type PortfolioDetailApiItem = PortfolioApiItem &
   Readonly<{
+    net_contributions: string;
     recent_cash_transactions: readonly CashTransactionApiItem[];
     holdings: readonly PortfolioHoldingApiItem[];
     orders: readonly unknown[];
