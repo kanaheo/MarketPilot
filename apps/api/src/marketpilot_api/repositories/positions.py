@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from marketpilot_api.models import OrderExecution
+from marketpilot_api.repositories.price_quotes import get_fixture_current_price
 
 
 @dataclass(frozen=True)
@@ -104,6 +105,18 @@ def build_holding_accumulators(
     return holdings_by_symbol
 
 
+def _get_current_price(
+    *,
+    average_price: Decimal,
+    currency: str,
+    symbol: str,
+) -> Decimal:
+    return (
+        get_fixture_current_price(symbol=symbol, currency=currency)
+        or average_price
+    )
+
+
 def list_portfolio_holdings(
     session: Session,
     *,
@@ -133,7 +146,11 @@ def get_portfolio_position_summary(
             continue
 
         average_price = accumulator.average_price
-        current_price = average_price
+        current_price = _get_current_price(
+            average_price=average_price,
+            currency=accumulator.currency,
+            symbol=accumulator.symbol,
+        )
         market_value = accumulator.quantity * current_price
         holding_unrealized_profit_loss = (
             current_price - average_price

@@ -152,23 +152,23 @@ def test_get_portfolio_detail_filters_owner_and_limits_transactions() -> None:
     assert transaction_statement._limit_clause.value == 20
     assert result is not None
     assert result.current_cash == Decimal("1000.0000")
-    assert result.invested_value == Decimal("200.000000000000")
+    assert result.invested_value == Decimal("390.000000000000")
     assert result.net_contributions == Decimal("1000.0000")
     assert result.realized_profit_loss == Decimal("0")
-    assert result.total_profit_loss == Decimal("200.000000000000")
-    assert result.total_return_rate == Decimal("0.200000000000")
-    assert result.total_value == Decimal("1200.000000000000")
-    assert result.unrealized_profit_loss == Decimal("0E-12")
+    assert result.total_profit_loss == Decimal("390.000000000000")
+    assert result.total_return_rate == Decimal("0.390000000000")
+    assert result.total_value == Decimal("1390.000000000000")
+    assert result.unrealized_profit_loss == Decimal("190.000000000000")
     assert result.recent_cash_transactions == [transaction]
     assert result.holdings == [
         PortfolioHolding(
             symbol="AAPL",
             quantity=Decimal("2.00000000"),
             average_price=Decimal("100.0000"),
-            current_price=Decimal("100.0000"),
-            market_value=Decimal("200.000000000000"),
-            unrealized_profit_loss=Decimal("0E-12"),
-            return_rate=Decimal("0"),
+            current_price=Decimal("195.0000"),
+            market_value=Decimal("390.000000000000"),
+            unrealized_profit_loss=Decimal("190.000000000000"),
+            return_rate=Decimal("0.950000000000"),
             currency="USD",
         )
     ]
@@ -239,14 +239,68 @@ def test_get_portfolio_detail_resets_average_price_after_closed_position() -> No
     assert result is not None
     assert result.net_contributions == Decimal("1000.0000")
     assert result.realized_profit_loss == Decimal("10.00000000")
-    assert result.unrealized_profit_loss == Decimal("0E-12")
+    assert result.unrealized_profit_loss == Decimal("-5.000000000000")
     assert result.holdings == [
         PortfolioHolding(
             symbol="AAPL",
             quantity=Decimal("1.00000000"),
             average_price=Decimal("200.0000"),
-            current_price=Decimal("200.0000"),
-            market_value=Decimal("200.000000000000"),
+            current_price=Decimal("195.0000"),
+            market_value=Decimal("195.000000000000"),
+            unrealized_profit_loss=Decimal("-5.000000000000"),
+            return_rate=Decimal("-0.025000000000"),
+            currency="USD",
+        )
+    ]
+
+
+def test_get_portfolio_detail_falls_back_to_average_price_without_quote() -> None:
+    session = MagicMock()
+    user_id = uuid.uuid4()
+    portfolio = Portfolio(
+        id=uuid.uuid4(),
+        user_id=user_id,
+        name="My portfolio",
+        base_currency="USD",
+    )
+    session.scalar.side_effect = [
+        portfolio,
+        Decimal("500.0000"),
+        Decimal("1000.0000"),
+    ]
+    session.scalars.return_value.all.side_effect = [
+        [],
+        [
+            OrderExecution(
+                id=uuid.uuid4(),
+                order_id=uuid.uuid4(),
+                portfolio_id=portfolio.id,
+                symbol="UNKNOWN",
+                side="BUY",
+                quantity=Decimal("2.00000000"),
+                price=Decimal("75.0000"),
+                gross_amount=Decimal("150.0000"),
+                currency="USD",
+                executed_at=datetime(2026, 1, 1, tzinfo=timezone.utc),
+            ),
+        ],
+    ]
+
+    result = get_portfolio_detail(
+        session,
+        portfolio_id=portfolio.id,
+        user_id=user_id,
+    )
+
+    assert result is not None
+    assert result.unrealized_profit_loss == Decimal("0E-12")
+    assert result.holdings == [
+        PortfolioHolding(
+            symbol="UNKNOWN",
+            quantity=Decimal("2.00000000"),
+            average_price=Decimal("75.0000"),
+            current_price=Decimal("75.0000"),
+            market_value=Decimal("150.000000000000"),
             unrealized_profit_loss=Decimal("0E-12"),
             return_rate=Decimal("0"),
             currency="USD",
