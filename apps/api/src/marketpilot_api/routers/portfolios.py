@@ -98,6 +98,7 @@ def retrieve_portfolio(
         base_currency=detail.portfolio.base_currency,
         current_cash=detail.current_cash,
         net_contributions=detail.net_contributions,
+        realized_profit_loss=detail.realized_profit_loss,
         created_at=detail.portfolio.created_at,
         updated_at=detail.portfolio.updated_at,
         recent_cash_transactions=detail.recent_cash_transactions,

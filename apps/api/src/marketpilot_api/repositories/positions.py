@@ -19,12 +19,19 @@ class PortfolioHolding:
     currency: str
 
 
+@dataclass(frozen=True)
+class PortfolioPositionSummary:
+    holdings: list[PortfolioHolding]
+    realized_profit_loss: Decimal
+
+
 @dataclass
 class HoldingAccumulator:
     symbol: str
     currency: str
     quantity: Decimal = Decimal("0")
     cost_basis: Decimal = Decimal("0")
+    realized_profit_loss: Decimal = Decimal("0")
 
     def apply_execution(self, execution: OrderExecution) -> None:
         if execution.side == "BUY":
@@ -37,6 +44,9 @@ class HoldingAccumulator:
 
         average_price = self.average_price
         sold_quantity = min(execution.quantity, self.quantity)
+        self.realized_profit_loss += (
+            execution.price - average_price
+        ) * sold_quantity
         self.quantity -= sold_quantity
         self.cost_basis -= average_price * sold_quantity
         if self.quantity == 0:
@@ -96,11 +106,24 @@ def list_portfolio_holdings(
     *,
     portfolio_id: uuid.UUID,
 ) -> list[PortfolioHolding]:
+    return get_portfolio_position_summary(
+        session,
+        portfolio_id=portfolio_id,
+    ).holdings
+
+
+def get_portfolio_position_summary(
+    session: Session,
+    *,
+    portfolio_id: uuid.UUID,
+) -> PortfolioPositionSummary:
     holdings = []
+    realized_profit_loss = Decimal("0")
 
     for accumulator in build_holding_accumulators(
         _list_order_executions(session, portfolio_id=portfolio_id)
     ).values():
+        realized_profit_loss += accumulator.realized_profit_loss
         if accumulator.quantity <= 0:
             continue
 
@@ -120,7 +143,10 @@ def list_portfolio_holdings(
             )
         )
 
-    return holdings
+    return PortfolioPositionSummary(
+        holdings=holdings,
+        realized_profit_loss=realized_profit_loss,
+    )
 
 
 def get_available_position_quantity(

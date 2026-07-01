@@ -153,6 +153,7 @@ def test_get_portfolio_detail_filters_owner_and_limits_transactions() -> None:
     assert result is not None
     assert result.current_cash == Decimal("1000.0000")
     assert result.net_contributions == Decimal("1000.0000")
+    assert result.realized_profit_loss == Decimal("0")
     assert result.recent_cash_transactions == [transaction]
     assert result.holdings == [
         PortfolioHolding(
@@ -231,6 +232,7 @@ def test_get_portfolio_detail_resets_average_price_after_closed_position() -> No
 
     assert result is not None
     assert result.net_contributions == Decimal("1000.0000")
+    assert result.realized_profit_loss == Decimal("10.00000000")
     assert result.holdings == [
         PortfolioHolding(
             symbol="AAPL",

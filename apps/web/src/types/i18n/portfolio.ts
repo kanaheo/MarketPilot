@@ -58,7 +58,7 @@ export type PortfolioMessages = Readonly<{
       totalValue: string;
       availableCash: string;
       totalReturn: string;
-      maxDrawdown: string;
+      realizedProfitLoss: string;
     };
   };
   valueChart: {

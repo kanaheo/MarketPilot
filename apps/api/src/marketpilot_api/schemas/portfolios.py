@@ -90,6 +90,7 @@ class PortfolioHoldingResponse(BaseModel):
 
 class PortfolioDetailResponse(PortfolioResponse):
     net_contributions: Decimal
+    realized_profit_loss: Decimal
     recent_cash_transactions: list[CashTransactionResponse]
     holdings: list[PortfolioHoldingResponse] = Field(default_factory=list)
     orders: list[object] = Field(default_factory=list)

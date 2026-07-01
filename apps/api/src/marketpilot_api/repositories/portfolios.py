@@ -14,7 +14,7 @@ from marketpilot_api.repositories.cash_ledger import (
 )
 from marketpilot_api.repositories.positions import (
     PortfolioHolding,
-    list_portfolio_holdings,
+    get_portfolio_position_summary,
 )
 from marketpilot_api.schemas.portfolios import (
     CashTransactionCreateRequest,
@@ -33,6 +33,7 @@ class PortfolioDetail:
     portfolio: Portfolio
     current_cash: Decimal
     net_contributions: Decimal
+    realized_profit_loss: Decimal
     recent_cash_transactions: list[CashTransaction]
     holdings: list["PortfolioHolding"]
 
@@ -149,14 +150,18 @@ def get_portfolio_detail(
             .limit(recent_transaction_limit)
         ).all()
     )
-    holdings = list_portfolio_holdings(session, portfolio_id=portfolio.id)
+    position_summary = get_portfolio_position_summary(
+        session,
+        portfolio_id=portfolio.id,
+    )
 
     return PortfolioDetail(
         portfolio=portfolio,
         current_cash=current_cash,
         net_contributions=net_contributions,
+        realized_profit_loss=position_summary.realized_profit_loss,
         recent_cash_transactions=recent_transactions,
-        holdings=holdings,
+        holdings=position_summary.holdings,
     )
 
 

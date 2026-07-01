@@ -21,6 +21,7 @@ export type PortfolioPageData = Readonly<{
   currentCash: number;
   investedValue: number;
   netContributions: number;
+  realizedProfitLoss: number;
   totalProfitLoss: number;
   totalReturnRate: number;
   totalValue: number;
@@ -83,6 +84,7 @@ export function mapPortfolioPageData(
 ): PortfolioPageData {
   const currentCash = Number(detail.current_cash);
   const netContributions = Number(detail.net_contributions);
+  const realizedProfitLoss = Number(detail.realized_profit_loss);
   const holdings = detail.holdings.map((holding) => ({
     averagePrice: Number(holding.average_price),
     color: getHoldingColor(holding.symbol),
@@ -109,6 +111,7 @@ export function mapPortfolioPageData(
     currentCash,
     investedValue,
     netContributions,
+    realizedProfitLoss,
     totalProfitLoss,
     totalReturnRate,
     totalValue,

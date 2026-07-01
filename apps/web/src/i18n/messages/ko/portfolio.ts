@@ -63,7 +63,7 @@ export const portfolio = {
       totalValue: "총 평가금액",
       availableCash: "사용 가능 현금",
       totalReturn: "총 수익률",
-      maxDrawdown: "최대 낙폭",
+      realizedProfitLoss: "실현 손익",
     },
   },
   valueChart: {

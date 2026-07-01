@@ -65,7 +65,7 @@ export const portfolio = {
       totalValue: "総評価額",
       availableCash: "利用可能な現金",
       totalReturn: "総収益率",
-      maxDrawdown: "最大ドローダウン",
+      realizedProfitLoss: "実現損益",
     },
   },
   valueChart: {

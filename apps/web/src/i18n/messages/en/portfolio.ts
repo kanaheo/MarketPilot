@@ -63,7 +63,7 @@ export const portfolio = {
       totalValue: "Total value",
       availableCash: "Available cash",
       totalReturn: "Total return",
-      maxDrawdown: "Max drawdown",
+      realizedProfitLoss: "Realized P/L",
     },
   },
   valueChart: {

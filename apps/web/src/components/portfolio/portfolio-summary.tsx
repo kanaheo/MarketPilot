@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, TrendingUp, WalletCards } from "lucide-react";
+import { ArrowUp, TrendingUp, WalletCards } from "lucide-react";
 
 import { SummaryCard } from "@/components/common/summary-card";
 import { formatMarketPrice, formatPercent } from "@/lib/formatters";
@@ -10,6 +10,7 @@ export function PortfolioSummary({
   currentCash,
   locale,
   messages,
+  realizedProfitLoss,
   totalProfitLoss,
   totalReturnRate,
   totalValue,
@@ -18,6 +19,12 @@ export function PortfolioSummary({
     totalReturnRate > 0
       ? "positive"
       : totalReturnRate < 0
+        ? "negative"
+        : "neutral";
+  const realizedProfitLossTone =
+    realizedProfitLoss > 0
+      ? "positive"
+      : realizedProfitLoss < 0
         ? "negative"
         : "neutral";
 
@@ -42,10 +49,10 @@ export function PortfolioSummary({
       tone: totalReturnTone,
     },
     {
-      label: messages.cards.maxDrawdown,
-      value: messages.unavailable,
-      icon: ArrowDown,
-      tone: "neutral" as const,
+      label: messages.cards.realizedProfitLoss,
+      value: formatMarketPrice(realizedProfitLoss, currency, locale),
+      icon: ArrowUp,
+      tone: realizedProfitLossTone,
     },
   ];
 
