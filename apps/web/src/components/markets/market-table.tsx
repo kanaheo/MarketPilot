@@ -87,13 +87,18 @@ export function MarketTable({
                   {messages.sessions[instrument.session]}
                 </small>
               </div>
-              <strong className="numeric-cell market-price" role="cell">
-                {formatMarketPrice(
-                  instrument.price,
-                  instrument.currency,
-                  locale,
+              <div className="numeric-cell market-price" role="cell">
+                <strong>
+                  {formatMarketPrice(
+                    instrument.price,
+                    instrument.currency,
+                    locale,
+                  )}
+                </strong>
+                {instrument.quoteSource === undefined ? null : (
+                  <small>{instrument.quoteSource}</small>
                 )}
-              </strong>
+              </div>
               <span role="cell">
                 <TrendValue value={instrument.changeRate}>
                   {formatPercent(instrument.changeRate, locale)}

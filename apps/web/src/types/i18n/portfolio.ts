@@ -58,7 +58,7 @@ export type PortfolioMessages = Readonly<{
       totalValue: string;
       availableCash: string;
       totalReturn: string;
-      maxDrawdown: string;
+      realizedProfitLoss: string;
     };
   };
   valueChart: {
@@ -92,6 +92,7 @@ export type PortfolioMessages = Readonly<{
       averagePrice: string;
       currentPrice: string;
       marketValue: string;
+      unrealizedProfitLoss: string;
       returnRate: string;
     };
     empty: {
@@ -194,6 +195,7 @@ export type PortfolioMessages = Readonly<{
     success: string;
     errors: {
       unauthorized: string;
+      conflict: string;
       invalid: string;
       notFound: string;
       unknown: string;
@@ -204,6 +206,7 @@ export type PortfolioMessages = Readonly<{
       limitPriceRequired: string;
       marketLimitPrice: string;
       orderType: string;
+      quantityDecimalPlaces: string;
       quantityPositive: string;
       quantityRequired: string;
       side: string;
@@ -220,6 +223,7 @@ export type PortfolioMessages = Readonly<{
       type: string;
       quantity: string;
       price: string;
+      amount: string;
       status: string;
       createdAt: string;
       actions: string;
@@ -239,10 +243,37 @@ export type PortfolioMessages = Readonly<{
       REJECTED: string;
     };
     marketPrice: string;
+    update: string;
+    updatePendingFeedback: string;
+    updateSubmitting: string;
+    updateQuantityLabel: string;
+    updateErrors: {
+      unauthorized: string;
+      invalid: string;
+      conflict: string;
+      notFound: string;
+      unknown: string;
+    };
     execute: string;
+    executePendingFeedback: string;
+    executeSubmitting: string;
     executePriceLabel: string;
     executePricePlaceholder: string;
+    executeErrors: {
+      unauthorized: string;
+      invalid: string;
+      conflict: string;
+      notFound: string;
+      unknown: string;
+    };
     cancel: string;
+    delete: string;
+    pagination: {
+      label: string;
+      next: string;
+      previous: string;
+      status: string;
+    };
     empty: {
       title: string;
       description: string;

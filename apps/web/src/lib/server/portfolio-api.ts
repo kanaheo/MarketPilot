@@ -1,4 +1,5 @@
 import {
+  marketPilotApiDelete,
   marketPilotApiPatch,
   marketPilotApiPost,
   marketPilotApiRequest,
@@ -6,13 +7,21 @@ import {
 import type {
   CashTransactionCreateApiRequest,
   CashTransactionApiItem,
+  MarketQuoteApiItem,
   OrderApiItem,
   OrderCreateApiRequest,
   OrderExecuteApiRequest,
+  OrderUpdateApiRequest,
   PortfolioApiItem,
   PortfolioCreateApiRequest,
   PortfolioDetailApiItem,
 } from "@/types/marketpilot-api";
+
+export async function getMarketQuotes(): Promise<
+  readonly MarketQuoteApiItem[]
+> {
+  return marketPilotApiRequest<MarketQuoteApiItem[]>("/market-data/quotes");
+}
 
 export async function getPortfolios(): Promise<readonly PortfolioApiItem[]> {
   return marketPilotApiRequest<PortfolioApiItem[]>("/portfolios");
@@ -72,6 +81,24 @@ export async function cancelOrder(
 ): Promise<OrderApiItem> {
   return marketPilotApiPatch<undefined, OrderApiItem>(
     `/portfolios/${portfolioId}/orders/${orderId}/cancel`,
+  );
+}
+
+export async function deleteOrder(
+  portfolioId: string,
+  orderId: string,
+): Promise<void> {
+  return marketPilotApiDelete(`/portfolios/${portfolioId}/orders/${orderId}`);
+}
+
+export async function updateOrder(
+  portfolioId: string,
+  orderId: string,
+  data: OrderUpdateApiRequest,
+): Promise<OrderApiItem> {
+  return marketPilotApiPatch<OrderUpdateApiRequest, OrderApiItem>(
+    `/portfolios/${portfolioId}/orders/${orderId}`,
+    data,
   );
 }
 

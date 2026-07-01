@@ -84,19 +84,25 @@ export default async function PortfolioPage({
         currentCash={portfolio.currentCash}
         locale={locale}
         messages={messages.portfolio.summary}
+        realizedProfitLoss={portfolio.realizedProfitLoss}
+        totalProfitLoss={portfolio.totalProfitLoss}
+        totalReturnRate={portfolio.totalReturnRate}
+        totalValue={portfolio.totalValue}
       />
       <AssetAllocation
         currency={portfolio.currency}
         currentCash={portfolio.currentCash}
+        investedValue={portfolio.investedValue}
         locale={locale}
         messages={messages.portfolio.allocation}
+        totalValue={portfolio.totalValue}
       />
       <PortfolioHoldings
         holdings={portfolio.holdings}
         locale={locale}
         messages={messages.portfolio.holdings}
       />
-      <div className="portfolio-details-grid">
+      <div className="portfolio-details-grid portfolio-trading-grid">
         <OrderForm
           locale={locale}
           messages={messages.portfolio.orderForm}

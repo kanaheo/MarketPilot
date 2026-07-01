@@ -8,7 +8,11 @@ import { EmptyState } from "@/components/common/empty-state";
 import { Panel } from "@/components/common/panel";
 import { SectionHeader } from "@/components/common/section-header";
 import { TrendValue } from "@/components/common/trend-value";
-import { formatMarketPrice, formatShortDate } from "@/lib/formatters";
+import {
+  formatMarketPrice,
+  formatMarketPriceDelta,
+  formatShortDate,
+} from "@/lib/formatters";
 import type { CashTransactionType } from "@/types/marketpilot-api";
 import type { CashActivityProps } from "@/types/portfolio";
 
@@ -44,14 +48,20 @@ export function CashActivity({
 
       {hasActivity ? (
         <div className="cash-activity-list">
-          {activities.map((activity) => {
+          {activities.map((activity, activityIndex) => {
             const Icon = activityIcons[activity.type];
             const amount = negativeActivityTypes.has(activity.type)
               ? -activity.amount
               : activity.amount;
+            const isLatestActivity = activityIndex === 0;
 
             return (
-              <article className="cash-activity-item" key={activity.id}>
+              <article
+                className={`cash-activity-item ${
+                  isLatestActivity ? "latest" : ""
+                }`}
+                key={activity.id}
+              >
                 <span
                   className={`cash-activity-icon ${
                     amount < 0 ? "purchase" : "deposit"
@@ -65,7 +75,7 @@ export function CashActivity({
                 </div>
                 <div className="cash-activity-amount">
                   <TrendValue value={amount}>
-                    {formatMarketPrice(amount, activity.currency, locale)}
+                    {formatMarketPriceDelta(amount, activity.currency, locale)}
                   </TrendValue>
                   <small>
                     {messages.balance}{" "}

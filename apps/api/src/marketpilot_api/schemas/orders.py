@@ -20,7 +20,7 @@ class OrderCreateRequest(BaseModel):
     quantity: Decimal = Field(
         gt=0,
         max_digits=20,
-        decimal_places=8,
+        decimal_places=2,
     )
     limit_price: Decimal | None = Field(
         default=None,
@@ -73,6 +73,14 @@ class OrderExecuteRequest(BaseModel):
         return self
 
 
+class OrderUpdateRequest(BaseModel):
+    quantity: Decimal = Field(
+        gt=0,
+        max_digits=20,
+        decimal_places=2,
+    )
+
+
 class OrderResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -83,6 +91,9 @@ class OrderResponse(BaseModel):
     order_type: OrderType
     quantity: Decimal
     limit_price: Decimal | None
+    execution_price: Decimal | None = None
+    execution_gross_amount: Decimal | None = None
+    executed_at: datetime | None = None
     currency: SupportedCurrency
     status: OrderStatus
     strategy_version: str

@@ -1,4 +1,5 @@
 import type { Locale, Messages } from "@/types/i18n";
+import type { MarketQuoteApiItem } from "@/types/marketpilot-api";
 
 export type MarketCountry = "all" | "us" | "kr" | "jp";
 export type MarketAssetClass = "all" | "stocks" | "etfs";
@@ -28,6 +29,7 @@ export type MarketInstrument = Readonly<{
   aiScore: number | null;
   color: string;
   sparkline: readonly number[];
+  quoteSource?: string;
 }>;
 
 export type MarketFilterState = Readonly<{
@@ -70,6 +72,7 @@ export type MarketFiltersProps = Readonly<{
 
 export type MarketExplorerProps = Readonly<{
   locale: Locale;
+  marketQuotes: readonly MarketQuoteApiItem[];
   messages: MarketsMessages;
 }>;
 

@@ -12,6 +12,8 @@ from marketpilot_api.models import Order, User
 from marketpilot_api.repositories.orders import (
     OrderExecutionPriceError,
     OrderInsufficientCashError,
+    OrderInsufficientPositionError,
+    OrderNotDeletableError,
     OrderNotPendingError,
     OrderPortfolioNotFoundError,
 )
@@ -188,6 +190,65 @@ def test_submit_order_hides_unowned_portfolio(monkeypatch) -> None:
     assert response.json()["detail"] == "Portfolio not found"
 
 
+def test_submit_order_rejects_insufficient_position(monkeypatch) -> None:
+    user = User(
+        id=uuid.uuid4(),
+        auth_provider="google",
+        auth_subject="google-user-1",
+    )
+    create_mock = MagicMock(side_effect=OrderInsufficientPositionError)
+    monkeypatch.setattr(orders_router, "create_order", create_mock)
+    app.dependency_overrides[get_current_user] = (
+        override_authenticated_user(user)
+    )
+    app.dependency_overrides[get_db_session] = override_session(MagicMock())
+
+    with TestClient(app) as client:
+        response = client.post(
+            f"/portfolios/{uuid.uuid4()}/orders",
+            json={
+                "symbol": "AAPL",
+                "side": "SELL",
+                "order_type": "MARKET",
+                "quantity": "2",
+            },
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Insufficient position quantity"
+
+
+def test_submit_order_rejects_insufficient_cash(monkeypatch) -> None:
+    user = User(
+        id=uuid.uuid4(),
+        auth_provider="google",
+        auth_subject="google-user-1",
+    )
+    create_mock = MagicMock(side_effect=OrderInsufficientCashError)
+    monkeypatch.setattr(orders_router, "create_order", create_mock)
+    app.dependency_overrides[get_current_user] = (
+        override_authenticated_user(user)
+    )
+    app.dependency_overrides[get_db_session] = override_session(MagicMock())
+
+    with TestClient(app) as client:
+        response = client.post(
+            f"/portfolios/{uuid.uuid4()}/orders",
+            json={
+                "symbol": "AAPL",
+                "side": "BUY",
+                "order_type": "LIMIT",
+                "quantity": "2",
+                "limit_price": "100",
+            },
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Insufficient cash balance"
+
+
 def test_execute_pending_order_returns_filled_order(monkeypatch) -> None:
     user = User(
         id=uuid.uuid4(),
@@ -231,6 +292,9 @@ def test_execute_pending_order_returns_filled_order(monkeypatch) -> None:
     clear_dependency_overrides()
     assert response.status_code == 200
     assert response.json()["status"] == "FILLED"
+    assert response.json()["executed_at"] is None
+    assert response.json()["execution_gross_amount"] is None
+    assert response.json()["execution_price"] is None
     assert execute_mock.call_args.kwargs["user_id"] == user.id
     assert execute_mock.call_args.kwargs["data"].price == Decimal("185.2500")
 
@@ -259,6 +323,32 @@ def test_execute_pending_order_rejects_insufficient_cash(monkeypatch) -> None:
     assert response.json()["detail"] == "Insufficient cash balance"
 
 
+def test_execute_pending_order_rejects_insufficient_position(
+    monkeypatch,
+) -> None:
+    user = User(
+        id=uuid.uuid4(),
+        auth_provider="google",
+        auth_subject="google-user-1",
+    )
+    execute_mock = MagicMock(side_effect=OrderInsufficientPositionError)
+    monkeypatch.setattr(orders_router, "execute_order", execute_mock)
+    app.dependency_overrides[get_current_user] = (
+        override_authenticated_user(user)
+    )
+    app.dependency_overrides[get_db_session] = override_session(MagicMock())
+
+    with TestClient(app) as client:
+        response = client.patch(
+            f"/portfolios/{uuid.uuid4()}/orders/{uuid.uuid4()}/execute",
+            json={"price": "100"},
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Insufficient position quantity"
+
+
 def test_execute_pending_order_rejects_limit_price_miss(monkeypatch) -> None:
     user = User(
         id=uuid.uuid4(),
@@ -284,6 +374,124 @@ def test_execute_pending_order_rejects_limit_price_miss(monkeypatch) -> None:
         response.json()["detail"]
         == "Execution price does not satisfy the limit order"
     )
+
+
+def test_update_pending_order_returns_updated_order(monkeypatch) -> None:
+    user = User(
+        id=uuid.uuid4(),
+        auth_provider="google",
+        auth_subject="google-user-1",
+    )
+    session = MagicMock()
+    portfolio_id = uuid.uuid4()
+    now = datetime.now(timezone.utc)
+    order = Order(
+        id=uuid.uuid4(),
+        portfolio_id=portfolio_id,
+        symbol="AAPL",
+        side="SELL",
+        order_type="MARKET",
+        quantity=Decimal("1.00000000"),
+        limit_price=None,
+        currency="USD",
+        status="PENDING",
+        strategy_version="manual-v1",
+        decision_evidence="Manual paper order",
+        created_at=now,
+        updated_at=now,
+    )
+    update_mock = MagicMock(return_value=order)
+    monkeypatch.setattr(orders_router, "update_order", update_mock)
+    app.dependency_overrides[get_current_user] = (
+        override_authenticated_user(user)
+    )
+    app.dependency_overrides[get_db_session] = override_session(session)
+
+    with TestClient(app) as client:
+        response = client.patch(
+            f"/portfolios/{portfolio_id}/orders/{order.id}",
+            json={"quantity": "1"},
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 200
+    assert response.json()["quantity"] == "1.00000000"
+    assert update_mock.call_args.kwargs["user_id"] == user.id
+    assert update_mock.call_args.kwargs["data"].quantity == Decimal("1")
+
+
+def test_update_pending_order_rejects_non_pending_order(monkeypatch) -> None:
+    user = User(
+        id=uuid.uuid4(),
+        auth_provider="google",
+        auth_subject="google-user-1",
+    )
+    update_mock = MagicMock(side_effect=OrderNotPendingError)
+    monkeypatch.setattr(orders_router, "update_order", update_mock)
+    app.dependency_overrides[get_current_user] = (
+        override_authenticated_user(user)
+    )
+    app.dependency_overrides[get_db_session] = override_session(MagicMock())
+
+    with TestClient(app) as client:
+        response = client.patch(
+            f"/portfolios/{uuid.uuid4()}/orders/{uuid.uuid4()}",
+            json={"quantity": "1"},
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Only pending orders can be updated"
+
+
+def test_update_pending_order_rejects_insufficient_position(
+    monkeypatch,
+) -> None:
+    user = User(
+        id=uuid.uuid4(),
+        auth_provider="google",
+        auth_subject="google-user-1",
+    )
+    update_mock = MagicMock(side_effect=OrderInsufficientPositionError)
+    monkeypatch.setattr(orders_router, "update_order", update_mock)
+    app.dependency_overrides[get_current_user] = (
+        override_authenticated_user(user)
+    )
+    app.dependency_overrides[get_db_session] = override_session(MagicMock())
+
+    with TestClient(app) as client:
+        response = client.patch(
+            f"/portfolios/{uuid.uuid4()}/orders/{uuid.uuid4()}",
+            json={"quantity": "3"},
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Insufficient position quantity"
+
+
+def test_update_pending_order_rejects_insufficient_cash(monkeypatch) -> None:
+    user = User(
+        id=uuid.uuid4(),
+        auth_provider="google",
+        auth_subject="google-user-1",
+    )
+    update_mock = MagicMock(side_effect=OrderInsufficientCashError)
+    monkeypatch.setattr(orders_router, "update_order", update_mock)
+    app.dependency_overrides[get_current_user] = (
+        override_authenticated_user(user)
+    )
+    app.dependency_overrides[get_db_session] = override_session(MagicMock())
+
+    with TestClient(app) as client:
+        response = client.patch(
+            f"/portfolios/{uuid.uuid4()}/orders/{uuid.uuid4()}",
+            json={"quantity": "3"},
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Insufficient cash balance"
 
 
 def test_cancel_pending_order_returns_cancelled_order(monkeypatch) -> None:
@@ -356,6 +564,59 @@ def test_cancel_pending_order_rejects_non_pending_order(monkeypatch) -> None:
     assert response.json()["detail"] == "Only pending orders can be cancelled"
 
 
+def test_delete_unfilled_order_returns_no_content(monkeypatch) -> None:
+    user = User(
+        id=uuid.uuid4(),
+        auth_provider="google",
+        auth_subject="google-user-1",
+    )
+    session = MagicMock()
+    portfolio_id = uuid.uuid4()
+    order_id = uuid.uuid4()
+    delete_mock = MagicMock(return_value=None)
+    monkeypatch.setattr(orders_router, "delete_order", delete_mock)
+    app.dependency_overrides[get_current_user] = (
+        override_authenticated_user(user)
+    )
+    app.dependency_overrides[get_db_session] = override_session(session)
+
+    with TestClient(app) as client:
+        response = client.delete(f"/portfolios/{portfolio_id}/orders/{order_id}")
+
+    clear_dependency_overrides()
+    assert response.status_code == 204
+    assert response.content == b""
+    delete_mock.assert_called_once_with(
+        session,
+        portfolio_id=portfolio_id,
+        order_id=order_id,
+        user_id=user.id,
+    )
+
+
+def test_delete_unfilled_order_rejects_filled_order(monkeypatch) -> None:
+    user = User(
+        id=uuid.uuid4(),
+        auth_provider="google",
+        auth_subject="google-user-1",
+    )
+    delete_mock = MagicMock(side_effect=OrderNotDeletableError)
+    monkeypatch.setattr(orders_router, "delete_order", delete_mock)
+    app.dependency_overrides[get_current_user] = (
+        override_authenticated_user(user)
+    )
+    app.dependency_overrides[get_db_session] = override_session(MagicMock())
+
+    with TestClient(app) as client:
+        response = client.delete(
+            f"/portfolios/{uuid.uuid4()}/orders/{uuid.uuid4()}",
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Filled orders cannot be deleted"
+
+
 def test_retrieve_orders_returns_owner_orders(monkeypatch) -> None:
     user = User(
         id=uuid.uuid4(),
@@ -380,6 +641,9 @@ def test_retrieve_orders_returns_owner_orders(monkeypatch) -> None:
         created_at=now,
         updated_at=now,
     )
+    order.execution_price = Decimal("2810.0000")
+    order.execution_gross_amount = Decimal("8430.0000")
+    order.executed_at = now
     list_mock = MagicMock(return_value=[order])
     monkeypatch.setattr(orders_router, "list_orders", list_mock)
     app.dependency_overrides[get_current_user] = (
@@ -393,6 +657,11 @@ def test_retrieve_orders_returns_owner_orders(monkeypatch) -> None:
     clear_dependency_overrides()
     assert response.status_code == 200
     assert response.json()[0]["symbol"] == "7203"
+    assert response.json()[0]["executed_at"] == (
+        now.isoformat().replace("+00:00", "Z")
+    )
+    assert response.json()[0]["execution_gross_amount"] == "8430.0000"
+    assert response.json()[0]["execution_price"] == "2810.0000"
     list_mock.assert_called_once_with(
         session,
         portfolio_id=portfolio_id,

@@ -6,10 +6,15 @@ from decimal import Decimal
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from marketpilot_api.models import CashTransaction, OrderExecution, Portfolio
+from marketpilot_api.models import CashTransaction, Portfolio
 from marketpilot_api.repositories.cash_ledger import (
     get_current_cash,
+    get_net_contributions,
     signed_cash_amount,
+)
+from marketpilot_api.repositories.positions import (
+    PortfolioHolding,
+    get_portfolio_position_summary,
 )
 from marketpilot_api.schemas.portfolios import (
     CashTransactionCreateRequest,
@@ -27,50 +32,15 @@ class PortfolioWithCash:
 class PortfolioDetail:
     portfolio: Portfolio
     current_cash: Decimal
+    invested_value: Decimal
+    net_contributions: Decimal
+    realized_profit_loss: Decimal
+    total_profit_loss: Decimal
+    total_return_rate: Decimal
+    total_value: Decimal
+    unrealized_profit_loss: Decimal
     recent_cash_transactions: list[CashTransaction]
     holdings: list["PortfolioHolding"]
-
-
-@dataclass(frozen=True)
-class PortfolioHolding:
-    symbol: str
-    quantity: Decimal
-    average_price: Decimal
-    current_price: Decimal
-    market_value: Decimal
-    return_rate: Decimal
-    currency: str
-
-
-@dataclass
-class HoldingAccumulator:
-    symbol: str
-    currency: str
-    quantity: Decimal = Decimal("0")
-    cost_basis: Decimal = Decimal("0")
-
-    def apply_execution(self, execution: OrderExecution) -> None:
-        if execution.side == "BUY":
-            self.quantity += execution.quantity
-            self.cost_basis += execution.gross_amount
-            return
-
-        if self.quantity <= 0:
-            return
-
-        average_price = self.average_price
-        sold_quantity = min(execution.quantity, self.quantity)
-        self.quantity -= sold_quantity
-        self.cost_basis -= average_price * sold_quantity
-        if self.quantity == 0:
-            self.cost_basis = Decimal("0")
-
-    @property
-    def average_price(self) -> Decimal:
-        if self.quantity <= 0:
-            return Decimal("0")
-
-        return self.cost_basis / self.quantity
 
 
 class PortfolioNotFoundError(Exception):
@@ -79,58 +49,6 @@ class PortfolioNotFoundError(Exception):
 
 class InsufficientCashError(Exception):
     pass
-
-
-def _get_portfolio_holdings(
-    session: Session,
-    *,
-    portfolio_id: uuid.UUID,
-) -> list[PortfolioHolding]:
-    executions = list(
-        session.scalars(
-            select(OrderExecution)
-            .where(OrderExecution.portfolio_id == portfolio_id)
-            .order_by(
-                OrderExecution.symbol.asc(),
-                OrderExecution.executed_at.asc(),
-                OrderExecution.id.asc(),
-            )
-        ).all()
-    )
-    holdings_by_symbol: dict[str, HoldingAccumulator] = {}
-
-    for execution in executions:
-        accumulator = holdings_by_symbol.setdefault(
-            execution.symbol,
-            HoldingAccumulator(
-                symbol=execution.symbol,
-                currency=execution.currency,
-            ),
-        )
-        accumulator.apply_execution(execution)
-
-    holdings: list[PortfolioHolding] = []
-    for accumulator in holdings_by_symbol.values():
-        if accumulator.quantity <= 0:
-            continue
-
-        average_price = accumulator.average_price
-        current_price = average_price
-        market_value = accumulator.quantity * current_price
-
-        holdings.append(
-            PortfolioHolding(
-                symbol=accumulator.symbol,
-                quantity=accumulator.quantity,
-                average_price=average_price,
-                current_price=current_price,
-                market_value=market_value,
-                return_rate=Decimal("0"),
-                currency=accumulator.currency,
-            )
-        )
-
-    return holdings
 
 
 def create_portfolio_with_initial_deposit(
@@ -221,6 +139,10 @@ def get_portfolio_detail(
         session,
         portfolio_id=portfolio.id,
     )
+    net_contributions = get_net_contributions(
+        session,
+        portfolio_id=portfolio.id,
+    )
     recent_transactions = list(
         session.scalars(
             select(CashTransaction)
@@ -233,13 +155,30 @@ def get_portfolio_detail(
             .limit(recent_transaction_limit)
         ).all()
     )
-    holdings = _get_portfolio_holdings(session, portfolio_id=portfolio.id)
+    position_summary = get_portfolio_position_summary(
+        session,
+        portfolio_id=portfolio.id,
+    )
+    total_value = current_cash + position_summary.invested_value
+    total_profit_loss = total_value - net_contributions
+    total_return_rate = (
+        total_profit_loss / net_contributions
+        if net_contributions > 0
+        else Decimal("0")
+    )
 
     return PortfolioDetail(
         portfolio=portfolio,
         current_cash=current_cash,
+        invested_value=position_summary.invested_value,
+        net_contributions=net_contributions,
+        realized_profit_loss=position_summary.realized_profit_loss,
+        total_profit_loss=total_profit_loss,
+        total_return_rate=total_return_rate,
+        total_value=total_value,
+        unrealized_profit_loss=position_summary.unrealized_profit_loss,
         recent_cash_transactions=recent_transactions,
-        holdings=holdings,
+        holdings=position_summary.holdings,
     )
 
 

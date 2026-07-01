@@ -39,12 +39,20 @@ export type PortfolioHoldingApiItem = Readonly<{
   average_price: string;
   current_price: string;
   market_value: string;
+  unrealized_profit_loss: string;
   return_rate: string;
   currency: SupportedCurrency;
 }>;
 
 export type PortfolioDetailApiItem = PortfolioApiItem &
   Readonly<{
+    invested_value: string;
+    net_contributions: string;
+    realized_profit_loss: string;
+    total_profit_loss: string;
+    total_return_rate: string;
+    total_value: string;
+    unrealized_profit_loss: string;
     recent_cash_transactions: readonly CashTransactionApiItem[];
     holdings: readonly PortfolioHoldingApiItem[];
     orders: readonly unknown[];
@@ -71,6 +79,9 @@ export type OrderApiItem = Readonly<{
   order_type: OrderType;
   quantity: string;
   limit_price: string | null;
+  execution_price: string | null;
+  execution_gross_amount: string | null;
+  executed_at: string | null;
   currency: SupportedCurrency;
   status: OrderStatus;
   strategy_version: string;
@@ -91,4 +102,15 @@ export type OrderCreateApiRequest = Readonly<{
 export type OrderExecuteApiRequest = Readonly<{
   price: string;
   executed_at?: string;
+}>;
+
+export type OrderUpdateApiRequest = Readonly<{
+  quantity: string;
+}>;
+
+export type MarketQuoteApiItem = Readonly<{
+  symbol: string;
+  currency: SupportedCurrency;
+  current_price: string;
+  source: "fixture";
 }>;

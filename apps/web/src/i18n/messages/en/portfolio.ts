@@ -63,7 +63,7 @@ export const portfolio = {
       totalValue: "Total value",
       availableCash: "Available cash",
       totalReturn: "Total return",
-      maxDrawdown: "Max drawdown",
+      realizedProfitLoss: "Realized P/L",
     },
   },
   valueChart: {
@@ -99,6 +99,7 @@ export const portfolio = {
       averagePrice: "Average price",
       currentPrice: "Current price",
       marketValue: "Market value",
+      unrealizedProfitLoss: "Unrealized P/L",
       returnRate: "Return",
     },
     empty: {
@@ -204,6 +205,7 @@ export const portfolio = {
     success: "Order recorded.",
     errors: {
       unauthorized: "Please sign in again before recording an order.",
+      conflict: "Check available cash or unreserved holdings before recording.",
       invalid: "Please check your order inputs.",
       notFound: "Portfolio not found.",
       unknown: "Could not record the order. Please try again shortly.",
@@ -215,6 +217,7 @@ export const portfolio = {
       limitPriceRequired: "Limit orders require a limit price.",
       marketLimitPrice: "Market orders must not include a limit price.",
       orderType: "Choose an order type.",
+      quantityDecimalPlaces: "Quantity can have at most 2 decimal places.",
       quantityPositive: "Quantity must be greater than 0.",
       quantityRequired: "Enter a quantity.",
       side: "Choose buy or sell.",
@@ -231,6 +234,7 @@ export const portfolio = {
       type: "Type",
       quantity: "Quantity",
       price: "Price",
+      amount: "Amount",
       status: "Status",
       createdAt: "Recorded",
       actions: "Action",
@@ -250,10 +254,40 @@ export const portfolio = {
       REJECTED: "Rejected",
     },
     marketPrice: "Market",
+    update: "Update",
+    updatePendingFeedback:
+      "Updating the order quantity. Recent orders will refresh when it finishes.",
+    updateSubmitting: "Updating...",
+    updateQuantityLabel: "Order quantity",
+    updateErrors: {
+      unauthorized: "Please sign in again before updating an order.",
+      invalid: "Check the quantity.",
+      conflict: "Check available cash or unreserved holdings before updating.",
+      notFound: "Order not found.",
+      unknown: "Could not update the order. Please try again shortly.",
+    },
     execute: "Fill",
+    executePendingFeedback:
+      "Filling the order. Cash, holdings, and profit/loss will refresh when it finishes.",
+    executeSubmitting: "Filling...",
     executePriceLabel: "Execution price",
     executePricePlaceholder: "Price",
+    executeErrors: {
+      unauthorized: "Please sign in again before filling an order.",
+      invalid: "Check the execution price.",
+      conflict:
+        "Could not fill the order. Check cash, position quantity, or order status.",
+      notFound: "Order not found.",
+      unknown: "Could not fill the order. Please try again shortly.",
+    },
     cancel: "Cancel",
+    delete: "Delete",
+    pagination: {
+      label: "Recent orders pages",
+      next: "Next orders page",
+      previous: "Previous orders page",
+      status: "{current} / {total}",
+    },
     empty: {
       title: "No orders yet",
       description: "Your first paper order will appear here.",

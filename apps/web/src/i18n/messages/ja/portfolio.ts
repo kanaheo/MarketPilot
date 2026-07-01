@@ -65,7 +65,7 @@ export const portfolio = {
       totalValue: "総評価額",
       availableCash: "利用可能な現金",
       totalReturn: "総収益率",
-      maxDrawdown: "最大ドローダウン",
+      realizedProfitLoss: "実現損益",
     },
   },
   valueChart: {
@@ -101,6 +101,7 @@ export const portfolio = {
       averagePrice: "平均取得価格",
       currentPrice: "現在値",
       marketValue: "評価額",
+      unrealizedProfitLoss: "未実現損益",
       returnRate: "収益率",
     },
     empty: {
@@ -207,6 +208,7 @@ export const portfolio = {
     success: "注文を記録しました。",
     errors: {
       unauthorized: "ログインが必要です。再度ログインしてからお試しください。",
+      conflict: "注文可能な現金または保有数量を確認してください。",
       invalid: "注文の入力内容を確認してください。",
       notFound: "ポートフォリオが見つかりません。",
       unknown:
@@ -218,6 +220,7 @@ export const portfolio = {
       limitPriceRequired: "指値注文には指値価格が必要です。",
       marketLimitPrice: "成行注文では指値価格を入力しません。",
       orderType: "注文種別を選択してください。",
+      quantityDecimalPlaces: "数量は小数第2位まで入力してください。",
       quantityPositive: "数量は0より大きい必要があります。",
       quantityRequired: "数量を入力してください。",
       side: "買いまたは売りを選択してください。",
@@ -234,6 +237,7 @@ export const portfolio = {
       type: "種別",
       quantity: "数量",
       price: "価格",
+      amount: "約定金額",
       status: "状態",
       createdAt: "記録日",
       actions: "操作",
@@ -253,10 +257,40 @@ export const portfolio = {
       REJECTED: "拒否",
     },
     marketPrice: "成行",
+    update: "修正",
+    updatePendingFeedback:
+      "注文数量を修正しています。完了すると最近の注文が更新されます。",
+    updateSubmitting: "修正中...",
+    updateQuantityLabel: "注文数量",
+    updateErrors: {
+      unauthorized: "ログインが必要です。再度ログインしてからお試しください。",
+      invalid: "数量を確認してください。",
+      conflict: "修正可能な現金または保有数量を確認してください。",
+      notFound: "注文が見つかりません。",
+      unknown: "注文を修正できませんでした。しばらくしてからもう一度お試しください。",
+    },
     execute: "約定",
+    executePendingFeedback:
+      "約定処理中です。完了すると現金、保有銘柄、損益が更新されます。",
+    executeSubmitting: "約定中...",
     executePriceLabel: "約定価格",
     executePricePlaceholder: "約定価格",
+    executeErrors: {
+      unauthorized: "ログインが必要です。再度ログインしてからお試しください。",
+      invalid: "約定価格を確認してください。",
+      conflict:
+        "約定できませんでした。現金、保有数量、注文状態を確認してください。",
+      notFound: "注文が見つかりません。",
+      unknown: "注文を約定できませんでした。しばらくしてからもう一度お試しください。",
+    },
     cancel: "取消",
+    delete: "削除",
+    pagination: {
+      label: "最近の注文ページ",
+      next: "次の注文ページ",
+      previous: "前の注文ページ",
+      status: "{current} / {total}",
+    },
     empty: {
       title: "注文はありません",
       description: "最初のペーパー注文を記録すると、ここに表示されます。",

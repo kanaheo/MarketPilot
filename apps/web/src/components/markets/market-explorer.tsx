@@ -14,6 +14,7 @@ import {
 import type {
   MarketExplorerProps,
   MarketFilterState,
+  MarketInstrument,
   MarketSort,
 } from "@/types/markets";
 
@@ -30,16 +31,57 @@ const defaultFilters: MarketFilterState = {
   aiSignalsOnly: false,
 };
 
-export function MarketExplorer({ locale, messages }: MarketExplorerProps) {
+function getQuoteKey(symbol: string, currency: string) {
+  return `${symbol.toUpperCase()}:${currency.toUpperCase()}`;
+}
+
+function applyMarketQuotes(
+  instruments: readonly MarketInstrument[],
+  marketQuotes: MarketExplorerProps["marketQuotes"],
+) {
+  const quotesByKey = new Map(
+    marketQuotes.map((quote) => [
+      getQuoteKey(quote.symbol, quote.currency),
+      quote,
+    ]),
+  );
+
+  return instruments.map((instrument) => {
+    const quote = quotesByKey.get(
+      getQuoteKey(instrument.symbol, instrument.currency),
+    );
+
+    if (quote === undefined) {
+      return instrument;
+    }
+
+    return {
+      ...instrument,
+      price: Number(quote.current_price),
+      quoteSource: quote.source,
+    };
+  });
+}
+
+export function MarketExplorer({
+  locale,
+  marketQuotes,
+  messages,
+}: MarketExplorerProps) {
   const [filters, setFilters] = useState<MarketFilterState>(defaultFilters);
   const [sort, setSort] = useState<MarketSort>("aiScore");
   const [watchlist, setWatchlist] = useState<ReadonlySet<string>>(
     () => new Set(["AAPL", "005930"]),
   );
 
+  const quotedInstruments = useMemo(
+    () => applyMarketQuotes(marketInstruments, marketQuotes),
+    [marketQuotes],
+  );
+
   const filteredInstruments = useMemo(
-    () => filterMarketInstruments(marketInstruments, filters),
-    [filters],
+    () => filterMarketInstruments(quotedInstruments, filters),
+    [filters, quotedInstruments],
   );
 
   const sortedInstruments = useMemo(

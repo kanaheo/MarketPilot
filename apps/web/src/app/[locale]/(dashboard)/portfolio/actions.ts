@@ -9,7 +9,9 @@ import {
   createCashTransaction,
   createOrder,
   createPortfolio,
+  deleteOrder,
   executeOrder,
+  updateOrder,
 } from "@/lib/server/portfolio-api";
 import type {
   CashTransactionFormValues,
@@ -21,7 +23,11 @@ import type {
   CashTransactionActionResult,
   CashTransactionFailureReason,
   OrderActionResult,
+  OrderExecuteActionResult,
+  OrderExecuteFailureReason,
   OrderFailureReason,
+  OrderUpdateActionResult,
+  OrderUpdateFailureReason,
   PortfolioCreateActionResult,
   PortfolioCreateFailureReason,
 } from "@/types/portfolio";
@@ -45,8 +51,27 @@ const ORDER_FAILURE_REASONS = {
   401: "unauthorized",
   403: "unauthorized",
   404: "notFound",
+  409: "conflict",
   422: "invalid",
 } as const satisfies Readonly<Partial<Record<number, OrderFailureReason>>>;
+
+const ORDER_EXECUTE_FAILURE_REASONS = {
+  401: "unauthorized",
+  403: "unauthorized",
+  404: "notFound",
+  409: "conflict",
+  422: "invalid",
+} as const satisfies Readonly<Partial<Record<number, OrderExecuteFailureReason>>>;
+
+const ORDER_UPDATE_FAILURE_REASONS = {
+  401: "unauthorized",
+  403: "unauthorized",
+  404: "notFound",
+  409: "conflict",
+  422: "invalid",
+} as const satisfies Readonly<Partial<Record<number, OrderUpdateFailureReason>>>;
+
+const ORDER_QUANTITY_PATTERN = /^\d+(?:\.\d{1,2})?$/;
 
 function getCreatePortfolioFailureReason(
   error: unknown,
@@ -72,6 +97,24 @@ function getOrderFailureReason(error: unknown): OrderFailureReason {
   return getMarketPilotActionFailureReason(
     error,
     ORDER_FAILURE_REASONS,
+    "unknown",
+  );
+}
+
+function getOrderExecuteFailureReason(
+  error: unknown,
+): OrderExecuteFailureReason {
+  return getMarketPilotActionFailureReason(
+    error,
+    ORDER_EXECUTE_FAILURE_REASONS,
+    "unknown",
+  );
+}
+
+function getOrderUpdateFailureReason(error: unknown): OrderUpdateFailureReason {
+  return getMarketPilotActionFailureReason(
+    error,
+    ORDER_UPDATE_FAILURE_REASONS,
     "unknown",
   );
 }
@@ -166,17 +209,36 @@ export async function cancelOrderAction(
   }
 }
 
+export async function deleteOrderAction(
+  locale: Locale,
+  portfolioId: string,
+  orderId: string,
+): Promise<void> {
+  assertLocale(locale);
+
+  try {
+    await deleteOrder(portfolioId, orderId);
+    revalidatePath(`/${locale}/portfolio`);
+  } catch {
+    return;
+  }
+}
+
 export async function executeOrderAction(
   locale: Locale,
   portfolioId: string,
   orderId: string,
+  _previousState: OrderExecuteActionResult,
   formData: FormData,
-): Promise<void> {
+): Promise<OrderExecuteActionResult> {
   assertLocale(locale);
 
   const price = Number(formData.get("price"));
   if (!Number.isFinite(price) || price <= 0) {
-    return;
+    return {
+      ok: false,
+      reason: "invalid",
+    };
   }
 
   try {
@@ -184,7 +246,63 @@ export async function executeOrderAction(
       price: String(price),
     });
     revalidatePath(`/${locale}/portfolio`);
-  } catch {
-    return;
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: getOrderExecuteFailureReason(error),
+    };
+  }
+}
+
+export async function executeOrderFormAction(
+  locale: Locale,
+  portfolioId: string,
+  orderId: string,
+  previousState: OrderExecuteActionResult,
+  formData: FormData,
+): Promise<OrderExecuteActionResult> {
+  return executeOrderAction(
+    locale,
+    portfolioId,
+    orderId,
+    previousState,
+    formData,
+  );
+}
+
+export async function updateOrderAction(
+  locale: Locale,
+  portfolioId: string,
+  orderId: string,
+  _previousState: OrderUpdateActionResult,
+  formData: FormData,
+): Promise<OrderUpdateActionResult> {
+  assertLocale(locale);
+
+  const quantityValue = String(formData.get("quantity") ?? "").trim();
+  const quantity = Number(quantityValue);
+  if (
+    !ORDER_QUANTITY_PATTERN.test(quantityValue) ||
+    !Number.isFinite(quantity) ||
+    quantity <= 0
+  ) {
+    return {
+      ok: false,
+      reason: "invalid",
+    };
+  }
+
+  try {
+    await updateOrder(portfolioId, orderId, {
+      quantity: quantityValue,
+    });
+    revalidatePath(`/${locale}/portfolio`);
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: getOrderUpdateFailureReason(error),
+    };
   }
 }

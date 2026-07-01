@@ -88,6 +88,7 @@ export type CashTransactionSubmitHandler = (
 ) => Promise<void>;
 
 export type OrderFailureReason =
+  | "conflict"
   | "invalid"
   | "notFound"
   | "unauthorized"
@@ -100,6 +101,38 @@ export type OrderActionResult =
   | Readonly<{
       ok: false;
       reason: OrderFailureReason;
+    }>;
+
+export type OrderExecuteFailureReason =
+  | "conflict"
+  | "invalid"
+  | "notFound"
+  | "unauthorized"
+  | "unknown";
+
+export type OrderExecuteActionResult =
+  | Readonly<{
+      ok: true;
+    }>
+  | Readonly<{
+      ok: false;
+      reason: OrderExecuteFailureReason;
+    }>;
+
+export type OrderUpdateFailureReason =
+  | "conflict"
+  | "invalid"
+  | "notFound"
+  | "unauthorized"
+  | "unknown";
+
+export type OrderUpdateActionResult =
+  | Readonly<{
+      ok: true;
+    }>
+  | Readonly<{
+      ok: false;
+      reason: OrderUpdateFailureReason;
     }>;
 
 export type OrderFormProps = Readonly<{
@@ -141,6 +174,10 @@ export type PortfolioSummaryProps = Readonly<{
   currentCash: number;
   locale: Locale;
   messages: PortfolioMessages["summary"];
+  realizedProfitLoss: number;
+  totalProfitLoss: number;
+  totalReturnRate: number;
+  totalValue: number;
 }>;
 
 export type PortfolioValueChartProps = Readonly<{
@@ -151,8 +188,10 @@ export type PortfolioValueChartProps = Readonly<{
 export type AssetAllocationProps = Readonly<{
   currency: SupportedCurrency;
   currentCash: number;
+  investedValue: number;
   locale: Locale;
   messages: PortfolioMessages["allocation"];
+  totalValue: number;
 }>;
 
 export type PortfolioHoldingsProps = Readonly<{
@@ -180,6 +219,7 @@ export type PortfolioHolding = Readonly<{
   averagePrice: number;
   currentPrice: number;
   marketValue: number;
+  unrealizedProfitLoss: number;
   returnRate: number;
   color: string;
 }>;
@@ -197,10 +237,14 @@ export type PortfolioCashActivity = Readonly<{
 export type PortfolioOrder = Readonly<{
   createdAt: string;
   currency: SupportedCurrency;
+  displayPrice: number | null;
+  executedAt: string | null;
+  executionGrossAmount: number | null;
   id: string;
   limitPrice: number | null;
   orderType: OrderType;
   quantity: number;
+  quantityInputValue: string;
   side: OrderSide;
   status: OrderStatus;
   symbol: string;
