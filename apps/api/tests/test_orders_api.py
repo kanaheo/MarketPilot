@@ -292,6 +292,8 @@ def test_execute_pending_order_returns_filled_order(monkeypatch) -> None:
     clear_dependency_overrides()
     assert response.status_code == 200
     assert response.json()["status"] == "FILLED"
+    assert response.json()["executed_at"] is None
+    assert response.json()["execution_gross_amount"] is None
     assert response.json()["execution_price"] is None
     assert execute_mock.call_args.kwargs["user_id"] == user.id
     assert execute_mock.call_args.kwargs["data"].price == Decimal("185.2500")
@@ -640,6 +642,8 @@ def test_retrieve_orders_returns_owner_orders(monkeypatch) -> None:
         updated_at=now,
     )
     order.execution_price = Decimal("2810.0000")
+    order.execution_gross_amount = Decimal("8430.0000")
+    order.executed_at = now
     list_mock = MagicMock(return_value=[order])
     monkeypatch.setattr(orders_router, "list_orders", list_mock)
     app.dependency_overrides[get_current_user] = (
@@ -653,6 +657,10 @@ def test_retrieve_orders_returns_owner_orders(monkeypatch) -> None:
     clear_dependency_overrides()
     assert response.status_code == 200
     assert response.json()[0]["symbol"] == "7203"
+    assert response.json()[0]["executed_at"] == (
+        now.isoformat().replace("+00:00", "Z")
+    )
+    assert response.json()[0]["execution_gross_amount"] == "8430.0000"
     assert response.json()[0]["execution_price"] == "2810.0000"
     list_mock.assert_called_once_with(
         session,

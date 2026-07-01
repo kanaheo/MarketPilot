@@ -853,13 +853,16 @@ def test_list_orders_checks_owner_and_sorts_newest_first() -> None:
     assert user_id in ownership_params
     assert "ORDER BY orders.created_at DESC" in str(order_statement)
     assert result == [order]
+    assert result[0].executed_at is None
+    assert result[0].execution_gross_amount is None
     assert result[0].execution_price is None
 
 
-def test_list_orders_attaches_execution_price_for_filled_order() -> None:
+def test_list_orders_attaches_execution_details_for_filled_order() -> None:
     session = MagicMock()
     user_id = uuid.uuid4()
     portfolio_id = uuid.uuid4()
+    executed_at = datetime.now(timezone.utc)
     order = Order(
         id=uuid.uuid4(),
         portfolio_id=portfolio_id,
@@ -876,7 +879,12 @@ def test_list_orders_attaches_execution_price_for_filled_order() -> None:
     session.scalar.return_value = portfolio_id
     session.scalars.return_value.all.return_value = [order]
     session.execute.return_value.all.return_value = [
-        (order.id, Decimal("185.2500")),
+        (
+            order.id,
+            Decimal("185.2500"),
+            Decimal("185.2500"),
+            executed_at,
+        ),
     ]
 
     result = list_orders(
@@ -886,4 +894,6 @@ def test_list_orders_attaches_execution_price_for_filled_order() -> None:
     )
 
     assert result == [order]
+    assert result[0].executed_at == executed_at
+    assert result[0].execution_gross_amount == Decimal("185.2500")
     assert result[0].execution_price == Decimal("185.2500")

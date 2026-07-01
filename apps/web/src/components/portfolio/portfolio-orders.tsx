@@ -56,6 +56,7 @@ export function PortfolioOrders({
           <span>{messages.columns.type}</span>
           <span>{messages.columns.quantity}</span>
           <span>{messages.columns.price}</span>
+          <span>{messages.columns.amount}</span>
           <span>{messages.columns.status}</span>
           <span>{messages.columns.createdAt}</span>
           <span>{messages.columns.actions}</span>
@@ -80,10 +81,21 @@ export function PortfolioOrders({
                     locale,
                   )}
             </span>
+            <span>
+              {order.executionGrossAmount === null
+                ? "-"
+                : formatMarketPrice(
+                    order.executionGrossAmount,
+                    order.currency,
+                    locale,
+                  )}
+            </span>
             <span className={`order-status ${order.status.toLowerCase()}`}>
               {messages.statuses[order.status]}
             </span>
-            <span>{formatShortDate(order.createdAt, locale)}</span>
+            <span>
+              {formatShortDate(order.executedAt ?? order.createdAt, locale)}
+            </span>
             <div className="order-action-cell">
               <PortfolioOrderActions
                 key={`${order.id}-${order.quantityInputValue}-${order.status}`}

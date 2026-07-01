@@ -223,6 +223,7 @@ export type PortfolioMessages = Readonly<{
       type: string;
       quantity: string;
       price: string;
+      amount: string;
       status: string;
       createdAt: string;
       actions: string;

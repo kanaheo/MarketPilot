@@ -359,9 +359,10 @@
     minmax(50px, 0.48fr)
     minmax(52px, 0.5fr)
     minmax(72px, 0.66fr)
+    minmax(84px, 0.74fr)
     minmax(54px, 0.52fr)
     minmax(78px, 0.72fr)
-    minmax(270px, 1.35fr);
+    minmax(250px, 1.28fr);
   min-height: 62px;
   align-items: center;
   gap: 8px;

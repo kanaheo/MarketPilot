@@ -135,6 +135,11 @@ export function mapPortfolioOrders(
           ? null
           : Number(order.limit_price)
         : Number(order.execution_price),
+    executedAt: order.executed_at,
+    executionGrossAmount:
+      order.execution_gross_amount === null
+        ? null
+        : Number(order.execution_gross_amount),
     id: order.id,
     limitPrice:
       order.limit_price === null ? null : Number(order.limit_price),

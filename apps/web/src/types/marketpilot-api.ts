@@ -80,6 +80,8 @@ export type OrderApiItem = Readonly<{
   quantity: string;
   limit_price: string | null;
   execution_price: string | null;
+  execution_gross_amount: string | null;
+  executed_at: string | null;
   currency: SupportedCurrency;
   status: OrderStatus;
   strategy_version: string;

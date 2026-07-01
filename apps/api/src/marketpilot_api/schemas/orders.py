@@ -92,6 +92,8 @@ class OrderResponse(BaseModel):
     quantity: Decimal
     limit_price: Decimal | None
     execution_price: Decimal | None = None
+    execution_gross_amount: Decimal | None = None
+    executed_at: datetime | None = None
     currency: SupportedCurrency
     status: OrderStatus
     strategy_version: str

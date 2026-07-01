@@ -231,6 +231,7 @@ export const portfolio = {
       type: "유형",
       quantity: "수량",
       price: "가격",
+      amount: "체결금액",
       status: "상태",
       createdAt: "기록일",
       actions: "작업",

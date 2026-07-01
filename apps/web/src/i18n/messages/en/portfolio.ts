@@ -234,6 +234,7 @@ export const portfolio = {
       type: "Type",
       quantity: "Quantity",
       price: "Price",
+      amount: "Amount",
       status: "Status",
       createdAt: "Recorded",
       actions: "Action",

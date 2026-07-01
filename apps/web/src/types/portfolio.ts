@@ -238,6 +238,8 @@ export type PortfolioOrder = Readonly<{
   createdAt: string;
   currency: SupportedCurrency;
   displayPrice: number | null;
+  executedAt: string | null;
+  executionGrossAmount: number | null;
   id: string;
   limitPrice: number | null;
   orderType: OrderType;

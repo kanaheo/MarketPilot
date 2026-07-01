@@ -129,16 +129,37 @@ def _attach_execution_prices(
     if not orders:
         return orders
 
-    execution_prices_by_order_id = dict(
-        session.execute(
-            select(OrderExecution.order_id, OrderExecution.price).where(
+    execution_details_by_order_id = {
+        order_id: {
+            "executed_at": executed_at,
+            "execution_gross_amount": gross_amount,
+            "execution_price": price,
+        }
+        for order_id, price, gross_amount, executed_at in session.execute(
+            select(
+                OrderExecution.order_id,
+                OrderExecution.price,
+                OrderExecution.gross_amount,
+                OrderExecution.executed_at,
+            ).where(
                 OrderExecution.order_id.in_([order.id for order in orders])
             )
         ).all()
-    )
+    }
 
     for order in orders:
-        order.execution_price = execution_prices_by_order_id.get(order.id)
+        execution_details = execution_details_by_order_id.get(order.id)
+        if execution_details is None:
+            order.execution_price = None
+            order.execution_gross_amount = None
+            order.executed_at = None
+            continue
+
+        order.execution_price = execution_details["execution_price"]
+        order.execution_gross_amount = execution_details[
+            "execution_gross_amount"
+        ]
+        order.executed_at = execution_details["executed_at"]
 
     return orders
 
@@ -339,6 +360,8 @@ def execute_order(
         session.refresh(order)
         session.commit()
         order.execution_price = data.price
+        order.execution_gross_amount = gross_amount
+        order.executed_at = executed_at
     except Exception:
         session.rollback()
         raise
