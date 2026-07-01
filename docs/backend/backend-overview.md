@@ -61,8 +61,14 @@ Manual paper orders can be submitted, listed, updated, cancelled, deleted, and
 executed per owned portfolio. Execution creates an immutable execution record,
 marks the order as `FILLED`, writes the related cash ledger event, and updates
 derived holdings through execution history. Pending SELL orders reserve
-position quantity, pending LIMIT BUY orders reserve cash, and pending MARKET
-BUY orders reserve cash only when the quote provider has a current price.
+position quantity, pending LIMIT BUY orders reserve cash in the portfolio base
+currency, and pending MARKET BUY orders reserve cash only when the quote
+provider has a current price. When an instrument quote currency differs from
+the portfolio base currency, cash checks and cash ledger entries use the FX
+provider boundary to convert the order amount into the portfolio base currency.
+New order creation still keeps the current base-currency flow until the
+portfolio valuation response can expose quote currency and valuation currency
+separately.
 
 Market quotes are currently fixture-backed but are exposed through a provider
 boundary and `GET /market-data/quotes`, so the implementation can later switch
@@ -133,9 +139,12 @@ transaction으로 저장합니다. 포트폴리오 목록은 항상 인증된 DB
 소유한 포트폴리오별로 수동 모의주문을 접수, 조회, 수정, 취소, 삭제 및 체결할 수
 있습니다. 체결은 변경 불가능한 execution 기록을 만들고, 주문을 `FILLED`로 바꾸며,
 관련 현금 원장 이벤트를 저장합니다. 보유 종목은 체결 이력을 기준으로 파생
-계산합니다. 대기 SELL 주문은 보유 수량을 예약하고, 대기 LIMIT BUY 주문은 현금을
-예약하며, 대기 MARKET BUY 주문은 현재가 provider에 가격이 있을 때만 현금을
-예약합니다.
+계산합니다. 대기 SELL 주문은 보유 수량을 예약하고, 대기 LIMIT BUY 주문은 포트폴리오
+기준 통화로 현금을 예약하며, 대기 MARKET BUY 주문은 현재가 provider에 가격이 있을
+때만 현금을 예약합니다. 종목 현재가 통화와 포트폴리오 기준 통화가 다르면 현금 검증과
+현금 원장 기록은 환율 provider 경계를 사용해 주문 금액을 포트폴리오 기준 통화로
+변환합니다. 다만 신규 주문 생성은 포트폴리오 평가 응답이 현재가 통화와 평가 통화를
+분리해서 내려줄 수 있을 때까지 기존 기준 통화 흐름을 유지합니다.
 
 시장 현재가는 아직 fixture 기반이지만 provider 경계와 `GET /market-data/quotes`를
 통해 노출됩니다. 따라서 이후 외부 또는 캐시 provider로 바꾸더라도 프론트엔드가
@@ -205,8 +214,12 @@ JPYです。
 所有するポートフォリオごとに手動ペーパー注文を登録、取得、編集、取消、削除、
 約定できます。約定は変更不可のexecution記録を作成し、注文を`FILLED`に変更し、
 関連する現金元帳イベントを保存します。保有銘柄は約定履歴から派生計算します。
-待機中SELL注文は保有数量を予約し、待機中LIMIT BUY注文は現金を予約します。
-待機中MARKET BUY注文は、価格providerに現在値がある場合のみ現金を予約します。
+待機中SELL注文は保有数量を予約し、待機中LIMIT BUY注文はポートフォリオ基準通貨で
+現金を予約します。待機中MARKET BUY注文は、価格providerに現在値がある場合のみ
+現金を予約します。銘柄価格の通貨とポートフォリオ基準通貨が異なる場合、現金検証と
+現金元帳記録はFX provider境界で注文金額をポートフォリオ基準通貨へ変換します。
+ただし、新規注文作成はポートフォリオ評価レスポンスが価格通貨と評価通貨を分離して
+返せるようになるまで、既存の基準通貨フローを維持します。
 
 市場価格はまだfixtureベースですが、provider境界と`GET /market-data/quotes`を通じて
 公開しています。そのため後で外部またはキャッシュ型providerへ切り替えても、

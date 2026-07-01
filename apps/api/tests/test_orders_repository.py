@@ -245,9 +245,37 @@ def test_get_reserved_buy_amount_includes_market_orders_with_quotes() -> None:
     result = orders_repository._get_reserved_buy_amount(
         session,
         portfolio_id=portfolio_id,
+        portfolio_base_currency="USD",
     )
 
     assert result == Decimal("295.0000")
+
+
+def test_get_reserved_buy_amount_converts_quote_currency_to_base_cash() -> None:
+    session = MagicMock()
+    portfolio_id = uuid.uuid4()
+    market_order = Order(
+        id=uuid.uuid4(),
+        portfolio_id=portfolio_id,
+        symbol="AAPL",
+        side="BUY",
+        order_type="MARKET",
+        quantity=Decimal("1.00"),
+        limit_price=None,
+        currency="USD",
+        status="PENDING",
+        strategy_version=MANUAL_STRATEGY_VERSION,
+        decision_evidence=MANUAL_DECISION_EVIDENCE,
+    )
+    session.scalars.return_value.all.return_value = [market_order]
+
+    result = orders_repository._get_reserved_buy_amount(
+        session,
+        portfolio_id=portfolio_id,
+        portfolio_base_currency="KRW",
+    )
+
+    assert result == Decimal("269100.0000")
 
 
 def test_create_order_rolls_back_for_unowned_portfolio() -> None:
@@ -271,6 +299,43 @@ def test_create_order_rolls_back_for_unowned_portfolio() -> None:
     session.add.assert_not_called()
     session.commit.assert_not_called()
     session.rollback.assert_called_once()
+
+
+def test_create_buy_order_keeps_portfolio_base_currency_until_fx_valuation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    session = MagicMock()
+    portfolio = Portfolio(
+        id=uuid.uuid4(),
+        user_id=uuid.uuid4(),
+        name="KRW portfolio",
+        base_currency="KRW",
+    )
+    session.scalar.return_value = portfolio
+    monkeypatch.setattr(
+        orders_repository,
+        "get_current_cash",
+        MagicMock(return_value=Decimal("300000.0000")),
+    )
+    monkeypatch.setattr(
+        orders_repository,
+        "_get_reserved_buy_amount",
+        MagicMock(return_value=Decimal("0")),
+    )
+
+    result = create_order(
+        session,
+        portfolio_id=portfolio.id,
+        user_id=portfolio.user_id,
+        data=OrderCreateRequest(
+            symbol="AAPL",
+            side="BUY",
+            order_type="MARKET",
+            quantity=Decimal("1.00"),
+        ),
+    )
+
+    assert result.currency == "KRW"
 
 
 def test_create_order_rolls_back_when_database_write_fails(
@@ -408,6 +473,53 @@ def test_execute_buy_order_fills_order_and_records_cash_outflow() -> None:
     session.refresh.assert_called_once_with(order)
     session.commit.assert_called_once()
     session.rollback.assert_not_called()
+
+
+def test_execute_buy_order_converts_quote_currency_to_base_cash() -> None:
+    session = MagicMock()
+    user_id = uuid.uuid4()
+    portfolio = Portfolio(
+        id=uuid.uuid4(),
+        user_id=user_id,
+        name="KRW portfolio",
+        base_currency="KRW",
+    )
+    order = Order(
+        id=uuid.uuid4(),
+        portfolio_id=portfolio.id,
+        symbol="AAPL",
+        side="BUY",
+        order_type="MARKET",
+        quantity=Decimal("1.00000000"),
+        limit_price=None,
+        currency="USD",
+        status="PENDING",
+        strategy_version=MANUAL_STRATEGY_VERSION,
+        decision_evidence=MANUAL_DECISION_EVIDENCE,
+    )
+    executed_at = datetime.now(timezone.utc)
+    session.scalar.side_effect = [portfolio, order, Decimal("300000.0000")]
+
+    result = execute_order(
+        session,
+        portfolio_id=portfolio.id,
+        order_id=order.id,
+        user_id=user_id,
+        data=OrderExecuteRequest(
+            price=Decimal("185.2500"),
+            executed_at=executed_at,
+        ),
+    )
+
+    execution = session.add.call_args_list[0].args[0]
+    cash_transaction = session.add.call_args_list[1].args[0]
+    assert result.status == "FILLED"
+    assert execution.currency == "USD"
+    assert execution.gross_amount == Decimal("185.2500")
+    assert execution.portfolio_base_currency == "KRW"
+    assert execution.execution_fx_rate == Decimal("1380.000000")
+    assert cash_transaction.amount == Decimal("255645.0000")
+    assert cash_transaction.currency == "KRW"
 
 
 def test_execute_sell_order_records_cash_inflow() -> None:
@@ -609,7 +721,13 @@ def test_update_order_changes_pending_order_quantity(
         strategy_version=MANUAL_STRATEGY_VERSION,
         decision_evidence=MANUAL_DECISION_EVIDENCE,
     )
-    session.scalar.side_effect = [portfolio_id, order]
+    portfolio = Portfolio(
+        id=portfolio_id,
+        user_id=user_id,
+        name="Paper portfolio",
+        base_currency="USD",
+    )
+    session.scalar.side_effect = [portfolio, order]
     monkeypatch.setattr(
         orders_repository,
         "get_current_cash",
@@ -651,7 +769,13 @@ def test_update_order_rejects_non_pending_order() -> None:
         strategy_version=MANUAL_STRATEGY_VERSION,
         decision_evidence=MANUAL_DECISION_EVIDENCE,
     )
-    session.scalar.side_effect = [order.portfolio_id, order]
+    portfolio = Portfolio(
+        id=order.portfolio_id,
+        user_id=uuid.uuid4(),
+        name="Paper portfolio",
+        base_currency="USD",
+    )
+    session.scalar.side_effect = [portfolio, order]
 
     with pytest.raises(OrderNotPendingError):
         update_order(
@@ -684,7 +808,13 @@ def test_update_order_rejects_insufficient_position_quantity(
         strategy_version=MANUAL_STRATEGY_VERSION,
         decision_evidence=MANUAL_DECISION_EVIDENCE,
     )
-    session.scalar.side_effect = [order.portfolio_id, order]
+    portfolio = Portfolio(
+        id=order.portfolio_id,
+        user_id=uuid.uuid4(),
+        name="Paper portfolio",
+        base_currency="USD",
+    )
+    session.scalar.side_effect = [portfolio, order]
     monkeypatch.setattr(
         orders_repository,
         "get_available_position_quantity",
@@ -727,7 +857,13 @@ def test_update_order_rejects_reserved_position_quantity(
         strategy_version=MANUAL_STRATEGY_VERSION,
         decision_evidence=MANUAL_DECISION_EVIDENCE,
     )
-    session.scalar.side_effect = [order.portfolio_id, order]
+    portfolio = Portfolio(
+        id=order.portfolio_id,
+        user_id=uuid.uuid4(),
+        name="Paper portfolio",
+        base_currency="USD",
+    )
+    session.scalar.side_effect = [portfolio, order]
     monkeypatch.setattr(
         orders_repository,
         "get_available_position_quantity",
@@ -770,7 +906,13 @@ def test_update_order_rejects_reserved_cash_amount(
         strategy_version=MANUAL_STRATEGY_VERSION,
         decision_evidence=MANUAL_DECISION_EVIDENCE,
     )
-    session.scalar.side_effect = [order.portfolio_id, order]
+    portfolio = Portfolio(
+        id=order.portfolio_id,
+        user_id=uuid.uuid4(),
+        name="Paper portfolio",
+        base_currency="USD",
+    )
+    session.scalar.side_effect = [portfolio, order]
     monkeypatch.setattr(
         orders_repository,
         "get_current_cash",

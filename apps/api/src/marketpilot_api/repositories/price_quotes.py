@@ -36,6 +36,18 @@ def get_current_price(
     return get_fixture_current_price(symbol=symbol, currency=currency)
 
 
+def get_market_quote(
+    *,
+    symbol: str,
+    currency: str | None = None,
+) -> MarketQuote | None:
+    quotes = list_market_quotes(currency=currency, symbols=[symbol])
+    if len(quotes) != 1:
+        return None
+
+    return quotes[0]
+
+
 def list_fixture_current_prices(
     *,
     currency: str | None = None,

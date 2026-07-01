@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from marketpilot_api.models import CashTransaction, Order, OrderExecution, Portfolio
 from marketpilot_api.repositories.cash_ledger import get_current_cash
-from marketpilot_api.repositories.fx_rates import get_fx_rate
+from marketpilot_api.repositories.fx_rates import FxRate, get_fx_rate
 from marketpilot_api.repositories.positions import get_available_position_quantity
 from marketpilot_api.repositories.price_quotes import get_current_price
 from marketpilot_api.schemas.orders import (
@@ -56,6 +56,58 @@ def _calculate_gross_amount(quantity: Decimal, price: Decimal) -> Decimal:
     return (quantity * price).quantize(MONEY_QUANTIZER)
 
 
+def _get_order_currency(*, portfolio: Portfolio, symbol: str) -> str:
+    return portfolio.base_currency
+
+
+def _get_fx_rate_or_raise(
+    *,
+    from_currency: str,
+    portfolio_base_currency: str,
+) -> FxRate:
+    fx_rate = get_fx_rate(
+        base_currency=from_currency,
+        quote_currency=portfolio_base_currency,
+    )
+    if fx_rate is None:
+        raise OrderFxRateNotFoundError
+
+    return fx_rate
+
+
+def _convert_to_portfolio_cash(
+    *,
+    amount: Decimal,
+    from_currency: str,
+    portfolio_base_currency: str,
+) -> Decimal:
+    return (
+        amount
+        * _get_fx_rate_or_raise(
+            from_currency=from_currency,
+            portfolio_base_currency=portfolio_base_currency,
+        ).rate
+    ).quantize(MONEY_QUANTIZER)
+
+
+def _get_portfolio_or_raise(
+    session: Session,
+    *,
+    portfolio_id: uuid.UUID,
+    user_id: uuid.UUID,
+) -> Portfolio:
+    portfolio = session.scalar(
+        select(Portfolio).where(
+            Portfolio.id == portfolio_id,
+            Portfolio.user_id == user_id,
+        )
+    )
+    if portfolio is None:
+        raise OrderPortfolioNotFoundError
+
+    return portfolio
+
+
 def _validate_execution_price(order: Order, price: Decimal) -> None:
     if order.limit_price is None:
         return
@@ -96,6 +148,7 @@ def _get_reserved_buy_amount(
     session: Session,
     *,
     portfolio_id: uuid.UUID,
+    portfolio_base_currency: str,
     excluded_order_id: uuid.UUID | None = None,
 ) -> Decimal:
     statement = select(Order).where(
@@ -113,6 +166,7 @@ def _get_reserved_buy_amount(
             currency=order.currency,
             limit_price=order.limit_price,
             order_type=order.order_type,
+            portfolio_base_currency=portfolio_base_currency,
             quantity=order.quantity,
             symbol=order.symbol,
         )
@@ -124,12 +178,17 @@ def _calculate_cash_reservation(
     *,
     currency: str,
     order_type: str,
+    portfolio_base_currency: str,
     quantity: Decimal,
     limit_price: Decimal | None,
     symbol: str,
 ) -> Decimal:
     if order_type == "LIMIT" and limit_price is not None:
-        return _calculate_gross_amount(quantity, limit_price)
+        return _convert_to_portfolio_cash(
+            amount=_calculate_gross_amount(quantity, limit_price),
+            from_currency=currency,
+            portfolio_base_currency=portfolio_base_currency,
+        )
 
     current_price = get_current_price(
         currency=currency,
@@ -138,7 +197,11 @@ def _calculate_cash_reservation(
     if order_type != "MARKET" or current_price is None:
         return Decimal("0")
 
-    return _calculate_gross_amount(quantity, current_price)
+    return _convert_to_portfolio_cash(
+        amount=_calculate_gross_amount(quantity, current_price),
+        from_currency=currency,
+        portfolio_base_currency=portfolio_base_currency,
+    )
 
 
 def _attach_execution_prices(
@@ -189,6 +252,7 @@ def _validate_buy_cash_available(
     portfolio_id: uuid.UUID,
     currency: str,
     order_type: str,
+    portfolio_base_currency: str,
     quantity: Decimal,
     limit_price: Decimal | None,
     symbol: str,
@@ -197,6 +261,7 @@ def _validate_buy_cash_available(
     requested_amount = _calculate_cash_reservation(
         currency=currency,
         order_type=order_type,
+        portfolio_base_currency=portfolio_base_currency,
         quantity=quantity,
         limit_price=limit_price,
         symbol=symbol,
@@ -208,6 +273,7 @@ def _validate_buy_cash_available(
     reserved_amount = _get_reserved_buy_amount(
         session,
         portfolio_id=portfolio_id,
+        portfolio_base_currency=portfolio_base_currency,
         excluded_order_id=excluded_order_id,
     )
 
@@ -247,26 +313,32 @@ def create_order(
     data: OrderCreateRequest,
 ) -> Order:
     try:
-        portfolio = session.scalar(
-            select(Portfolio).where(
-                Portfolio.id == portfolio_id,
-                Portfolio.user_id == user_id,
-            )
+        portfolio = _get_portfolio_or_raise(
+            session,
+            portfolio_id=portfolio_id,
+            user_id=user_id,
         )
-        if portfolio is None:
-            raise OrderPortfolioNotFoundError
 
         if data.side == "BUY":
+            order_currency = _get_order_currency(
+                portfolio=portfolio,
+                symbol=data.symbol,
+            )
             _validate_buy_cash_available(
                 session,
                 portfolio_id=portfolio.id,
-                currency=portfolio.base_currency,
+                currency=order_currency,
                 order_type=data.order_type,
+                portfolio_base_currency=portfolio.base_currency,
                 quantity=data.quantity,
                 limit_price=data.limit_price,
                 symbol=data.symbol,
             )
         elif data.side == "SELL":
+            order_currency = _get_order_currency(
+                portfolio=portfolio,
+                symbol=data.symbol,
+            )
             _validate_sell_quantity_available(
                 session,
                 portfolio_id=portfolio.id,
@@ -282,7 +354,7 @@ def create_order(
             order_type=data.order_type,
             quantity=data.quantity,
             limit_price=data.limit_price,
-            currency=portfolio.base_currency,
+            currency=order_currency,
             status="PENDING",
             strategy_version=MANUAL_STRATEGY_VERSION,
             decision_evidence=(
@@ -337,9 +409,18 @@ def execute_order(
         _validate_execution_price(order, data.price)
 
         gross_amount = _calculate_gross_amount(order.quantity, data.price)
+        execution_fx_rate = _get_fx_rate_or_raise(
+            from_currency=order.currency,
+            portfolio_base_currency=portfolio.base_currency,
+        )
+        portfolio_cash_amount = _convert_to_portfolio_cash(
+            amount=gross_amount,
+            from_currency=order.currency,
+            portfolio_base_currency=portfolio.base_currency,
+        )
         if order.side == "BUY":
             current_cash = get_current_cash(session, portfolio_id=portfolio.id)
-            if gross_amount > current_cash:
+            if portfolio_cash_amount > current_cash:
                 raise OrderInsufficientCashError
         else:
             available_quantity = get_available_position_quantity(
@@ -353,13 +434,6 @@ def execute_order(
         executed_at = data.executed_at
         if executed_at is None:
             raise ValueError("Executed at is required")
-
-        execution_fx_rate = get_fx_rate(
-            base_currency=order.currency,
-            quote_currency=portfolio.base_currency,
-        )
-        if execution_fx_rate is None:
-            raise OrderFxRateNotFoundError
 
         execution = OrderExecution(
             id=uuid.uuid4(),
@@ -381,7 +455,7 @@ def execute_order(
             transaction_type=(
                 "TRADE_BUY" if order.side == "BUY" else "TRADE_SELL"
             ),
-            amount=gross_amount,
+            amount=portfolio_cash_amount,
             currency=portfolio.base_currency,
             occurred_at=executed_at,
             note=f"{order.side} {order.quantity} {order.symbol} @ {data.price}",
@@ -412,14 +486,11 @@ def update_order(
     data: OrderUpdateRequest,
 ) -> Order:
     try:
-        portfolio_exists = session.scalar(
-            select(Portfolio.id).where(
-                Portfolio.id == portfolio_id,
-                Portfolio.user_id == user_id,
-            )
+        portfolio = _get_portfolio_or_raise(
+            session,
+            portfolio_id=portfolio_id,
+            user_id=user_id,
         )
-        if portfolio_exists is None:
-            raise OrderPortfolioNotFoundError
 
         order = session.scalar(
             select(Order)
@@ -441,6 +512,7 @@ def update_order(
                 portfolio_id=portfolio_id,
                 currency=order.currency,
                 order_type=order.order_type,
+                portfolio_base_currency=portfolio.base_currency,
                 quantity=data.quantity,
                 limit_price=order.limit_price,
                 symbol=order.symbol,
