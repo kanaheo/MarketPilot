@@ -7,6 +7,7 @@ import {
 import type {
   CashTransactionCreateApiRequest,
   CashTransactionApiItem,
+  MarketQuoteApiItem,
   OrderApiItem,
   OrderCreateApiRequest,
   OrderExecuteApiRequest,
@@ -15,6 +16,12 @@ import type {
   PortfolioCreateApiRequest,
   PortfolioDetailApiItem,
 } from "@/types/marketpilot-api";
+
+export async function getMarketQuotes(): Promise<
+  readonly MarketQuoteApiItem[]
+> {
+  return marketPilotApiRequest<MarketQuoteApiItem[]>("/market-data/quotes");
+}
 
 export async function getPortfolios(): Promise<readonly PortfolioApiItem[]> {
   return marketPilotApiRequest<PortfolioApiItem[]>("/portfolios");

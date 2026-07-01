@@ -107,3 +107,10 @@ export type OrderExecuteApiRequest = Readonly<{
 export type OrderUpdateApiRequest = Readonly<{
   quantity: string;
 }>;
+
+export type MarketQuoteApiItem = Readonly<{
+  symbol: string;
+  currency: SupportedCurrency;
+  current_price: string;
+  source: "fixture";
+}>;
