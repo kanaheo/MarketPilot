@@ -48,6 +48,7 @@ export function PortfolioOrderActions({
 
   const isPending = order.status === "PENDING";
   const canDelete = order.status !== "FILLED";
+  const isBusy = isExecuting || isUpdating;
 
   if (!isPending && !canDelete) {
     return (
@@ -74,10 +75,10 @@ export function PortfolioOrderActions({
               />
               <button
                 className="order-update-button"
-                disabled={isUpdating}
+                disabled={isBusy}
                 type="submit"
               >
-                {messages.update}
+                {isUpdating ? messages.updateSubmitting : messages.update}
               </button>
             </form>
             <form action={executeAction} className="order-execute-form">
@@ -92,10 +93,10 @@ export function PortfolioOrderActions({
               />
               <button
                 className="order-execute-button"
-                disabled={isExecuting}
+                disabled={isBusy}
                 type="submit"
               >
-                {messages.execute}
+                {isExecuting ? messages.executeSubmitting : messages.execute}
               </button>
             </form>
             <div className="order-secondary-actions">
@@ -107,7 +108,11 @@ export function PortfolioOrderActions({
                   order.id,
                 )}
               >
-                <button className="order-cancel-button" type="submit">
+                <button
+                  className="order-cancel-button"
+                  disabled={isBusy}
+                  type="submit"
+                >
                   {messages.cancel}
                 </button>
               </form>
@@ -120,11 +125,25 @@ export function PortfolioOrderActions({
           <form
             action={deleteOrderAction.bind(null, locale, portfolioId, order.id)}
           >
-            <button className="order-delete-button" type="submit">
+            <button
+              className="order-delete-button"
+              disabled={isBusy}
+              type="submit"
+            >
               {messages.delete}
             </button>
           </form>
         </div>
+      ) : null}
+      {isExecuting && isPending ? (
+        <p className="order-action-message" role="status">
+          {messages.executePendingFeedback}
+        </p>
+      ) : null}
+      {isUpdating && isPending ? (
+        <p className="order-action-message" role="status">
+          {messages.updatePendingFeedback}
+        </p>
       ) : null}
       {!executionResult.ok && isPending ? (
         <p className="order-action-message" role="status">

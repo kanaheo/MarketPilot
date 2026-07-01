@@ -251,6 +251,9 @@ export const portfolio = {
     },
     marketPrice: "시장가",
     update: "수정",
+    updatePendingFeedback:
+      "주문 수량을 수정 중입니다. 완료되면 최근 주문이 갱신됩니다.",
+    updateSubmitting: "수정 중...",
     updateQuantityLabel: "주문 수량",
     updateErrors: {
       unauthorized: "로그인이 필요합니다. 다시 로그인한 뒤 시도해 주세요.",
@@ -260,6 +263,9 @@ export const portfolio = {
       unknown: "주문을 수정하지 못했습니다. 잠시 후 다시 시도해 주세요.",
     },
     execute: "체결",
+    executePendingFeedback:
+      "체결 처리 중입니다. 완료되면 현금, 보유 종목, 손익이 갱신됩니다.",
+    executeSubmitting: "체결 중...",
     executePriceLabel: "체결가",
     executePricePlaceholder: "체결가",
     executeErrors: {

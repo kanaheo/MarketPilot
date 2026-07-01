@@ -254,6 +254,9 @@ export const portfolio = {
     },
     marketPrice: "Market",
     update: "Update",
+    updatePendingFeedback:
+      "Updating the order quantity. Recent orders will refresh when it finishes.",
+    updateSubmitting: "Updating...",
     updateQuantityLabel: "Order quantity",
     updateErrors: {
       unauthorized: "Please sign in again before updating an order.",
@@ -263,6 +266,9 @@ export const portfolio = {
       unknown: "Could not update the order. Please try again shortly.",
     },
     execute: "Fill",
+    executePendingFeedback:
+      "Filling the order. Cash, holdings, and profit/loss will refresh when it finishes.",
+    executeSubmitting: "Filling...",
     executePriceLabel: "Execution price",
     executePricePlaceholder: "Price",
     executeErrors: {

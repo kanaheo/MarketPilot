@@ -6,12 +6,27 @@ import { Panel } from "@/components/common/panel";
 import { SectionHeader } from "@/components/common/section-header";
 import { TrendValue } from "@/components/common/trend-value";
 import { formatMarketPrice, formatPercent } from "@/lib/formatters";
-import type { PortfolioHoldingsProps } from "@/types/portfolio";
+import type {
+  PortfolioHolding,
+  PortfolioHoldingsProps,
+} from "@/types/portfolio";
 
 const HOLDING_QUANTITY_FORMAT_OPTIONS = {
   maximumFractionDigits: 2,
   minimumFractionDigits: 0,
 } as const satisfies Intl.NumberFormatOptions;
+
+function getHoldingChangeKey(holding: PortfolioHolding): string {
+  return [
+    holding.symbol,
+    holding.quantity,
+    holding.averagePrice,
+    holding.currentPrice,
+    holding.marketValue,
+    holding.unrealizedProfitLoss,
+    holding.returnRate,
+  ].join("-");
+}
 
 export function PortfolioHoldings({
   holdings,
@@ -51,8 +66,8 @@ export function PortfolioHoldings({
 
           {holdings.map((holding) => (
             <div
-              className="portfolio-holdings-row"
-              key={holding.symbol}
+              className="portfolio-holdings-row portfolio-holdings-row-live"
+              key={getHoldingChangeKey(holding)}
               role="row"
             >
               <div className="asset-cell" role="cell">
@@ -62,35 +77,47 @@ export function PortfolioHoldings({
                   <small>{holding.name}</small>
                 </span>
               </div>
-              <span className="numeric-cell" role="cell">
+              <span
+                className="numeric-cell holding-change-value"
+                role="cell"
+              >
                 {holding.quantity.toLocaleString(
                   locale,
                   HOLDING_QUANTITY_FORMAT_OPTIONS,
                 )}
                 {messages.shareUnit}
               </span>
-              <span className="numeric-cell average-price" role="cell">
+              <span
+                className="numeric-cell average-price holding-change-value"
+                role="cell"
+              >
                 {formatMarketPrice(
                   holding.averagePrice,
                   holding.currency,
                   locale,
                 )}
               </span>
-              <span className="numeric-cell current-price" role="cell">
+              <span
+                className="numeric-cell current-price holding-change-value"
+                role="cell"
+              >
                 {formatMarketPrice(
                   holding.currentPrice,
                   holding.currency,
                   locale,
                 )}
               </span>
-              <strong className="numeric-cell" role="cell">
+              <strong
+                className="numeric-cell holding-change-value"
+                role="cell"
+              >
                 {formatMarketPrice(
                   holding.marketValue,
                   holding.currency,
                   locale,
                 )}
               </strong>
-              <span role="cell">
+              <span className="holding-change-value" role="cell">
                 <TrendValue value={holding.unrealizedProfitLoss}>
                   {formatMarketPrice(
                     holding.unrealizedProfitLoss,
@@ -99,7 +126,7 @@ export function PortfolioHoldings({
                   )}
                 </TrendValue>
               </span>
-              <span role="cell">
+              <span className="holding-change-value" role="cell">
                 <TrendValue value={holding.returnRate}>
                   {formatPercent(holding.returnRate, locale)}
                 </TrendValue>

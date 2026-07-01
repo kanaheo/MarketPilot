@@ -243,6 +243,8 @@ export type PortfolioMessages = Readonly<{
     };
     marketPrice: string;
     update: string;
+    updatePendingFeedback: string;
+    updateSubmitting: string;
     updateQuantityLabel: string;
     updateErrors: {
       unauthorized: string;
@@ -252,6 +254,8 @@ export type PortfolioMessages = Readonly<{
       unknown: string;
     };
     execute: string;
+    executePendingFeedback: string;
+    executeSubmitting: string;
     executePriceLabel: string;
     executePricePlaceholder: string;
     executeErrors: {

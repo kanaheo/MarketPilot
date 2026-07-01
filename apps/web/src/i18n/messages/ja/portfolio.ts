@@ -257,6 +257,9 @@ export const portfolio = {
     },
     marketPrice: "成行",
     update: "修正",
+    updatePendingFeedback:
+      "注文数量を修正しています。完了すると最近の注文が更新されます。",
+    updateSubmitting: "修正中...",
     updateQuantityLabel: "注文数量",
     updateErrors: {
       unauthorized: "ログインが必要です。再度ログインしてからお試しください。",
@@ -266,6 +269,9 @@ export const portfolio = {
       unknown: "注文を修正できませんでした。しばらくしてからもう一度お試しください。",
     },
     execute: "約定",
+    executePendingFeedback:
+      "約定処理中です。完了すると現金、保有銘柄、損益が更新されます。",
+    executeSubmitting: "約定中...",
     executePriceLabel: "約定価格",
     executePricePlaceholder: "約定価格",
     executeErrors: {

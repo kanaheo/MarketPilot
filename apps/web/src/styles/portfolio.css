@@ -691,6 +691,62 @@
   font-variant-numeric: tabular-nums;
 }
 
+.portfolio-holdings-row-live .holding-change-value {
+  width: fit-content;
+  justify-self: end;
+  margin: -5px -7px;
+  padding: 5px 7px;
+  border-radius: 7px;
+  animation: holding-value-flash 1.4s ease-out both;
+}
+
+.portfolio-holdings-row-live .asset-cell + .holding-change-value {
+  animation-delay: 40ms;
+}
+
+.portfolio-holdings-row-live .average-price {
+  animation-delay: 90ms;
+}
+
+.portfolio-holdings-row-live .current-price {
+  animation-delay: 140ms;
+}
+
+.portfolio-holdings-row-live .current-price + .holding-change-value {
+  animation-delay: 190ms;
+}
+
+.portfolio-holdings-row-live .trend-value {
+  transition: color 180ms ease;
+}
+
+@keyframes holding-value-flash {
+  0% {
+    background: rgba(15, 118, 110, 0.18);
+    box-shadow: 0 0 0 1px rgba(15, 118, 110, 0.18);
+    color: #0f766e;
+    transform: translateY(-1px);
+  }
+
+  55% {
+    background: rgba(15, 118, 110, 0.1);
+    box-shadow: 0 0 0 1px rgba(15, 118, 110, 0.08);
+  }
+
+  100% {
+    background: transparent;
+    box-shadow: none;
+    color: inherit;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portfolio-holdings-row-live .holding-change-value {
+    animation: none;
+  }
+}
+
 .portfolio-details-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
