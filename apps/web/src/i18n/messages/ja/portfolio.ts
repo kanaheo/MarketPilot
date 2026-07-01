@@ -284,6 +284,12 @@ export const portfolio = {
     },
     cancel: "取消",
     delete: "削除",
+    pagination: {
+      label: "最近の注文ページ",
+      next: "次の注文ページ",
+      previous: "前の注文ページ",
+      status: "{current} / {total}",
+    },
     empty: {
       title: "注文はありません",
       description: "最初のペーパー注文を記録すると、ここに表示されます。",

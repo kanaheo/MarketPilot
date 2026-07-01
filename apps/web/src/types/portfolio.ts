@@ -237,6 +237,7 @@ export type PortfolioCashActivity = Readonly<{
 export type PortfolioOrder = Readonly<{
   createdAt: string;
   currency: SupportedCurrency;
+  displayPrice: number | null;
   id: string;
   limitPrice: number | null;
   orderType: OrderType;

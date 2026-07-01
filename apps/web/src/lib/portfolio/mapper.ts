@@ -129,6 +129,12 @@ export function mapPortfolioOrders(
   return orders.map((order) => ({
     createdAt: order.created_at,
     currency: order.currency,
+    displayPrice:
+      order.execution_price === null
+        ? order.limit_price === null
+          ? null
+          : Number(order.limit_price)
+        : Number(order.execution_price),
     id: order.id,
     limitPrice:
       order.limit_price === null ? null : Number(order.limit_price),

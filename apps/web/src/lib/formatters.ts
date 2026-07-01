@@ -60,6 +60,20 @@ export function formatMarketPrice(
   }).format(value);
 }
 
+export function formatMarketPriceDelta(
+  value: number,
+  currency: "USD" | "KRW" | "JPY",
+  locale: Locale,
+) {
+  return new Intl.NumberFormat(localeCodes[locale], {
+    currency,
+    maximumFractionDigits: currency === "USD" ? 2 : currency === "JPY" ? 1 : 0,
+    minimumFractionDigits: currency === "USD" ? 2 : 0,
+    signDisplay: "always",
+    style: "currency",
+  }).format(value);
+}
+
 export function formatCompactNumber(value: number, locale: Locale) {
   return new Intl.NumberFormat(localeCodes[locale], {
     maximumFractionDigits: 1,

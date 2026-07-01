@@ -838,6 +838,7 @@ def test_list_orders_checks_owner_and_sorts_newest_first() -> None:
         updated_at=now,
     )
     session.scalars.return_value.all.return_value = [order]
+    session.execute.return_value.all.return_value = []
 
     result = list_orders(
         session,
@@ -852,3 +853,37 @@ def test_list_orders_checks_owner_and_sorts_newest_first() -> None:
     assert user_id in ownership_params
     assert "ORDER BY orders.created_at DESC" in str(order_statement)
     assert result == [order]
+    assert result[0].execution_price is None
+
+
+def test_list_orders_attaches_execution_price_for_filled_order() -> None:
+    session = MagicMock()
+    user_id = uuid.uuid4()
+    portfolio_id = uuid.uuid4()
+    order = Order(
+        id=uuid.uuid4(),
+        portfolio_id=portfolio_id,
+        symbol="AAPL",
+        side="BUY",
+        order_type="MARKET",
+        quantity=Decimal("1"),
+        limit_price=None,
+        currency="USD",
+        status="FILLED",
+        strategy_version=MANUAL_STRATEGY_VERSION,
+        decision_evidence=MANUAL_DECISION_EVIDENCE,
+    )
+    session.scalar.return_value = portfolio_id
+    session.scalars.return_value.all.return_value = [order]
+    session.execute.return_value.all.return_value = [
+        (order.id, Decimal("185.2500")),
+    ]
+
+    result = list_orders(
+        session,
+        portfolio_id=portfolio_id,
+        user_id=user_id,
+    )
+
+    assert result == [order]
+    assert result[0].execution_price == Decimal("185.2500")

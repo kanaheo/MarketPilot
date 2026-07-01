@@ -277,6 +277,12 @@ export const portfolio = {
     },
     cancel: "취소",
     delete: "삭제",
+    pagination: {
+      label: "최근 주문 페이지",
+      next: "다음 주문 페이지",
+      previous: "이전 주문 페이지",
+      status: "{current} / {total}",
+    },
     empty: {
       title: "주문이 없습니다",
       description: "첫 모의주문을 기록하면 이곳에 표시됩니다.",

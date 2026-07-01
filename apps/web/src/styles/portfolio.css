@@ -306,6 +306,51 @@
   border-top: 1px solid var(--color-border);
 }
 
+.portfolio-orders-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 12px;
+}
+
+.portfolio-orders-pagination button {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  background: white;
+  color: var(--color-text);
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.portfolio-orders-pagination button:not(:disabled):hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.portfolio-orders-pagination button:disabled {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.portfolio-orders-pagination span {
+  min-width: 46px;
+  color: var(--color-text-muted);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 750;
+  text-align: center;
+}
+
 .portfolio-orders-row {
   display: grid;
   grid-template-columns:
@@ -359,6 +404,7 @@
 .order-status.filled {
   background: var(--color-primary-soft);
   color: var(--color-primary);
+  animation: order-filled-pulse 3s ease-out both;
 }
 
 .order-status.pending {
@@ -370,6 +416,22 @@
 .order-status.cancelled {
   background: #fdeaea;
   color: #d84950;
+}
+
+@keyframes order-filled-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(15, 118, 110, 0.34);
+    transform: translateY(-1px);
+  }
+
+  70% {
+    box-shadow: 0 0 0 7px rgba(15, 118, 110, 0);
+  }
+
+  100% {
+    box-shadow: none;
+    transform: translateY(0);
+  }
 }
 
 .order-action-cell {
@@ -692,12 +754,39 @@
 }
 
 .portfolio-holdings-row-live .holding-change-value {
-  width: fit-content;
+  display: inline-flex;
+  min-width: 0;
+  align-items: flex-end;
+  flex-direction: column;
+  gap: 3px;
   justify-self: end;
   margin: -5px -7px;
   padding: 5px 7px;
   border-radius: 7px;
-  animation: holding-value-flash 1.4s ease-out both;
+}
+
+.portfolio-holdings-row-live .holding-change-current {
+  min-width: 0;
+}
+
+.portfolio-holdings-row-live .holding-change-delta {
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.portfolio-holdings-row-live .strong-value {
+  font-weight: 800;
+}
+
+.portfolio-holdings-row-live .holding-change-value.is-increase {
+  animation: holding-value-increase-flash 3s ease-out both;
+}
+
+.portfolio-holdings-row-live .holding-change-value.is-decrease {
+  animation: holding-value-decrease-flash 3s ease-out both;
 }
 
 .portfolio-holdings-row-live .asset-cell + .holding-change-value {
@@ -720,17 +809,51 @@
   transition: color 180ms ease;
 }
 
-@keyframes holding-value-flash {
+.portfolio-holdings-row-live .is-increase .trend-value,
+.portfolio-holdings-row-live .is-decrease .trend-value {
+  color: inherit;
+}
+
+@keyframes holding-value-increase-flash {
   0% {
-    background: rgba(15, 118, 110, 0.18);
-    box-shadow: 0 0 0 1px rgba(15, 118, 110, 0.18);
-    color: #0f766e;
+    background: rgba(216, 73, 80, 0.16);
+    box-shadow: 0 0 0 1px rgba(216, 73, 80, 0.18);
+    color: #d84950;
     transform: translateY(-1px);
   }
 
   55% {
-    background: rgba(15, 118, 110, 0.1);
-    box-shadow: 0 0 0 1px rgba(15, 118, 110, 0.08);
+    background: rgba(216, 73, 80, 0.09);
+    box-shadow: 0 0 0 1px rgba(216, 73, 80, 0.08);
+  }
+
+  82% {
+    color: #d84950;
+  }
+
+  100% {
+    background: transparent;
+    box-shadow: none;
+    color: inherit;
+    transform: translateY(0);
+  }
+}
+
+@keyframes holding-value-decrease-flash {
+  0% {
+    background: rgba(37, 99, 235, 0.14);
+    box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.16);
+    color: #2563eb;
+    transform: translateY(-1px);
+  }
+
+  55% {
+    background: rgba(37, 99, 235, 0.08);
+    box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.07);
+  }
+
+  82% {
+    color: #2563eb;
   }
 
   100% {
@@ -742,7 +865,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .portfolio-holdings-row-live .holding-change-value {
+  .portfolio-holdings-row-live .holding-change-value.is-increase,
+  .portfolio-holdings-row-live .holding-change-value.is-decrease {
+    animation: none;
+  }
+
+  .cash-activity-item.latest,
+  .order-status.filled {
     animation: none;
   }
 }
@@ -775,6 +904,10 @@
   align-items: center;
   gap: 11px;
   border-top: 1px solid #edf0ee;
+}
+
+.cash-activity-item.latest {
+  animation: cash-activity-latest-flash 3s ease-out both;
 }
 
 .cash-activity-icon,
@@ -821,6 +954,21 @@
 .cash-activity-amount .trend-value {
   font-size: 11px;
   font-weight: 750;
+}
+
+@keyframes cash-activity-latest-flash {
+  0% {
+    border-radius: 8px;
+    background: rgba(15, 118, 110, 0.12);
+    box-shadow: 0 0 0 1px rgba(15, 118, 110, 0.08);
+    transform: translateY(-1px);
+  }
+
+  100% {
+    background: transparent;
+    box-shadow: none;
+    transform: translateY(0);
+  }
 }
 
 .risk-overview-item {

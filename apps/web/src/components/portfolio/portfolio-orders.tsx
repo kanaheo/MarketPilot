@@ -1,4 +1,7 @@
-import { ClipboardList } from "lucide-react";
+"use client";
+
+import { useMemo, useState } from "react";
+import { ChevronLeft, ChevronRight, ClipboardList } from "lucide-react";
 
 import { EmptyState } from "@/components/common/empty-state";
 import { Panel } from "@/components/common/panel";
@@ -11,6 +14,7 @@ const ORDER_QUANTITY_FORMAT_OPTIONS = {
   maximumFractionDigits: 2,
   minimumFractionDigits: 0,
 } as const satisfies Intl.NumberFormatOptions;
+const ORDERS_PER_PAGE = 10;
 
 export function PortfolioOrders({
   locale,
@@ -18,6 +22,14 @@ export function PortfolioOrders({
   orders,
   portfolioId,
 }: PortfolioOrdersProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(orders.length / ORDERS_PER_PAGE));
+  const activePage = Math.min(currentPage, totalPages);
+  const visibleOrders = useMemo(() => {
+    const startIndex = (activePage - 1) * ORDERS_PER_PAGE;
+    return orders.slice(startIndex, startIndex + ORDERS_PER_PAGE);
+  }, [activePage, orders]);
+
   if (orders.length === 0) {
     return (
       <Panel className="portfolio-orders-panel">
@@ -48,7 +60,7 @@ export function PortfolioOrders({
           <span>{messages.columns.createdAt}</span>
           <span>{messages.columns.actions}</span>
         </div>
-        {orders.map((order) => (
+        {visibleOrders.map((order) => (
           <article className="portfolio-orders-row" key={order.id}>
             <strong>{order.symbol}</strong>
             <span>{messages.sides[order.side]}</span>
@@ -60,10 +72,10 @@ export function PortfolioOrders({
               )}
             </span>
             <span>
-              {order.limitPrice === null
+              {order.displayPrice === null
                 ? messages.marketPrice
                 : formatMarketPrice(
-                    order.limitPrice,
+                    order.displayPrice,
                     order.currency,
                     locale,
                   )}
@@ -84,6 +96,36 @@ export function PortfolioOrders({
           </article>
         ))}
       </div>
+      {totalPages > 1 ? (
+        <nav
+          className="portfolio-orders-pagination"
+          aria-label={messages.pagination.label}
+        >
+          <button
+            aria-label={messages.pagination.previous}
+            disabled={activePage === 1}
+            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+            type="button"
+          >
+            <ChevronLeft size={15} aria-hidden="true" />
+          </button>
+          <span>
+            {messages.pagination.status
+              .replace("{current}", String(activePage))
+              .replace("{total}", String(totalPages))}
+          </span>
+          <button
+            aria-label={messages.pagination.next}
+            disabled={activePage === totalPages}
+            onClick={() =>
+              setCurrentPage((page) => Math.min(totalPages, page + 1))
+            }
+            type="button"
+          >
+            <ChevronRight size={15} aria-hidden="true" />
+          </button>
+        </nav>
+      ) : null}
     </Panel>
   );
 }

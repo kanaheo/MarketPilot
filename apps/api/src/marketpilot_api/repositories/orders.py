@@ -122,6 +122,27 @@ def _calculate_cash_reservation(
     return _calculate_gross_amount(quantity, limit_price)
 
 
+def _attach_execution_prices(
+    session: Session,
+    orders: list[Order],
+) -> list[Order]:
+    if not orders:
+        return orders
+
+    execution_prices_by_order_id = dict(
+        session.execute(
+            select(OrderExecution.order_id, OrderExecution.price).where(
+                OrderExecution.order_id.in_([order.id for order in orders])
+            )
+        ).all()
+    )
+
+    for order in orders:
+        order.execution_price = execution_prices_by_order_id.get(order.id)
+
+    return orders
+
+
 def _validate_buy_cash_available(
     session: Session,
     *,
@@ -317,6 +338,7 @@ def execute_order(
         session.flush()
         session.refresh(order)
         session.commit()
+        order.execution_price = data.price
     except Exception:
         session.rollback()
         raise
@@ -480,10 +502,12 @@ def list_orders(
     if portfolio_exists is None:
         raise OrderPortfolioNotFoundError
 
-    return list(
+    orders = list(
         session.scalars(
             select(Order)
             .where(Order.portfolio_id == portfolio_id)
             .order_by(Order.created_at.desc(), Order.id.desc())
         ).all()
     )
+
+    return _attach_execution_prices(session, orders)

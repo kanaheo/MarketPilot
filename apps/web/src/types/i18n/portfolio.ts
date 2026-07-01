@@ -267,6 +267,12 @@ export type PortfolioMessages = Readonly<{
     };
     cancel: string;
     delete: string;
+    pagination: {
+      label: string;
+      next: string;
+      previous: string;
+      status: string;
+    };
     empty: {
       title: string;
       description: string;

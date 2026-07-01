@@ -91,6 +91,7 @@ class OrderResponse(BaseModel):
     order_type: OrderType
     quantity: Decimal
     limit_price: Decimal | None
+    execution_price: Decimal | None = None
     currency: SupportedCurrency
     status: OrderStatus
     strategy_version: str

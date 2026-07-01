@@ -281,6 +281,12 @@ export const portfolio = {
     },
     cancel: "Cancel",
     delete: "Delete",
+    pagination: {
+      label: "Recent orders pages",
+      next: "Next orders page",
+      previous: "Previous orders page",
+      status: "{current} / {total}",
+    },
     empty: {
       title: "No orders yet",
       description: "Your first paper order will appear here.",
