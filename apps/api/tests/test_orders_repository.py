@@ -42,7 +42,7 @@ def test_create_order_sets_manual_pending_defaults() -> None:
     session.scalar.return_value = portfolio
     data = OrderCreateRequest(
         symbol=" aapl ",
-        side="SELL",
+        side="BUY",
         order_type="MARKET",
         quantity=Decimal("2"),
     )
@@ -150,6 +150,47 @@ def test_create_order_rolls_back_when_database_write_fails() -> None:
             data=data,
         )
 
+    session.commit.assert_not_called()
+    session.rollback.assert_called_once()
+
+
+def test_create_sell_order_rejects_reserved_position_quantity(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    session = MagicMock()
+    portfolio = Portfolio(
+        id=uuid.uuid4(),
+        user_id=uuid.uuid4(),
+        name="Paper portfolio",
+        base_currency="USD",
+    )
+    session.scalar.return_value = portfolio
+    monkeypatch.setattr(
+        orders_repository,
+        "get_available_position_quantity",
+        MagicMock(return_value=Decimal("1.00")),
+    )
+    monkeypatch.setattr(
+        orders_repository,
+        "_get_reserved_sell_quantity",
+        MagicMock(return_value=Decimal("0.50")),
+    )
+    data = OrderCreateRequest(
+        symbol="AAPL",
+        side="SELL",
+        order_type="MARKET",
+        quantity=Decimal("0.75"),
+    )
+
+    with pytest.raises(OrderInsufficientPositionError):
+        create_order(
+            session,
+            portfolio_id=portfolio.id,
+            user_id=portfolio.user_id,
+            data=data,
+        )
+
+    session.add.assert_not_called()
     session.commit.assert_not_called()
     session.rollback.assert_called_once()
 
@@ -474,6 +515,11 @@ def test_update_order_rejects_insufficient_position_quantity(
         "get_available_position_quantity",
         MagicMock(return_value=Decimal("1.00000000")),
     )
+    monkeypatch.setattr(
+        orders_repository,
+        "_get_reserved_sell_quantity",
+        MagicMock(return_value=Decimal("0")),
+    )
 
     with pytest.raises(OrderInsufficientPositionError):
         update_order(
@@ -485,6 +531,49 @@ def test_update_order_rejects_insufficient_position_quantity(
         )
 
     assert order.quantity == Decimal("1.00000000")
+    session.commit.assert_not_called()
+    session.rollback.assert_called_once()
+
+
+def test_update_order_rejects_reserved_position_quantity(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    session = MagicMock()
+    order = Order(
+        id=uuid.uuid4(),
+        portfolio_id=uuid.uuid4(),
+        symbol="AAPL",
+        side="SELL",
+        order_type="MARKET",
+        quantity=Decimal("1.00"),
+        limit_price=None,
+        currency="USD",
+        status="PENDING",
+        strategy_version=MANUAL_STRATEGY_VERSION,
+        decision_evidence=MANUAL_DECISION_EVIDENCE,
+    )
+    session.scalar.side_effect = [order.portfolio_id, order]
+    monkeypatch.setattr(
+        orders_repository,
+        "get_available_position_quantity",
+        MagicMock(return_value=Decimal("2.00")),
+    )
+    monkeypatch.setattr(
+        orders_repository,
+        "_get_reserved_sell_quantity",
+        MagicMock(return_value=Decimal("0.75")),
+    )
+
+    with pytest.raises(OrderInsufficientPositionError):
+        update_order(
+            session,
+            portfolio_id=order.portfolio_id,
+            order_id=order.id,
+            user_id=uuid.uuid4(),
+            data=OrderUpdateRequest(quantity=Decimal("1.50")),
+        )
+
+    assert order.quantity == Decimal("1.00")
     session.commit.assert_not_called()
     session.rollback.assert_called_once()
 

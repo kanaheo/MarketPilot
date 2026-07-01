@@ -51,6 +51,7 @@ const ORDER_FAILURE_REASONS = {
   401: "unauthorized",
   403: "unauthorized",
   404: "notFound",
+  409: "conflict",
   422: "invalid",
 } as const satisfies Readonly<Partial<Record<number, OrderFailureReason>>>;
 

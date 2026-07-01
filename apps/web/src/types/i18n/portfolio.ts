@@ -194,6 +194,7 @@ export type PortfolioMessages = Readonly<{
     success: string;
     errors: {
       unauthorized: string;
+      conflict: string;
       invalid: string;
       notFound: string;
       unknown: string;

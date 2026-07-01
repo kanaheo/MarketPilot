@@ -204,6 +204,7 @@ export const portfolio = {
     success: "Order recorded.",
     errors: {
       unauthorized: "Please sign in again before recording an order.",
+      conflict: "Sell quantity cannot exceed the unreserved position.",
       invalid: "Please check your order inputs.",
       notFound: "Portfolio not found.",
       unknown: "Could not record the order. Please try again shortly.",

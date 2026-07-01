@@ -207,6 +207,7 @@ export const portfolio = {
     success: "注文を記録しました。",
     errors: {
       unauthorized: "ログインが必要です。再度ログインしてからお試しください。",
+      conflict: "保有数量を超える売り注文は記録できません。",
       invalid: "注文の入力内容を確認してください。",
       notFound: "ポートフォリオが見つかりません。",
       unknown:

@@ -88,6 +88,7 @@ export type CashTransactionSubmitHandler = (
 ) => Promise<void>;
 
 export type OrderFailureReason =
+  | "conflict"
   | "invalid"
   | "notFound"
   | "unauthorized"

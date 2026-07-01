@@ -58,6 +58,11 @@ def submit_order(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Portfolio not found",
         ) from None
+    except OrderInsufficientPositionError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Insufficient position quantity",
+        ) from None
 
     return OrderResponse.model_validate(order)
 

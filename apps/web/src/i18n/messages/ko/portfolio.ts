@@ -202,6 +202,7 @@ export const portfolio = {
     success: "주문을 기록했습니다.",
     errors: {
       unauthorized: "로그인이 필요합니다. 다시 로그인한 뒤 시도해 주세요.",
+      conflict: "보유 수량보다 큰 매도 주문은 기록할 수 없습니다.",
       invalid: "주문 입력값을 확인해 주세요.",
       notFound: "포트폴리오를 찾을 수 없습니다.",
       unknown: "주문을 기록하지 못했습니다. 잠시 후 다시 시도해 주세요.",

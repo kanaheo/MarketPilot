@@ -1,7 +1,7 @@
 import uuid
 from decimal import Decimal
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from marketpilot_api.models import CashTransaction, Order, OrderExecution, Portfolio
@@ -61,6 +61,55 @@ def _validate_execution_price(order: Order, price: Decimal) -> None:
         raise OrderExecutionPriceError
 
 
+def _get_reserved_sell_quantity(
+    session: Session,
+    *,
+    portfolio_id: uuid.UUID,
+    symbol: str,
+    excluded_order_id: uuid.UUID | None = None,
+) -> Decimal:
+    statement = select(
+        func.coalesce(
+            func.sum(Order.quantity),
+            Decimal("0"),
+        )
+    ).where(
+        Order.portfolio_id == portfolio_id,
+        Order.symbol == symbol,
+        Order.side == "SELL",
+        Order.status == "PENDING",
+    )
+
+    if excluded_order_id is not None:
+        statement = statement.where(Order.id != excluded_order_id)
+
+    return session.scalar(statement)
+
+
+def _validate_sell_quantity_available(
+    session: Session,
+    *,
+    portfolio_id: uuid.UUID,
+    symbol: str,
+    quantity: Decimal,
+    excluded_order_id: uuid.UUID | None = None,
+) -> None:
+    available_quantity = get_available_position_quantity(
+        session,
+        portfolio_id=portfolio_id,
+        symbol=symbol,
+    )
+    reserved_quantity = _get_reserved_sell_quantity(
+        session,
+        portfolio_id=portfolio_id,
+        symbol=symbol,
+        excluded_order_id=excluded_order_id,
+    )
+
+    if quantity > available_quantity - reserved_quantity:
+        raise OrderInsufficientPositionError
+
+
 def create_order(
     session: Session,
     *,
@@ -77,6 +126,14 @@ def create_order(
         )
         if portfolio is None:
             raise OrderPortfolioNotFoundError
+
+        if data.side == "SELL":
+            _validate_sell_quantity_available(
+                session,
+                portfolio_id=portfolio.id,
+                symbol=data.symbol,
+                quantity=data.quantity,
+            )
 
         order = Order(
             id=uuid.uuid4(),
@@ -228,13 +285,13 @@ def update_order(
             raise OrderNotPendingError
 
         if order.side == "SELL":
-            available_quantity = get_available_position_quantity(
+            _validate_sell_quantity_available(
                 session,
                 portfolio_id=portfolio_id,
                 symbol=order.symbol,
+                quantity=data.quantity,
+                excluded_order_id=order.id,
             )
-            if data.quantity > available_quantity:
-                raise OrderInsufficientPositionError
 
         order.quantity = data.quantity
         session.flush()

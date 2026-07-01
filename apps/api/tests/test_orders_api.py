@@ -190,6 +190,35 @@ def test_submit_order_hides_unowned_portfolio(monkeypatch) -> None:
     assert response.json()["detail"] == "Portfolio not found"
 
 
+def test_submit_order_rejects_insufficient_position(monkeypatch) -> None:
+    user = User(
+        id=uuid.uuid4(),
+        auth_provider="google",
+        auth_subject="google-user-1",
+    )
+    create_mock = MagicMock(side_effect=OrderInsufficientPositionError)
+    monkeypatch.setattr(orders_router, "create_order", create_mock)
+    app.dependency_overrides[get_current_user] = (
+        override_authenticated_user(user)
+    )
+    app.dependency_overrides[get_db_session] = override_session(MagicMock())
+
+    with TestClient(app) as client:
+        response = client.post(
+            f"/portfolios/{uuid.uuid4()}/orders",
+            json={
+                "symbol": "AAPL",
+                "side": "SELL",
+                "order_type": "MARKET",
+                "quantity": "2",
+            },
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Insufficient position quantity"
+
+
 def test_execute_pending_order_returns_filled_order(monkeypatch) -> None:
     user = User(
         id=uuid.uuid4(),
