@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from marketpilot_api.models import CashTransaction, Order, OrderExecution, Portfolio
 from marketpilot_api.repositories.cash_ledger import get_current_cash
 from marketpilot_api.repositories.positions import get_available_position_quantity
+from marketpilot_api.repositories.price_quotes import get_fixture_current_price
 from marketpilot_api.schemas.orders import (
     OrderCreateRequest,
     OrderExecuteRequest,
@@ -92,34 +93,47 @@ def _get_reserved_buy_amount(
     portfolio_id: uuid.UUID,
     excluded_order_id: uuid.UUID | None = None,
 ) -> Decimal:
-    statement = select(
-        func.coalesce(
-            func.sum(Order.quantity * Order.limit_price),
-            Decimal("0"),
-        )
-    ).where(
+    statement = select(Order).where(
         Order.portfolio_id == portfolio_id,
         Order.side == "BUY",
-        Order.order_type == "LIMIT",
         Order.status == "PENDING",
     )
 
     if excluded_order_id is not None:
         statement = statement.where(Order.id != excluded_order_id)
 
-    return session.scalar(statement)
+    reserved_amount = Decimal("0")
+    for order in session.scalars(statement).all():
+        reserved_amount += _calculate_cash_reservation(
+            currency=order.currency,
+            limit_price=order.limit_price,
+            order_type=order.order_type,
+            quantity=order.quantity,
+            symbol=order.symbol,
+        )
+
+    return reserved_amount
 
 
 def _calculate_cash_reservation(
     *,
+    currency: str,
     order_type: str,
     quantity: Decimal,
     limit_price: Decimal | None,
+    symbol: str,
 ) -> Decimal:
-    if order_type != "LIMIT" or limit_price is None:
+    if order_type == "LIMIT" and limit_price is not None:
+        return _calculate_gross_amount(quantity, limit_price)
+
+    current_price = get_fixture_current_price(
+        currency=currency,
+        symbol=symbol,
+    )
+    if order_type != "MARKET" or current_price is None:
         return Decimal("0")
 
-    return _calculate_gross_amount(quantity, limit_price)
+    return _calculate_gross_amount(quantity, current_price)
 
 
 def _attach_execution_prices(
@@ -168,15 +182,19 @@ def _validate_buy_cash_available(
     session: Session,
     *,
     portfolio_id: uuid.UUID,
+    currency: str,
     order_type: str,
     quantity: Decimal,
     limit_price: Decimal | None,
+    symbol: str,
     excluded_order_id: uuid.UUID | None = None,
 ) -> None:
     requested_amount = _calculate_cash_reservation(
+        currency=currency,
         order_type=order_type,
         quantity=quantity,
         limit_price=limit_price,
+        symbol=symbol,
     )
     if requested_amount == 0:
         return
@@ -237,9 +255,11 @@ def create_order(
             _validate_buy_cash_available(
                 session,
                 portfolio_id=portfolio.id,
+                currency=portfolio.base_currency,
                 order_type=data.order_type,
                 quantity=data.quantity,
                 limit_price=data.limit_price,
+                symbol=data.symbol,
             )
         elif data.side == "SELL":
             _validate_sell_quantity_available(
@@ -405,9 +425,11 @@ def update_order(
             _validate_buy_cash_available(
                 session,
                 portfolio_id=portfolio_id,
+                currency=order.currency,
                 order_type=order.order_type,
                 quantity=data.quantity,
                 limit_price=order.limit_price,
+                symbol=order.symbol,
                 excluded_order_id=order.id,
             )
         elif order.side == "SELL":

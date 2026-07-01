@@ -30,7 +30,9 @@ from marketpilot_api.schemas.orders import (
 )
 
 
-def test_create_order_sets_manual_pending_defaults() -> None:
+def test_create_order_sets_manual_pending_defaults(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     session = MagicMock()
     user_id = uuid.uuid4()
     portfolio = Portfolio(
@@ -40,6 +42,16 @@ def test_create_order_sets_manual_pending_defaults() -> None:
         base_currency="USD",
     )
     session.scalar.return_value = portfolio
+    monkeypatch.setattr(
+        orders_repository,
+        "get_current_cash",
+        MagicMock(return_value=Decimal("1000.0000")),
+    )
+    monkeypatch.setattr(
+        orders_repository,
+        "_get_reserved_buy_amount",
+        MagicMock(return_value=Decimal("0")),
+    )
     data = OrderCreateRequest(
         symbol=" aapl ",
         side="BUY",
@@ -153,6 +165,89 @@ def test_create_buy_limit_order_rejects_reserved_cash_amount(
     session.add.assert_not_called()
     session.commit.assert_not_called()
     session.rollback.assert_called_once()
+
+
+def test_create_buy_market_order_reserves_fixture_current_price(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    session = MagicMock()
+    portfolio = Portfolio(
+        id=uuid.uuid4(),
+        user_id=uuid.uuid4(),
+        name="Paper portfolio",
+        base_currency="USD",
+    )
+    session.scalar.return_value = portfolio
+    monkeypatch.setattr(
+        orders_repository,
+        "get_current_cash",
+        MagicMock(return_value=Decimal("250.0000")),
+    )
+    monkeypatch.setattr(
+        orders_repository,
+        "_get_reserved_buy_amount",
+        MagicMock(return_value=Decimal("80.0000")),
+    )
+    data = OrderCreateRequest(
+        symbol="AAPL",
+        side="BUY",
+        order_type="MARKET",
+        quantity=Decimal("1.00"),
+    )
+
+    with pytest.raises(OrderInsufficientCashError):
+        create_order(
+            session,
+            portfolio_id=portfolio.id,
+            user_id=portfolio.user_id,
+            data=data,
+        )
+
+    session.add.assert_not_called()
+    session.commit.assert_not_called()
+    session.rollback.assert_called_once()
+
+
+def test_get_reserved_buy_amount_includes_market_orders_with_quotes() -> None:
+    session = MagicMock()
+    portfolio_id = uuid.uuid4()
+    limit_order = Order(
+        id=uuid.uuid4(),
+        portfolio_id=portfolio_id,
+        symbol="MSFT",
+        side="BUY",
+        order_type="LIMIT",
+        quantity=Decimal("2.00"),
+        limit_price=Decimal("50.0000"),
+        currency="USD",
+        status="PENDING",
+        strategy_version=MANUAL_STRATEGY_VERSION,
+        decision_evidence=MANUAL_DECISION_EVIDENCE,
+    )
+    market_order = Order(
+        id=uuid.uuid4(),
+        portfolio_id=portfolio_id,
+        symbol="AAPL",
+        side="BUY",
+        order_type="MARKET",
+        quantity=Decimal("1.00"),
+        limit_price=None,
+        currency="USD",
+        status="PENDING",
+        strategy_version=MANUAL_STRATEGY_VERSION,
+        decision_evidence=MANUAL_DECISION_EVIDENCE,
+    )
+    session.scalars.return_value.all.return_value = [
+        limit_order,
+        market_order,
+    ]
+
+    result = orders_repository._get_reserved_buy_amount(
+        session,
+        portfolio_id=portfolio_id,
+    )
+
+    assert result == Decimal("295.0000")
 
 
 def test_create_order_rolls_back_for_unowned_portfolio() -> None:
@@ -493,7 +588,9 @@ def test_execute_order_rejects_limit_price_miss() -> None:
     session.rollback.assert_called_once()
 
 
-def test_update_order_changes_pending_order_quantity() -> None:
+def test_update_order_changes_pending_order_quantity(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     session = MagicMock()
     user_id = uuid.uuid4()
     portfolio_id = uuid.uuid4()
@@ -511,6 +608,16 @@ def test_update_order_changes_pending_order_quantity() -> None:
         decision_evidence=MANUAL_DECISION_EVIDENCE,
     )
     session.scalar.side_effect = [portfolio_id, order]
+    monkeypatch.setattr(
+        orders_repository,
+        "get_current_cash",
+        MagicMock(return_value=Decimal("1000.0000")),
+    )
+    monkeypatch.setattr(
+        orders_repository,
+        "_get_reserved_buy_amount",
+        MagicMock(return_value=Decimal("0")),
+    )
 
     result = update_order(
         session,
