@@ -13,10 +13,12 @@ from marketpilot_api.repositories.orders import (
     OrderExecutionPriceError,
     OrderInsufficientCashError,
     OrderInsufficientPositionError,
+    OrderNotDeletableError,
     OrderNotPendingError,
     OrderPortfolioNotFoundError,
     cancel_order,
     create_order,
+    delete_order,
     execute_order,
     list_orders,
     update_order,
@@ -408,7 +410,7 @@ def test_update_order_changes_pending_order_quantity() -> None:
         portfolio_id=portfolio_id,
         order_id=order.id,
         user_id=user_id,
-        data=OrderUpdateRequest(quantity=Decimal("1.00000000")),
+        data=OrderUpdateRequest(quantity=Decimal("1.00")),
     )
 
     assert result.quantity == Decimal("1.00000000")
@@ -441,7 +443,7 @@ def test_update_order_rejects_non_pending_order() -> None:
             portfolio_id=order.portfolio_id,
             order_id=order.id,
             user_id=uuid.uuid4(),
-            data=OrderUpdateRequest(quantity=Decimal("2.00000000")),
+            data=OrderUpdateRequest(quantity=Decimal("2.00")),
         )
 
     assert order.quantity == Decimal("1.00000000")
@@ -479,7 +481,7 @@ def test_update_order_rejects_insufficient_position_quantity(
             portfolio_id=order.portfolio_id,
             order_id=order.id,
             user_id=uuid.uuid4(),
-            data=OrderUpdateRequest(quantity=Decimal("3.00000000")),
+            data=OrderUpdateRequest(quantity=Decimal("3.00")),
         )
 
     assert order.quantity == Decimal("1.00000000")
@@ -551,6 +553,67 @@ def test_cancel_order_rejects_non_pending_order() -> None:
         )
 
     assert order.status == "FILLED"
+    session.commit.assert_not_called()
+    session.rollback.assert_called_once()
+
+
+def test_delete_order_removes_unfilled_order() -> None:
+    session = MagicMock()
+    user_id = uuid.uuid4()
+    portfolio_id = uuid.uuid4()
+    order = Order(
+        id=uuid.uuid4(),
+        portfolio_id=portfolio_id,
+        symbol="AAPL",
+        side="BUY",
+        order_type="MARKET",
+        quantity=Decimal("1.00000000"),
+        limit_price=None,
+        currency="USD",
+        status="CANCELLED",
+        strategy_version=MANUAL_STRATEGY_VERSION,
+        decision_evidence=MANUAL_DECISION_EVIDENCE,
+    )
+    session.scalar.side_effect = [portfolio_id, order]
+
+    delete_order(
+        session,
+        portfolio_id=portfolio_id,
+        order_id=order.id,
+        user_id=user_id,
+    )
+
+    session.delete.assert_called_once_with(order)
+    session.commit.assert_called_once()
+    session.rollback.assert_not_called()
+
+
+def test_delete_order_rejects_filled_order() -> None:
+    session = MagicMock()
+    order = Order(
+        id=uuid.uuid4(),
+        portfolio_id=uuid.uuid4(),
+        symbol="AAPL",
+        side="BUY",
+        order_type="MARKET",
+        quantity=Decimal("1.00000000"),
+        limit_price=None,
+        currency="USD",
+        status="FILLED",
+        strategy_version=MANUAL_STRATEGY_VERSION,
+        decision_evidence=MANUAL_DECISION_EVIDENCE,
+    )
+    session.scalar.side_effect = [order.portfolio_id, order]
+
+    with pytest.raises(OrderNotDeletableError):
+        delete_order(
+            session,
+            portfolio_id=order.portfolio_id,
+            order_id=order.id,
+            user_id=uuid.uuid4(),
+        )
+
+    session.delete.assert_not_called()
     session.commit.assert_not_called()
     session.rollback.assert_called_once()
 

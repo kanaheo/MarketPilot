@@ -11,11 +11,13 @@ from marketpilot_api.repositories.orders import (
     OrderExecutionPriceError,
     OrderInsufficientCashError,
     OrderInsufficientPositionError,
+    OrderNotDeletableError,
     OrderNotFoundError,
     OrderNotPendingError,
     OrderPortfolioNotFoundError,
     cancel_order,
     create_order,
+    delete_order,
     execute_order,
     list_orders,
     update_order,
@@ -175,6 +177,35 @@ def cancel_pending_order(
         ) from None
 
     return OrderResponse.model_validate(order)
+
+
+@router.delete(
+    "/{order_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_unfilled_order(
+    portfolio_id: uuid.UUID,
+    order_id: uuid.UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[Session, Depends(get_db_session)],
+) -> None:
+    try:
+        delete_order(
+            session,
+            portfolio_id=portfolio_id,
+            order_id=order_id,
+            user_id=current_user.id,
+        )
+    except (OrderPortfolioNotFoundError, OrderNotFoundError):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Order not found",
+        ) from None
+    except OrderNotDeletableError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Filled orders cannot be deleted",
+        ) from None
 
 
 @router.get("", response_model=list[OrderResponse])

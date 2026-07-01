@@ -218,6 +218,7 @@ export const portfolio = {
       limitPriceRequired: "指値注文には指値価格が必要です。",
       marketLimitPrice: "成行注文では指値価格を入力しません。",
       orderType: "注文種別を選択してください。",
+      quantityDecimalPlaces: "数量は小数第2位まで入力してください。",
       quantityPositive: "数量は0より大きい必要があります。",
       quantityRequired: "数量を入力してください。",
       side: "買いまたは売りを選択してください。",
@@ -274,6 +275,7 @@ export const portfolio = {
       unknown: "注文を約定できませんでした。しばらくしてからもう一度お試しください。",
     },
     cancel: "取消",
+    delete: "削除",
     empty: {
       title: "注文はありません",
       description: "最初のペーパー注文を記録すると、ここに表示されます。",

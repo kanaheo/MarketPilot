@@ -2,6 +2,17 @@ import { z } from "zod";
 
 import type { PortfolioMessages } from "@/types/i18n/portfolio";
 
+const ORDER_QUANTITY_SCALE = 100;
+
+function hasAtMostTwoDecimalPlaces(value: number): boolean {
+  return (
+    Math.abs(
+      value * ORDER_QUANTITY_SCALE -
+        Math.round(value * ORDER_QUANTITY_SCALE),
+    ) < 1e-9
+  );
+}
+
 export function createPortfolioSchema(
   messages: PortfolioMessages["createForm"]["validation"],
 ) {
@@ -61,7 +72,11 @@ export function createOrderSchema(
       quantity: z
         .number(messages.quantityRequired)
         .finite(messages.quantityRequired)
-        .positive(messages.quantityPositive),
+        .positive(messages.quantityPositive)
+        .refine(
+          hasAtMostTwoDecimalPlaces,
+          messages.quantityDecimalPlaces,
+        ),
       side: z.enum(["BUY", "SELL"], {
         error: messages.side,
       }),

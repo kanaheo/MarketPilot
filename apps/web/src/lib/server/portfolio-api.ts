@@ -1,4 +1,5 @@
 import {
+  marketPilotApiDelete,
   marketPilotApiPatch,
   marketPilotApiPost,
   marketPilotApiRequest,
@@ -74,6 +75,13 @@ export async function cancelOrder(
   return marketPilotApiPatch<undefined, OrderApiItem>(
     `/portfolios/${portfolioId}/orders/${orderId}/cancel`,
   );
+}
+
+export async function deleteOrder(
+  portfolioId: string,
+  orderId: string,
+): Promise<void> {
+  return marketPilotApiDelete(`/portfolios/${portfolioId}/orders/${orderId}`);
 }
 
 export async function updateOrder(

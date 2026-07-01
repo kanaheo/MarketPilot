@@ -13,6 +13,7 @@ from marketpilot_api.repositories.orders import (
     OrderExecutionPriceError,
     OrderInsufficientCashError,
     OrderInsufficientPositionError,
+    OrderNotDeletableError,
     OrderNotPendingError,
     OrderPortfolioNotFoundError,
 )
@@ -475,6 +476,59 @@ def test_cancel_pending_order_rejects_non_pending_order(monkeypatch) -> None:
     clear_dependency_overrides()
     assert response.status_code == 409
     assert response.json()["detail"] == "Only pending orders can be cancelled"
+
+
+def test_delete_unfilled_order_returns_no_content(monkeypatch) -> None:
+    user = User(
+        id=uuid.uuid4(),
+        auth_provider="google",
+        auth_subject="google-user-1",
+    )
+    session = MagicMock()
+    portfolio_id = uuid.uuid4()
+    order_id = uuid.uuid4()
+    delete_mock = MagicMock(return_value=None)
+    monkeypatch.setattr(orders_router, "delete_order", delete_mock)
+    app.dependency_overrides[get_current_user] = (
+        override_authenticated_user(user)
+    )
+    app.dependency_overrides[get_db_session] = override_session(session)
+
+    with TestClient(app) as client:
+        response = client.delete(f"/portfolios/{portfolio_id}/orders/{order_id}")
+
+    clear_dependency_overrides()
+    assert response.status_code == 204
+    assert response.content == b""
+    delete_mock.assert_called_once_with(
+        session,
+        portfolio_id=portfolio_id,
+        order_id=order_id,
+        user_id=user.id,
+    )
+
+
+def test_delete_unfilled_order_rejects_filled_order(monkeypatch) -> None:
+    user = User(
+        id=uuid.uuid4(),
+        auth_provider="google",
+        auth_subject="google-user-1",
+    )
+    delete_mock = MagicMock(side_effect=OrderNotDeletableError)
+    monkeypatch.setattr(orders_router, "delete_order", delete_mock)
+    app.dependency_overrides[get_current_user] = (
+        override_authenticated_user(user)
+    )
+    app.dependency_overrides[get_db_session] = override_session(MagicMock())
+
+    with TestClient(app) as client:
+        response = client.delete(
+            f"/portfolios/{uuid.uuid4()}/orders/{uuid.uuid4()}",
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Filled orders cannot be deleted"
 
 
 def test_retrieve_orders_returns_owner_orders(monkeypatch) -> None:

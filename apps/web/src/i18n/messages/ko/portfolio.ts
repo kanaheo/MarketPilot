@@ -212,6 +212,7 @@ export const portfolio = {
       limitPriceRequired: "지정가 주문은 지정가가 필요합니다.",
       marketLimitPrice: "시장가 주문은 지정가를 입력하지 않습니다.",
       orderType: "주문 유형을 선택해 주세요.",
+      quantityDecimalPlaces: "수량은 소수점 둘째 자리까지 입력해 주세요.",
       quantityPositive: "수량은 0보다 커야 합니다.",
       quantityRequired: "수량을 입력해 주세요.",
       side: "매수 또는 매도를 선택해 주세요.",
@@ -267,6 +268,7 @@ export const portfolio = {
       unknown: "주문을 체결하지 못했습니다. 잠시 후 다시 시도해 주세요.",
     },
     cancel: "취소",
+    delete: "삭제",
     empty: {
       title: "주문이 없습니다",
       description: "첫 모의주문을 기록하면 이곳에 표시됩니다.",

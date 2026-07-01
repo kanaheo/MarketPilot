@@ -9,6 +9,11 @@ import { useForm, useWatch } from "react-hook-form";
 
 import { createOrderAction } from "@/app/[locale]/(dashboard)/portfolio/actions";
 import {
+  ORDER_QUANTITY_INPUT_MIN,
+  ORDER_QUANTITY_INPUT_STEP,
+  sanitizeOrderQuantityInput,
+} from "@/lib/portfolio/order-quantity";
+import {
   createOrderSchema,
   type OrderFormValues,
 } from "@/lib/validation/portfolios";
@@ -107,18 +112,54 @@ export function OrderForm({
         noValidate
         onSubmit={handleSubmit(submitOrder)}
       >
-        <label>
-          <span>{messages.fields.symbol.label}</span>
-          <input
-            {...register("symbol")}
-            aria-invalid={errors.symbol ? "true" : "false"}
-            placeholder={messages.fields.symbol.placeholder}
-            type="text"
-          />
-          {errors.symbol ? <small>{errors.symbol.message}</small> : null}
-        </label>
+        <div className="order-form-trade-row">
+          <label>
+            <span>{messages.fields.symbol.label}</span>
+            <input
+              {...register("symbol")}
+              aria-invalid={errors.symbol ? "true" : "false"}
+              placeholder={messages.fields.symbol.placeholder}
+              type="text"
+            />
+            {errors.symbol ? <small>{errors.symbol.message}</small> : null}
+          </label>
+          <label>
+            <span>{messages.fields.quantity.label}</span>
+            <input
+              {...register("quantity", { valueAsNumber: true })}
+              aria-invalid={errors.quantity ? "true" : "false"}
+              min={ORDER_QUANTITY_INPUT_MIN}
+              onInput={sanitizeOrderQuantityInput}
+              placeholder={messages.fields.quantity.placeholder}
+              step={ORDER_QUANTITY_INPUT_STEP}
+              type="number"
+            />
+            {errors.quantity ? (
+              <small>{errors.quantity.message}</small>
+            ) : null}
+          </label>
+          {orderType === "LIMIT" ? (
+            <label>
+              <span>{messages.fields.limitPrice.label}</span>
+              <input
+                {...register("limitPrice", {
+                  setValueAs: (value: string) =>
+                    value === "" ? undefined : Number(value),
+                })}
+                aria-invalid={errors.limitPrice ? "true" : "false"}
+                min="0.0001"
+                placeholder={messages.fields.limitPrice.placeholder}
+                step="0.0001"
+                type="number"
+              />
+              {errors.limitPrice ? (
+                <small>{errors.limitPrice.message}</small>
+              ) : null}
+            </label>
+          ) : null}
+        </div>
 
-        <div className="portfolio-create-fields">
+        <div className="order-form-option-row">
           <div className="cash-transaction-type-group">
             <span>{messages.fields.side.label}</span>
             <label>
@@ -157,57 +198,19 @@ export function OrderForm({
           </div>
         </div>
 
-        <div className="portfolio-create-fields">
+        <div className="portfolio-create-actions order-form-actions">
           <label>
-            <span>{messages.fields.quantity.label}</span>
+            <span>{messages.fields.decisionEvidence.label}</span>
             <input
-              {...register("quantity", { valueAsNumber: true })}
-              aria-invalid={errors.quantity ? "true" : "false"}
-              min="0.00000001"
-              placeholder={messages.fields.quantity.placeholder}
-              step="0.00000001"
-              type="number"
+              {...register("decisionEvidence")}
+              aria-invalid={errors.decisionEvidence ? "true" : "false"}
+              placeholder={messages.fields.decisionEvidence.placeholder}
+              type="text"
             />
-            {errors.quantity ? (
-              <small>{errors.quantity.message}</small>
+            {errors.decisionEvidence ? (
+              <small>{errors.decisionEvidence.message}</small>
             ) : null}
           </label>
-
-          {orderType === "LIMIT" ? (
-            <label>
-              <span>{messages.fields.limitPrice.label}</span>
-              <input
-                {...register("limitPrice", {
-                  setValueAs: (value: string) =>
-                    value === "" ? undefined : Number(value),
-                })}
-                aria-invalid={errors.limitPrice ? "true" : "false"}
-                min="0.0001"
-                placeholder={messages.fields.limitPrice.placeholder}
-                step="0.0001"
-                type="number"
-              />
-              {errors.limitPrice ? (
-                <small>{errors.limitPrice.message}</small>
-              ) : null}
-            </label>
-          ) : null}
-        </div>
-
-        <label>
-          <span>{messages.fields.decisionEvidence.label}</span>
-          <input
-            {...register("decisionEvidence")}
-            aria-invalid={errors.decisionEvidence ? "true" : "false"}
-            placeholder={messages.fields.decisionEvidence.placeholder}
-            type="text"
-          />
-          {errors.decisionEvidence ? (
-            <small>{errors.decisionEvidence.message}</small>
-          ) : null}
-        </label>
-
-        <div className="portfolio-create-actions">
           <p
             aria-live="polite"
             className={

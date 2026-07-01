@@ -204,6 +204,7 @@ export type PortfolioMessages = Readonly<{
       limitPriceRequired: string;
       marketLimitPrice: string;
       orderType: string;
+      quantityDecimalPlaces: string;
       quantityPositive: string;
       quantityRequired: string;
       side: string;
@@ -259,6 +260,7 @@ export type PortfolioMessages = Readonly<{
       unknown: string;
     };
     cancel: string;
+    delete: string;
     empty: {
       title: string;
       description: string;

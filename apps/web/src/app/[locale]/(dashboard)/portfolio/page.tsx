@@ -101,7 +101,7 @@ export default async function PortfolioPage({
         locale={locale}
         messages={messages.portfolio.holdings}
       />
-      <div className="portfolio-details-grid">
+      <div className="portfolio-details-grid portfolio-trading-grid">
         <OrderForm
           locale={locale}
           messages={messages.portfolio.orderForm}

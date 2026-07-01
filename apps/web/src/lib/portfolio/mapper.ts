@@ -9,6 +9,11 @@ import type {
 } from "@/types/portfolio";
 
 const HOLDING_COLORS = ["#0f766e", "#d97706", "#4f46e5", "#be123c", "#15803d"];
+const QUANTITY_INPUT_FORMAT_OPTIONS = {
+  maximumFractionDigits: 2,
+  minimumFractionDigits: 2,
+  useGrouping: false,
+} as const satisfies Intl.NumberFormatOptions;
 
 export type PortfolioPageData = Readonly<{
   name: string;
@@ -30,6 +35,18 @@ function getHoldingColor(symbol: string): string {
   );
 
   return HOLDING_COLORS[colorIndex % HOLDING_COLORS.length];
+}
+
+function formatQuantityInputValue(quantity: string): string {
+  const numericQuantity = Number(quantity);
+  if (!Number.isFinite(numericQuantity)) {
+    return quantity;
+  }
+
+  return numericQuantity.toLocaleString(
+    "en-US",
+    QUANTITY_INPUT_FORMAT_OPTIONS,
+  );
 }
 
 function mapCashActivities(
@@ -114,6 +131,7 @@ export function mapPortfolioOrders(
       order.limit_price === null ? null : Number(order.limit_price),
     orderType: order.order_type,
     quantity: Number(order.quantity),
+    quantityInputValue: formatQuantityInputValue(order.quantity),
     side: order.side,
     status: order.status,
     symbol: order.symbol,

@@ -238,6 +238,7 @@ export type PortfolioOrder = Readonly<{
   limitPrice: number | null;
   orderType: OrderType;
   quantity: number;
+  quantityInputValue: string;
   side: OrderSide;
   status: OrderStatus;
   symbol: string;

@@ -7,6 +7,11 @@ import { SectionHeader } from "@/components/common/section-header";
 import { formatMarketPrice, formatShortDate } from "@/lib/formatters";
 import type { PortfolioOrdersProps } from "@/types/portfolio";
 
+const ORDER_QUANTITY_FORMAT_OPTIONS = {
+  maximumFractionDigits: 2,
+  minimumFractionDigits: 0,
+} as const satisfies Intl.NumberFormatOptions;
+
 export function PortfolioOrders({
   locale,
   messages,
@@ -48,7 +53,12 @@ export function PortfolioOrders({
             <strong>{order.symbol}</strong>
             <span>{messages.sides[order.side]}</span>
             <span>{messages.types[order.orderType]}</span>
-            <span>{order.quantity.toLocaleString(locale)}</span>
+            <span>
+              {order.quantity.toLocaleString(
+                locale,
+                ORDER_QUANTITY_FORMAT_OPTIONS,
+              )}
+            </span>
             <span>
               {order.limitPrice === null
                 ? messages.marketPrice
@@ -64,7 +74,7 @@ export function PortfolioOrders({
             <span>{formatShortDate(order.createdAt, locale)}</span>
             <div className="order-action-cell">
               <PortfolioOrderActions
-                key={`${order.id}-${order.quantity}-${order.status}`}
+                key={`${order.id}-${order.quantityInputValue}-${order.status}`}
                 locale={locale}
                 messages={messages}
                 order={order}

@@ -115,3 +115,16 @@ export async function marketPilotApiPatch<RequestBody, ResponseBody>(
     method: "PATCH",
   });
 }
+
+export async function marketPilotApiDelete(path: `/${string}`): Promise<void> {
+  const response = await marketPilotApiFetch(path, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new MarketPilotApiError(
+      `MarketPilot API request failed: ${response.status}`,
+      response.status,
+    );
+  }
+}

@@ -215,6 +215,7 @@ export const portfolio = {
       limitPriceRequired: "Limit orders require a limit price.",
       marketLimitPrice: "Market orders must not include a limit price.",
       orderType: "Choose an order type.",
+      quantityDecimalPlaces: "Quantity can have at most 2 decimal places.",
       quantityPositive: "Quantity must be greater than 0.",
       quantityRequired: "Enter a quantity.",
       side: "Choose buy or sell.",
@@ -271,6 +272,7 @@ export const portfolio = {
       unknown: "Could not fill the order. Please try again shortly.",
     },
     cancel: "Cancel",
+    delete: "Delete",
     empty: {
       title: "No orders yet",
       description: "Your first paper order will appear here.",

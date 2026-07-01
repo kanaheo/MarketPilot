@@ -9,6 +9,7 @@ import {
   createCashTransaction,
   createOrder,
   createPortfolio,
+  deleteOrder,
   executeOrder,
   updateOrder,
 } from "@/lib/server/portfolio-api";
@@ -68,6 +69,8 @@ const ORDER_UPDATE_FAILURE_REASONS = {
   409: "conflict",
   422: "invalid",
 } as const satisfies Readonly<Partial<Record<number, OrderUpdateFailureReason>>>;
+
+const ORDER_QUANTITY_PATTERN = /^\d+(?:\.\d{1,2})?$/;
 
 function getCreatePortfolioFailureReason(
   error: unknown,
@@ -205,6 +208,21 @@ export async function cancelOrderAction(
   }
 }
 
+export async function deleteOrderAction(
+  locale: Locale,
+  portfolioId: string,
+  orderId: string,
+): Promise<void> {
+  assertLocale(locale);
+
+  try {
+    await deleteOrder(portfolioId, orderId);
+    revalidatePath(`/${locale}/portfolio`);
+  } catch {
+    return;
+  }
+}
+
 export async function executeOrderAction(
   locale: Locale,
   portfolioId: string,
@@ -261,8 +279,13 @@ export async function updateOrderAction(
 ): Promise<OrderUpdateActionResult> {
   assertLocale(locale);
 
-  const quantity = Number(formData.get("quantity"));
-  if (!Number.isFinite(quantity) || quantity <= 0) {
+  const quantityValue = String(formData.get("quantity") ?? "").trim();
+  const quantity = Number(quantityValue);
+  if (
+    !ORDER_QUANTITY_PATTERN.test(quantityValue) ||
+    !Number.isFinite(quantity) ||
+    quantity <= 0
+  ) {
     return {
       ok: false,
       reason: "invalid",
@@ -271,7 +294,7 @@ export async function updateOrderAction(
 
   try {
     await updateOrder(portfolioId, orderId, {
-      quantity: String(quantity),
+      quantity: quantityValue,
     });
     revalidatePath(`/${locale}/portfolio`);
     return { ok: true };

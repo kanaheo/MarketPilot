@@ -30,6 +30,10 @@ class OrderNotPendingError(Exception):
     pass
 
 
+class OrderNotDeletableError(Exception):
+    pass
+
+
 class OrderInsufficientCashError(Exception):
     pass
 
@@ -283,6 +287,44 @@ def cancel_order(
         raise
 
     return order
+
+
+def delete_order(
+    session: Session,
+    *,
+    portfolio_id: uuid.UUID,
+    order_id: uuid.UUID,
+    user_id: uuid.UUID,
+) -> None:
+    try:
+        portfolio_exists = session.scalar(
+            select(Portfolio.id).where(
+                Portfolio.id == portfolio_id,
+                Portfolio.user_id == user_id,
+            )
+        )
+        if portfolio_exists is None:
+            raise OrderPortfolioNotFoundError
+
+        order = session.scalar(
+            select(Order)
+            .where(
+                Order.id == order_id,
+                Order.portfolio_id == portfolio_id,
+            )
+            .with_for_update()
+        )
+        if order is None:
+            raise OrderNotFoundError
+
+        if order.status == "FILLED":
+            raise OrderNotDeletableError
+
+        session.delete(order)
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
 
 
 def list_orders(

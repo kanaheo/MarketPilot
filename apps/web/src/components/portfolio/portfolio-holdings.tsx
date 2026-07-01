@@ -9,7 +9,7 @@ import { formatMarketPrice, formatPercent } from "@/lib/formatters";
 import type { PortfolioHoldingsProps } from "@/types/portfolio";
 
 const HOLDING_QUANTITY_FORMAT_OPTIONS = {
-  maximumFractionDigits: 8,
+  maximumFractionDigits: 2,
   minimumFractionDigits: 0,
 } as const satisfies Intl.NumberFormatOptions;
 

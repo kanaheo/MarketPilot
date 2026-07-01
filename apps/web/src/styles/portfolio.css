@@ -200,7 +200,62 @@
 .order-form-panel {
   display: grid;
   align-content: start;
-  gap: 18px;
+  gap: 12px;
+}
+
+.order-form-panel .portfolio-create-heading {
+  align-items: center;
+}
+
+.order-form-panel .portfolio-create-heading > span {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+}
+
+.order-form-panel .portfolio-create-heading p {
+  margin-top: 3px;
+}
+
+.order-form-panel .portfolio-create-form {
+  gap: 10px;
+}
+
+.order-form-panel .portfolio-create-form input {
+  min-height: 34px;
+}
+
+.order-form-trade-row {
+  display: grid;
+  grid-template-columns: minmax(170px, 1.2fr) minmax(150px, 0.9fr);
+  gap: 10px;
+}
+
+.order-form-trade-row > label:nth-child(2):last-child {
+  max-width: none;
+}
+
+.order-form-trade-row > label:nth-child(3) {
+  grid-column: 2;
+}
+
+.order-form-option-row {
+  display: grid;
+  grid-template-columns: minmax(170px, 1.2fr) minmax(150px, 0.9fr);
+  column-gap: 10px;
+  row-gap: 8px;
+}
+
+.order-form-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(120px, 0.6fr) auto;
+  align-items: end;
+  gap: 10px;
+  margin-top: 0;
+}
+
+.order-form-actions label {
+  min-width: 0;
 }
 
 .cash-transaction-type-group {
@@ -219,7 +274,7 @@
 
 .cash-transaction-type-group label {
   display: inline-flex;
-  min-height: 36px;
+  min-height: 32px;
   align-items: center;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-control);
@@ -261,8 +316,8 @@
     minmax(72px, 0.66fr)
     minmax(54px, 0.52fr)
     minmax(78px, 0.72fr)
-    minmax(260px, 1.35fr);
-  min-height: 54px;
+    minmax(270px, 1.35fr);
+  min-height: 62px;
   align-items: center;
   gap: 8px;
   border-bottom: 1px solid #edf0ee;
@@ -318,10 +373,10 @@
 }
 
 .order-action-cell {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 6px;
+  display: grid;
+  justify-items: end;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .order-action-message {
@@ -336,29 +391,46 @@
 
 .order-execute-form,
 .order-update-form {
-  display: flex;
-  justify-content: flex-end;
+  display: grid;
+  grid-template-columns: minmax(62px, 1fr) auto;
   gap: 4px;
+  min-width: 0;
+}
+
+.order-action-grid {
+  display: grid;
+  grid-template-columns: minmax(100px, 1fr) minmax(108px, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  width: min(100%, 270px);
+}
+
+.order-secondary-actions {
+  display: contents;
+  max-width: 100%;
 }
 
 .order-execute-form input,
 .order-update-form input {
-  width: 68px;
+  width: 100%;
   min-width: 0;
   border: 1px solid #d8dedb;
   border-radius: 6px;
   background: #ffffff;
+  min-height: 28px;
   padding: 5px 6px;
   font-size: 10px;
   font-variant-numeric: tabular-nums;
 }
 
 .order-cancel-button,
+.order-delete-button,
 .order-execute-button,
 .order-update-button {
   border: 1px solid #d8dedb;
   border-radius: 6px;
   background: #ffffff;
+  min-height: 28px;
   padding: 5px 7px;
   color: var(--color-text-muted);
   font-size: 10px;
@@ -389,6 +461,15 @@
 .order-cancel-button:hover {
   border-color: #d84950;
   color: #d84950;
+}
+
+.order-delete-button {
+  border-color: #f1c9cc;
+  color: #d84950;
+}
+
+.order-delete-button:hover {
+  background: #fdeaea;
 }
 
 .order-action-placeholder {
@@ -614,6 +695,10 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: stretch;
   gap: 14px;
+}
+
+.portfolio-trading-grid {
+  grid-template-columns: minmax(360px, 0.7fr) minmax(820px, 1.3fr);
 }
 
 .portfolio-detail-panel {

@@ -20,7 +20,7 @@ class OrderCreateRequest(BaseModel):
     quantity: Decimal = Field(
         gt=0,
         max_digits=20,
-        decimal_places=8,
+        decimal_places=2,
     )
     limit_price: Decimal | None = Field(
         default=None,
@@ -77,7 +77,7 @@ class OrderUpdateRequest(BaseModel):
     quantity: Decimal = Field(
         gt=0,
         max_digits=20,
-        decimal_places=8,
+        decimal_places=2,
     )
 
 
