@@ -25,6 +25,7 @@ export type PortfolioPageData = Readonly<{
   totalProfitLoss: number;
   totalReturnRate: number;
   totalValue: number;
+  unrealizedProfitLoss: number;
   cashActivities: readonly PortfolioCashActivity[];
   holdings: readonly PortfolioHolding[];
 }>;
@@ -83,8 +84,13 @@ export function mapPortfolioPageData(
   detail: PortfolioDetailApiItem,
 ): PortfolioPageData {
   const currentCash = Number(detail.current_cash);
+  const investedValue = Number(detail.invested_value);
   const netContributions = Number(detail.net_contributions);
   const realizedProfitLoss = Number(detail.realized_profit_loss);
+  const totalProfitLoss = Number(detail.total_profit_loss);
+  const totalReturnRate = Number(detail.total_return_rate);
+  const totalValue = Number(detail.total_value);
+  const unrealizedProfitLoss = Number(detail.unrealized_profit_loss);
   const holdings = detail.holdings.map((holding) => ({
     averagePrice: Number(holding.average_price),
     color: getHoldingColor(holding.symbol),
@@ -95,15 +101,8 @@ export function mapPortfolioPageData(
     quantity: Number(holding.quantity),
     returnRate: Number(holding.return_rate),
     symbol: holding.symbol,
+    unrealizedProfitLoss: Number(holding.unrealized_profit_loss),
   }));
-  const investedValue = holdings.reduce(
-    (total, holding) => total + holding.marketValue,
-    0,
-  );
-  const totalValue = currentCash + investedValue;
-  const totalProfitLoss = totalValue - netContributions;
-  const totalReturnRate =
-    netContributions > 0 ? totalProfitLoss / netContributions : 0;
 
   return {
     name: detail.name,
@@ -115,6 +114,7 @@ export function mapPortfolioPageData(
     totalProfitLoss,
     totalReturnRate,
     totalValue,
+    unrealizedProfitLoss,
     cashActivities: mapCashActivities(
       currentCash,
       detail.recent_cash_transactions,

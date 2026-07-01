@@ -84,13 +84,19 @@ class PortfolioHoldingResponse(BaseModel):
     average_price: Decimal
     current_price: Decimal
     market_value: Decimal
+    unrealized_profit_loss: Decimal
     return_rate: Decimal
     currency: SupportedCurrency
 
 
 class PortfolioDetailResponse(PortfolioResponse):
+    invested_value: Decimal
     net_contributions: Decimal
     realized_profit_loss: Decimal
+    total_profit_loss: Decimal
+    total_return_rate: Decimal
+    total_value: Decimal
+    unrealized_profit_loss: Decimal
     recent_cash_transactions: list[CashTransactionResponse]
     holdings: list[PortfolioHoldingResponse] = Field(default_factory=list)
     orders: list[object] = Field(default_factory=list)

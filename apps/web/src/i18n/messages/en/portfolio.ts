@@ -99,6 +99,7 @@ export const portfolio = {
       averagePrice: "Average price",
       currentPrice: "Current price",
       marketValue: "Market value",
+      unrealizedProfitLoss: "Unrealized P/L",
       returnRate: "Return",
     },
     empty: {

@@ -228,8 +228,13 @@ def test_retrieve_portfolio_returns_detail_for_owner(monkeypatch) -> None:
         return_value=PortfolioDetail(
             portfolio=portfolio,
             current_cash=Decimal("10250.0000"),
+            invested_value=Decimal("200.0000"),
             net_contributions=Decimal("10000.0000"),
             realized_profit_loss=Decimal("25.0000"),
+            total_profit_loss=Decimal("450.0000"),
+            total_return_rate=Decimal("0.045"),
+            total_value=Decimal("10450.0000"),
+            unrealized_profit_loss=Decimal("0"),
             recent_cash_transactions=[cash_transaction],
             holdings=[
                 PortfolioHolding(
@@ -238,6 +243,7 @@ def test_retrieve_portfolio_returns_detail_for_owner(monkeypatch) -> None:
                     average_price=Decimal("100.0000"),
                     current_price=Decimal("100.0000"),
                     market_value=Decimal("200.0000"),
+                    unrealized_profit_loss=Decimal("0"),
                     return_rate=Decimal("0"),
                     currency="USD",
                 )
@@ -260,14 +266,20 @@ def test_retrieve_portfolio_returns_detail_for_owner(monkeypatch) -> None:
     clear_dependency_overrides()
     assert response.status_code == 200
     assert response.json()["current_cash"] == "10250.0000"
+    assert response.json()["invested_value"] == "200.0000"
     assert response.json()["net_contributions"] == "10000.0000"
     assert response.json()["realized_profit_loss"] == "25.0000"
+    assert response.json()["total_profit_loss"] == "450.0000"
+    assert response.json()["total_return_rate"] == "0.045"
+    assert response.json()["total_value"] == "10450.0000"
+    assert response.json()["unrealized_profit_loss"] == "0"
     assert response.json()["recent_cash_transactions"][0]["note"] == (
         "Extra cash"
     )
     assert response.json()["holdings"][0]["symbol"] == "AAPL"
     assert response.json()["holdings"][0]["quantity"] == "2.00000000"
     assert response.json()["holdings"][0]["market_value"] == "200.0000"
+    assert response.json()["holdings"][0]["unrealized_profit_loss"] == "0"
     assert response.json()["orders"] == []
     detail_mock.assert_called_once_with(
         session,

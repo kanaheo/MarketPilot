@@ -152,8 +152,13 @@ def test_get_portfolio_detail_filters_owner_and_limits_transactions() -> None:
     assert transaction_statement._limit_clause.value == 20
     assert result is not None
     assert result.current_cash == Decimal("1000.0000")
+    assert result.invested_value == Decimal("200.000000000000")
     assert result.net_contributions == Decimal("1000.0000")
     assert result.realized_profit_loss == Decimal("0")
+    assert result.total_profit_loss == Decimal("200.000000000000")
+    assert result.total_return_rate == Decimal("0.200000000000")
+    assert result.total_value == Decimal("1200.000000000000")
+    assert result.unrealized_profit_loss == Decimal("0E-12")
     assert result.recent_cash_transactions == [transaction]
     assert result.holdings == [
         PortfolioHolding(
@@ -162,6 +167,7 @@ def test_get_portfolio_detail_filters_owner_and_limits_transactions() -> None:
             average_price=Decimal("100.0000"),
             current_price=Decimal("100.0000"),
             market_value=Decimal("200.000000000000"),
+            unrealized_profit_loss=Decimal("0E-12"),
             return_rate=Decimal("0"),
             currency="USD",
         )
@@ -233,6 +239,7 @@ def test_get_portfolio_detail_resets_average_price_after_closed_position() -> No
     assert result is not None
     assert result.net_contributions == Decimal("1000.0000")
     assert result.realized_profit_loss == Decimal("10.00000000")
+    assert result.unrealized_profit_loss == Decimal("0E-12")
     assert result.holdings == [
         PortfolioHolding(
             symbol="AAPL",
@@ -240,6 +247,7 @@ def test_get_portfolio_detail_resets_average_price_after_closed_position() -> No
             average_price=Decimal("200.0000"),
             current_price=Decimal("200.0000"),
             market_value=Decimal("200.000000000000"),
+            unrealized_profit_loss=Decimal("0E-12"),
             return_rate=Decimal("0"),
             currency="USD",
         )

@@ -101,6 +101,7 @@ export const portfolio = {
       averagePrice: "平均取得価格",
       currentPrice: "現在値",
       marketValue: "評価額",
+      unrealizedProfitLoss: "未実現損益",
       returnRate: "収益率",
     },
     empty: {

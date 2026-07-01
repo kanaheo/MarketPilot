@@ -32,8 +32,13 @@ class PortfolioWithCash:
 class PortfolioDetail:
     portfolio: Portfolio
     current_cash: Decimal
+    invested_value: Decimal
     net_contributions: Decimal
     realized_profit_loss: Decimal
+    total_profit_loss: Decimal
+    total_return_rate: Decimal
+    total_value: Decimal
+    unrealized_profit_loss: Decimal
     recent_cash_transactions: list[CashTransaction]
     holdings: list["PortfolioHolding"]
 
@@ -154,12 +159,24 @@ def get_portfolio_detail(
         session,
         portfolio_id=portfolio.id,
     )
+    total_value = current_cash + position_summary.invested_value
+    total_profit_loss = total_value - net_contributions
+    total_return_rate = (
+        total_profit_loss / net_contributions
+        if net_contributions > 0
+        else Decimal("0")
+    )
 
     return PortfolioDetail(
         portfolio=portfolio,
         current_cash=current_cash,
+        invested_value=position_summary.invested_value,
         net_contributions=net_contributions,
         realized_profit_loss=position_summary.realized_profit_loss,
+        total_profit_loss=total_profit_loss,
+        total_return_rate=total_return_rate,
+        total_value=total_value,
+        unrealized_profit_loss=position_summary.unrealized_profit_loss,
         recent_cash_transactions=recent_transactions,
         holdings=position_summary.holdings,
     )

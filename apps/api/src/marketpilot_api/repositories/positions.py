@@ -15,6 +15,7 @@ class PortfolioHolding:
     average_price: Decimal
     current_price: Decimal
     market_value: Decimal
+    unrealized_profit_loss: Decimal
     return_rate: Decimal
     currency: str
 
@@ -22,7 +23,9 @@ class PortfolioHolding:
 @dataclass(frozen=True)
 class PortfolioPositionSummary:
     holdings: list[PortfolioHolding]
+    invested_value: Decimal
     realized_profit_loss: Decimal
+    unrealized_profit_loss: Decimal
 
 
 @dataclass
@@ -118,7 +121,9 @@ def get_portfolio_position_summary(
     portfolio_id: uuid.UUID,
 ) -> PortfolioPositionSummary:
     holdings = []
+    invested_value = Decimal("0")
     realized_profit_loss = Decimal("0")
+    unrealized_profit_loss = Decimal("0")
 
     for accumulator in build_holding_accumulators(
         _list_order_executions(session, portfolio_id=portfolio_id)
@@ -130,6 +135,16 @@ def get_portfolio_position_summary(
         average_price = accumulator.average_price
         current_price = average_price
         market_value = accumulator.quantity * current_price
+        holding_unrealized_profit_loss = (
+            current_price - average_price
+        ) * accumulator.quantity
+        holding_return_rate = (
+            holding_unrealized_profit_loss / accumulator.cost_basis
+            if accumulator.cost_basis > 0
+            else Decimal("0")
+        )
+        invested_value += market_value
+        unrealized_profit_loss += holding_unrealized_profit_loss
 
         holdings.append(
             PortfolioHolding(
@@ -138,14 +153,17 @@ def get_portfolio_position_summary(
                 average_price=average_price,
                 current_price=current_price,
                 market_value=market_value,
-                return_rate=Decimal("0"),
+                unrealized_profit_loss=holding_unrealized_profit_loss,
+                return_rate=holding_return_rate,
                 currency=accumulator.currency,
             )
         )
 
     return PortfolioPositionSummary(
         holdings=holdings,
+        invested_value=invested_value,
         realized_profit_loss=realized_profit_loss,
+        unrealized_profit_loss=unrealized_profit_loss,
     )
 
 

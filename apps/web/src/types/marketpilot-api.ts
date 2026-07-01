@@ -39,14 +39,20 @@ export type PortfolioHoldingApiItem = Readonly<{
   average_price: string;
   current_price: string;
   market_value: string;
+  unrealized_profit_loss: string;
   return_rate: string;
   currency: SupportedCurrency;
 }>;
 
 export type PortfolioDetailApiItem = PortfolioApiItem &
   Readonly<{
+    invested_value: string;
     net_contributions: string;
     realized_profit_loss: string;
+    total_profit_loss: string;
+    total_return_rate: string;
+    total_value: string;
+    unrealized_profit_loss: string;
     recent_cash_transactions: readonly CashTransactionApiItem[];
     holdings: readonly PortfolioHoldingApiItem[];
     orders: readonly unknown[];

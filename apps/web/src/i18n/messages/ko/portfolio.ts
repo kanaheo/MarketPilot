@@ -99,6 +99,7 @@ export const portfolio = {
       averagePrice: "평균 매수가",
       currentPrice: "현재가",
       marketValue: "평가금액",
+      unrealizedProfitLoss: "미실현 손익",
       returnRate: "수익률",
     },
     empty: {

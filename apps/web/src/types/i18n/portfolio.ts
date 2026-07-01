@@ -92,6 +92,7 @@ export type PortfolioMessages = Readonly<{
       averagePrice: string;
       currentPrice: string;
       marketValue: string;
+      unrealizedProfitLoss: string;
       returnRate: string;
     };
     empty: {

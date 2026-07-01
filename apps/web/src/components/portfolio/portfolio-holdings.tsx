@@ -43,6 +43,9 @@ export function PortfolioHoldings({
               {messages.columns.currentPrice}
             </span>
             <span role="columnheader">{messages.columns.marketValue}</span>
+            <span role="columnheader">
+              {messages.columns.unrealizedProfitLoss}
+            </span>
             <span role="columnheader">{messages.columns.returnRate}</span>
           </div>
 
@@ -87,6 +90,15 @@ export function PortfolioHoldings({
                   locale,
                 )}
               </strong>
+              <span role="cell">
+                <TrendValue value={holding.unrealizedProfitLoss}>
+                  {formatMarketPrice(
+                    holding.unrealizedProfitLoss,
+                    holding.currency,
+                    locale,
+                  )}
+                </TrendValue>
+              </span>
               <span role="cell">
                 <TrendValue value={holding.returnRate}>
                   {formatPercent(holding.returnRate, locale)}

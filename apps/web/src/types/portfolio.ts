@@ -219,6 +219,7 @@ export type PortfolioHolding = Readonly<{
   averagePrice: number;
   currentPrice: number;
   marketValue: number;
+  unrealizedProfitLoss: number;
   returnRate: number;
   color: string;
 }>;
