@@ -398,6 +398,8 @@ def test_execute_buy_order_fills_order_and_records_cash_outflow() -> None:
     assert result.status == "FILLED"
     assert execution.order_id == order.id
     assert execution.gross_amount == Decimal("370.5000")
+    assert execution.portfolio_base_currency == "USD"
+    assert execution.execution_fx_rate == Decimal("1.000000")
     assert execution.executed_at == executed_at
     assert cash_transaction.transaction_type == "TRADE_BUY"
     assert cash_transaction.amount == Decimal("370.5000")

@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from marketpilot_api.models import CashTransaction, Order, OrderExecution, Portfolio
 from marketpilot_api.repositories.cash_ledger import get_current_cash
+from marketpilot_api.repositories.fx_rates import get_fx_rate
 from marketpilot_api.repositories.positions import get_available_position_quantity
 from marketpilot_api.repositories.price_quotes import get_current_price
 from marketpilot_api.schemas.orders import (
@@ -44,6 +45,10 @@ class OrderInsufficientPositionError(Exception):
 
 
 class OrderExecutionPriceError(Exception):
+    pass
+
+
+class OrderFxRateNotFoundError(Exception):
     pass
 
 
@@ -349,6 +354,13 @@ def execute_order(
         if executed_at is None:
             raise ValueError("Executed at is required")
 
+        execution_fx_rate = get_fx_rate(
+            base_currency=order.currency,
+            quote_currency=portfolio.base_currency,
+        )
+        if execution_fx_rate is None:
+            raise OrderFxRateNotFoundError
+
         execution = OrderExecution(
             id=uuid.uuid4(),
             order_id=order.id,
@@ -358,7 +370,9 @@ def execute_order(
             quantity=order.quantity,
             price=data.price,
             gross_amount=gross_amount,
-            currency=portfolio.base_currency,
+            currency=order.currency,
+            portfolio_base_currency=portfolio.base_currency,
+            execution_fx_rate=execution_fx_rate.rate,
             executed_at=executed_at,
         )
         cash_transaction = CashTransaction(

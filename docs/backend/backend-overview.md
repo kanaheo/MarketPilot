@@ -70,9 +70,9 @@ to an external or cached provider without making the frontend call a third
 party directly.
 
 FX rates are also fixture-backed behind a provider boundary. The first API
-surface returns a single pair rate for supported currencies. Cross-currency
-portfolio valuation should use current FX rates, while order executions should
-eventually store the exact execution-time FX rate.
+surface returns a single pair rate for supported currencies. Order executions
+store the execution-time FX rate snapshot, and cross-currency portfolio
+valuation should use current FX rates in a later step.
 
 ---
 
@@ -142,8 +142,8 @@ transaction으로 저장합니다. 포트폴리오 목록은 항상 인증된 DB
 외부 API를 직접 호출하지 않아도 됩니다.
 
 환율도 provider 경계 뒤에 fixture로 준비했습니다. 첫 API는 지원 통화 사이의 단일
-환율을 반환합니다. 서로 다른 통화의 포트폴리오 평가는 현재 환율을 사용하고,
-주문 체결 기록에는 이후 체결 시점 환율을 저장해야 합니다.
+환율을 반환합니다. 주문 체결 기록에는 체결 시점 환율 snapshot을 저장하고, 서로 다른
+통화의 포트폴리오 평가는 이후 단계에서 현재 환율을 사용하도록 연결해야 합니다.
 
 ---
 
@@ -213,5 +213,5 @@ JPYです。
 フロントエンドが外部APIを直接呼ぶ必要はありません。
 
 FXレートもprovider境界の背後にfixtureとして用意しています。最初のAPIは対応通貨
-間の単一レートを返します。通貨が異なるポートフォリオ評価は現在のFXレートを使い、
-注文約定記録には後で約定時点のFXレートを保存する必要があります。
+間の単一レートを返します。注文約定記録には約定時点のFXレートsnapshotを保存し、
+通貨が異なるポートフォリオ評価は後続ステップで現在のFXレートへ接続します。

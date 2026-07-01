@@ -9,6 +9,7 @@ from marketpilot_api.db.session import get_db_session
 from marketpilot_api.models import User
 from marketpilot_api.repositories.orders import (
     OrderExecutionPriceError,
+    OrderFxRateNotFoundError,
     OrderInsufficientCashError,
     OrderInsufficientPositionError,
     OrderNotDeletableError,
@@ -115,6 +116,11 @@ def execute_pending_order(
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Execution price does not satisfy the limit order",
+        ) from None
+    except OrderFxRateNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="FX rate is not available for this order",
         ) from None
 
     return OrderResponse.model_validate(order)
