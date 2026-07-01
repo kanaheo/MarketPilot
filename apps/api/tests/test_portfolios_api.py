@@ -246,6 +246,9 @@ def test_retrieve_portfolio_returns_detail_for_owner(monkeypatch) -> None:
                     unrealized_profit_loss=Decimal("0"),
                     return_rate=Decimal("0"),
                     currency="USD",
+                    quote_currency="USD",
+                    valuation_currency="USD",
+                    valuation_fx_rate=Decimal("1.000000"),
                 )
             ],
         )

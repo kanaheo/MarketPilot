@@ -98,10 +98,13 @@ export function mapPortfolioPageData(
     currentPrice: Number(holding.current_price),
     marketValue: Number(holding.market_value),
     name: holding.symbol,
+    quoteCurrency: holding.quote_currency,
     quantity: Number(holding.quantity),
     returnRate: Number(holding.return_rate),
     symbol: holding.symbol,
     unrealizedProfitLoss: Number(holding.unrealized_profit_loss),
+    valuationCurrency: holding.valuation_currency,
+    valuationFxRate: Number(holding.valuation_fx_rate),
   }));
 
   return {

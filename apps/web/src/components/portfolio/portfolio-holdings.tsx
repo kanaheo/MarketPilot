@@ -79,7 +79,7 @@ export function PortfolioHoldings({
               </HoldingChangeValue>
               <HoldingChangeValue
                 className="numeric-cell average-price"
-                currency={holding.currency}
+                currency={holding.quoteCurrency}
                 deltaType="currency"
                 locale={locale}
                 role="cell"
@@ -87,13 +87,13 @@ export function PortfolioHoldings({
               >
                 {formatMarketPrice(
                   holding.averagePrice,
-                  holding.currency,
+                  holding.quoteCurrency,
                   locale,
                 )}
               </HoldingChangeValue>
               <HoldingChangeValue
                 className="numeric-cell current-price"
-                currency={holding.currency}
+                currency={holding.quoteCurrency}
                 deltaType="currency"
                 locale={locale}
                 role="cell"
@@ -101,13 +101,13 @@ export function PortfolioHoldings({
               >
                 {formatMarketPrice(
                   holding.currentPrice,
-                  holding.currency,
+                  holding.quoteCurrency,
                   locale,
                 )}
               </HoldingChangeValue>
               <HoldingChangeValue
                 className="numeric-cell strong-value"
-                currency={holding.currency}
+                currency={holding.valuationCurrency}
                 deltaType="currency"
                 locale={locale}
                 role="cell"
@@ -115,12 +115,12 @@ export function PortfolioHoldings({
               >
                 {formatMarketPrice(
                   holding.marketValue,
-                  holding.currency,
+                  holding.valuationCurrency,
                   locale,
                 )}
               </HoldingChangeValue>
               <HoldingChangeValue
-                currency={holding.currency}
+                currency={holding.valuationCurrency}
                 deltaType="currency"
                 locale={locale}
                 role="cell"
@@ -129,7 +129,7 @@ export function PortfolioHoldings({
                 <TrendValue value={holding.unrealizedProfitLoss}>
                   {formatMarketPrice(
                     holding.unrealizedProfitLoss,
-                    holding.currency,
+                    holding.valuationCurrency,
                     locale,
                   )}
                 </TrendValue>

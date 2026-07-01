@@ -42,6 +42,9 @@ export type PortfolioHoldingApiItem = Readonly<{
   unrealized_profit_loss: string;
   return_rate: string;
   currency: SupportedCurrency;
+  quote_currency: SupportedCurrency;
+  valuation_currency: SupportedCurrency;
+  valuation_fx_rate: string;
 }>;
 
 export type PortfolioDetailApiItem = PortfolioApiItem &

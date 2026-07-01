@@ -87,6 +87,9 @@ class PortfolioHoldingResponse(BaseModel):
     unrealized_profit_loss: Decimal
     return_rate: Decimal
     currency: SupportedCurrency
+    quote_currency: SupportedCurrency
+    valuation_currency: SupportedCurrency
+    valuation_fx_rate: Decimal
 
 
 class PortfolioDetailResponse(PortfolioResponse):

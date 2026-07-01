@@ -6,7 +6,10 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from marketpilot_api.models import OrderExecution
+from marketpilot_api.repositories.fx_rates import get_fx_rate
 from marketpilot_api.repositories.price_quotes import get_current_price
+
+VALUATION_FX_RATE_IDENTITY = Decimal("1.000000")
 
 
 @dataclass(frozen=True)
@@ -19,6 +22,9 @@ class PortfolioHolding:
     unrealized_profit_loss: Decimal
     return_rate: Decimal
     currency: str
+    quote_currency: str
+    valuation_currency: str
+    valuation_fx_rate: Decimal
 
 
 @dataclass(frozen=True)
@@ -48,9 +54,12 @@ class HoldingAccumulator:
 
         average_price = self.average_price
         sold_quantity = min(execution.quantity, self.quantity)
+        execution_fx_rate = (
+            execution.execution_fx_rate or VALUATION_FX_RATE_IDENTITY
+        )
         self.realized_profit_loss += (
             execution.price - average_price
-        ) * sold_quantity
+        ) * sold_quantity * execution_fx_rate
         self.quantity -= sold_quantity
         self.cost_basis -= average_price * sold_quantity
         if self.quantity == 0:
@@ -114,14 +123,31 @@ def _get_current_price(
     return get_current_price(symbol=symbol, currency=currency) or average_price
 
 
+def _get_valuation_fx_rate(
+    *,
+    quote_currency: str,
+    valuation_currency: str,
+) -> Decimal:
+    fx_rate = get_fx_rate(
+        base_currency=quote_currency,
+        quote_currency=valuation_currency,
+    )
+    if fx_rate is None:
+        return VALUATION_FX_RATE_IDENTITY
+
+    return fx_rate.rate
+
+
 def list_portfolio_holdings(
     session: Session,
     *,
     portfolio_id: uuid.UUID,
+    valuation_currency: str,
 ) -> list[PortfolioHolding]:
     return get_portfolio_position_summary(
         session,
         portfolio_id=portfolio_id,
+        valuation_currency=valuation_currency,
     ).holdings
 
 
@@ -129,6 +155,7 @@ def get_portfolio_position_summary(
     session: Session,
     *,
     portfolio_id: uuid.UUID,
+    valuation_currency: str,
 ) -> PortfolioPositionSummary:
     holdings = []
     invested_value = Decimal("0")
@@ -148,12 +175,20 @@ def get_portfolio_position_summary(
             currency=accumulator.currency,
             symbol=accumulator.symbol,
         )
-        market_value = accumulator.quantity * current_price
+        valuation_fx_rate = _get_valuation_fx_rate(
+            quote_currency=accumulator.currency,
+            valuation_currency=valuation_currency,
+        )
+        market_value = accumulator.quantity * current_price * valuation_fx_rate
         holding_unrealized_profit_loss = (
             current_price - average_price
-        ) * accumulator.quantity
+        ) * accumulator.quantity * valuation_fx_rate
         holding_return_rate = (
-            holding_unrealized_profit_loss / accumulator.cost_basis
+            (
+                (current_price - average_price)
+                * accumulator.quantity
+                / accumulator.cost_basis
+            )
             if accumulator.cost_basis > 0
             else Decimal("0")
         )
@@ -169,7 +204,10 @@ def get_portfolio_position_summary(
                 market_value=market_value,
                 unrealized_profit_loss=holding_unrealized_profit_loss,
                 return_rate=holding_return_rate,
-                currency=accumulator.currency,
+                currency=valuation_currency,
+                quote_currency=accumulator.currency,
+                valuation_currency=valuation_currency,
+                valuation_fx_rate=valuation_fx_rate,
             )
         )
 
