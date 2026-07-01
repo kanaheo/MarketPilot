@@ -41,3 +41,35 @@ def test_list_market_quotes_filters_by_symbols() -> None:
 
     assert response.status_code == 200
     assert [quote["symbol"] for quote in response.json()] == ["AAPL", "NVDA"]
+
+
+def test_retrieve_fx_rate_returns_fixture_rate() -> None:
+    with TestClient(app) as client:
+        response = client.get(
+            "/market-data/fx-rates",
+            params={"base_currency": "USD", "quote_currency": "KRW"},
+        )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "base_currency": "USD",
+        "quote_currency": "KRW",
+        "rate": "1380.000000",
+        "source": "fixture",
+    }
+
+
+def test_retrieve_fx_rate_returns_identity_rate() -> None:
+    with TestClient(app) as client:
+        response = client.get(
+            "/market-data/fx-rates",
+            params={"base_currency": "JPY", "quote_currency": "JPY"},
+        )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "base_currency": "JPY",
+        "quote_currency": "JPY",
+        "rate": "1.000000",
+        "source": "fixture",
+    }

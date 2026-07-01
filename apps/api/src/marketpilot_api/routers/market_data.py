@@ -1,11 +1,15 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query, status
 
+from marketpilot_api.repositories.fx_rates import get_fx_rate
 from marketpilot_api.repositories.price_quotes import (
     list_market_quotes as list_provider_market_quotes,
 )
-from marketpilot_api.schemas.market_data import MarketQuoteResponse
+from marketpilot_api.schemas.market_data import (
+    FxRateResponse,
+    MarketQuoteResponse,
+)
 from marketpilot_api.schemas.portfolios import SupportedCurrency
 
 router = APIRouter(prefix="/market-data", tags=["market-data"])
@@ -28,3 +32,27 @@ def list_market_quotes(
             symbols=symbols,
         )
     ]
+
+
+@router.get("/fx-rates", response_model=FxRateResponse)
+def retrieve_fx_rate(
+    base_currency: SupportedCurrency,
+    quote_currency: SupportedCurrency,
+) -> FxRateResponse:
+    fx_rate = get_fx_rate(
+        base_currency=base_currency,
+        quote_currency=quote_currency,
+    )
+
+    if fx_rate is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="FX rate not found",
+        )
+
+    return FxRateResponse(
+        base_currency=fx_rate.base_currency,
+        quote_currency=fx_rate.quote_currency,
+        rate=fx_rate.rate,
+        source=fx_rate.source,
+    )
