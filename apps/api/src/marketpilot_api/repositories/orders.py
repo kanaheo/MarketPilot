@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from marketpilot_api.models import CashTransaction, Order, OrderExecution, Portfolio
 from marketpilot_api.repositories.cash_ledger import get_current_cash
 from marketpilot_api.repositories.positions import get_available_position_quantity
-from marketpilot_api.repositories.price_quotes import get_fixture_current_price
+from marketpilot_api.repositories.price_quotes import get_current_price
 from marketpilot_api.schemas.orders import (
     OrderCreateRequest,
     OrderExecuteRequest,
@@ -126,7 +126,7 @@ def _calculate_cash_reservation(
     if order_type == "LIMIT" and limit_price is not None:
         return _calculate_gross_amount(quantity, limit_price)
 
-    current_price = get_fixture_current_price(
+    current_price = get_current_price(
         currency=currency,
         symbol=symbol,
     )

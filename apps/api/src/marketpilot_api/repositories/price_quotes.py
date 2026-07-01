@@ -1,7 +1,17 @@
+from dataclasses import dataclass
 from decimal import Decimal
 from typing import Iterable
 
 FixturePriceKey = tuple[str, str]
+
+
+@dataclass(frozen=True)
+class MarketQuote:
+    symbol: str
+    currency: str
+    current_price: Decimal
+    source: str
+
 
 FIXTURE_CURRENT_PRICES: dict[FixturePriceKey, Decimal] = {
     ("AAPL", "USD"): Decimal("195.0000"),
@@ -16,6 +26,14 @@ def get_fixture_current_price(
     currency: str,
 ) -> Decimal | None:
     return FIXTURE_CURRENT_PRICES.get((symbol.upper(), currency.upper()))
+
+
+def get_current_price(
+    *,
+    symbol: str,
+    currency: str,
+) -> Decimal | None:
+    return get_fixture_current_price(symbol=symbol, currency=currency)
 
 
 def list_fixture_current_prices(
@@ -39,3 +57,22 @@ def list_fixture_current_prices(
         quotes.append((symbol, quote_currency, current_price))
 
     return sorted(quotes, key=lambda quote: (quote[1], quote[0]))
+
+
+def list_market_quotes(
+    *,
+    currency: str | None = None,
+    symbols: Iterable[str] | None = None,
+) -> list[MarketQuote]:
+    return [
+        MarketQuote(
+            symbol=symbol,
+            currency=quote_currency,
+            current_price=current_price,
+            source="fixture",
+        )
+        for symbol, quote_currency, current_price in list_fixture_current_prices(
+            currency=currency,
+            symbols=symbols,
+        )
+    ]

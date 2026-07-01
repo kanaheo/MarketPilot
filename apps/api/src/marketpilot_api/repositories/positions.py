@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from marketpilot_api.models import OrderExecution
-from marketpilot_api.repositories.price_quotes import get_fixture_current_price
+from marketpilot_api.repositories.price_quotes import get_current_price
 
 
 @dataclass(frozen=True)
@@ -111,10 +111,7 @@ def _get_current_price(
     currency: str,
     symbol: str,
 ) -> Decimal:
-    return (
-        get_fixture_current_price(symbol=symbol, currency=currency)
-        or average_price
-    )
+    return get_current_price(symbol=symbol, currency=currency) or average_price
 
 
 def list_portfolio_holdings(

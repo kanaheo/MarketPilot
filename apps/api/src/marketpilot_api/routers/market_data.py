@@ -2,7 +2,9 @@ from typing import Annotated
 
 from fastapi import APIRouter, Query
 
-from marketpilot_api.repositories.price_quotes import list_fixture_current_prices
+from marketpilot_api.repositories.price_quotes import (
+    list_market_quotes as list_provider_market_quotes,
+)
 from marketpilot_api.schemas.market_data import MarketQuoteResponse
 from marketpilot_api.schemas.portfolios import SupportedCurrency
 
@@ -16,12 +18,12 @@ def list_market_quotes(
 ) -> list[MarketQuoteResponse]:
     return [
         MarketQuoteResponse(
-            symbol=symbol,
-            currency=quote_currency,
-            current_price=current_price,
-            source="fixture",
+            symbol=quote.symbol,
+            currency=quote.currency,
+            current_price=quote.current_price,
+            source=quote.source,
         )
-        for symbol, quote_currency, current_price in list_fixture_current_prices(
+        for quote in list_provider_market_quotes(
             currency=currency,
             symbols=symbols,
         )
