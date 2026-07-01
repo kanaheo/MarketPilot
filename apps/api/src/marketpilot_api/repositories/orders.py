@@ -86,6 +86,70 @@ def _get_reserved_sell_quantity(
     return session.scalar(statement)
 
 
+def _get_reserved_buy_amount(
+    session: Session,
+    *,
+    portfolio_id: uuid.UUID,
+    excluded_order_id: uuid.UUID | None = None,
+) -> Decimal:
+    statement = select(
+        func.coalesce(
+            func.sum(Order.quantity * Order.limit_price),
+            Decimal("0"),
+        )
+    ).where(
+        Order.portfolio_id == portfolio_id,
+        Order.side == "BUY",
+        Order.order_type == "LIMIT",
+        Order.status == "PENDING",
+    )
+
+    if excluded_order_id is not None:
+        statement = statement.where(Order.id != excluded_order_id)
+
+    return session.scalar(statement)
+
+
+def _calculate_cash_reservation(
+    *,
+    order_type: str,
+    quantity: Decimal,
+    limit_price: Decimal | None,
+) -> Decimal:
+    if order_type != "LIMIT" or limit_price is None:
+        return Decimal("0")
+
+    return _calculate_gross_amount(quantity, limit_price)
+
+
+def _validate_buy_cash_available(
+    session: Session,
+    *,
+    portfolio_id: uuid.UUID,
+    order_type: str,
+    quantity: Decimal,
+    limit_price: Decimal | None,
+    excluded_order_id: uuid.UUID | None = None,
+) -> None:
+    requested_amount = _calculate_cash_reservation(
+        order_type=order_type,
+        quantity=quantity,
+        limit_price=limit_price,
+    )
+    if requested_amount == 0:
+        return
+
+    current_cash = get_current_cash(session, portfolio_id=portfolio_id)
+    reserved_amount = _get_reserved_buy_amount(
+        session,
+        portfolio_id=portfolio_id,
+        excluded_order_id=excluded_order_id,
+    )
+
+    if requested_amount > current_cash - reserved_amount:
+        raise OrderInsufficientCashError
+
+
 def _validate_sell_quantity_available(
     session: Session,
     *,
@@ -127,7 +191,15 @@ def create_order(
         if portfolio is None:
             raise OrderPortfolioNotFoundError
 
-        if data.side == "SELL":
+        if data.side == "BUY":
+            _validate_buy_cash_available(
+                session,
+                portfolio_id=portfolio.id,
+                order_type=data.order_type,
+                quantity=data.quantity,
+                limit_price=data.limit_price,
+            )
+        elif data.side == "SELL":
             _validate_sell_quantity_available(
                 session,
                 portfolio_id=portfolio.id,
@@ -284,7 +356,16 @@ def update_order(
         if order.status != "PENDING":
             raise OrderNotPendingError
 
-        if order.side == "SELL":
+        if order.side == "BUY":
+            _validate_buy_cash_available(
+                session,
+                portfolio_id=portfolio_id,
+                order_type=order.order_type,
+                quantity=data.quantity,
+                limit_price=order.limit_price,
+                excluded_order_id=order.id,
+            )
+        elif order.side == "SELL":
             _validate_sell_quantity_available(
                 session,
                 portfolio_id=portfolio_id,

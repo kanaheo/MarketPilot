@@ -58,6 +58,11 @@ def submit_order(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Portfolio not found",
         ) from None
+    except OrderInsufficientCashError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Insufficient cash balance",
+        ) from None
     except OrderInsufficientPositionError:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -143,6 +148,11 @@ def update_pending_order(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Only pending orders can be updated",
+        ) from None
+    except OrderInsufficientCashError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Insufficient cash balance",
         ) from None
     except OrderInsufficientPositionError:
         raise HTTPException(

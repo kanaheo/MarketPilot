@@ -207,7 +207,7 @@ export const portfolio = {
     success: "注文を記録しました。",
     errors: {
       unauthorized: "ログインが必要です。再度ログインしてからお試しください。",
-      conflict: "保有数量を超える売り注文は記録できません。",
+      conflict: "注文可能な現金または保有数量を確認してください。",
       invalid: "注文の入力内容を確認してください。",
       notFound: "ポートフォリオが見つかりません。",
       unknown:
@@ -260,7 +260,7 @@ export const portfolio = {
     updateErrors: {
       unauthorized: "ログインが必要です。再度ログインしてからお試しください。",
       invalid: "数量を確認してください。",
-      conflict: "保有数量を超える売り注文には修正できません。",
+      conflict: "修正可能な現金または保有数量を確認してください。",
       notFound: "注文が見つかりません。",
       unknown: "注文を修正できませんでした。しばらくしてからもう一度お試しください。",
     },

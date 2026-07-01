@@ -204,7 +204,7 @@ export const portfolio = {
     success: "Order recorded.",
     errors: {
       unauthorized: "Please sign in again before recording an order.",
-      conflict: "Sell quantity cannot exceed the unreserved position.",
+      conflict: "Check available cash or unreserved holdings before recording.",
       invalid: "Please check your order inputs.",
       notFound: "Portfolio not found.",
       unknown: "Could not record the order. Please try again shortly.",
@@ -257,7 +257,7 @@ export const portfolio = {
     updateErrors: {
       unauthorized: "Please sign in again before updating an order.",
       invalid: "Check the quantity.",
-      conflict: "Sell quantity cannot be greater than the current position.",
+      conflict: "Check available cash or unreserved holdings before updating.",
       notFound: "Order not found.",
       unknown: "Could not update the order. Please try again shortly.",
     },
