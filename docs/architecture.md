@@ -73,10 +73,15 @@ instead of silently overwriting a seed-money field.
 
 - instrument metadata
 - price bars
+- quote provider boundary exposed through the backend API
 - exchange calendars
 - foreign-exchange rates
 - corporate actions
 - collection runs and quality checks
+
+The frontend should request quotes from MarketPilot's backend instead of
+calling third-party market-data APIs directly. This keeps secrets, provider
+selection, caching, FX conversion, and valuation rules on the server side.
 
 ### Research data
 
@@ -227,10 +232,15 @@ MarketPilot/
 
 - 종목 메타데이터
 - 가격 봉
+- 백엔드 API를 통해 노출되는 현재가 provider 경계
 - 거래소 달력
 - 환율
 - 기업 활동
 - 수집 실행 이력 및 품질 검사
+
+프론트엔드는 외부 시장 데이터 API를 직접 호출하지 않고 MarketPilot 백엔드에 현재가를
+요청합니다. 이렇게 하면 비밀값, 제공자 선택, 캐시, 환율 변환 및 평가 규칙을 서버
+쪽에서 관리할 수 있습니다.
 
 #### 연구 데이터
 
@@ -382,10 +392,15 @@ MarketPilot/
 
 - 銘柄メタデータ
 - 価格バー
+- バックエンドAPIを通じて公開する価格provider境界
 - 取引所カレンダー
 - 為替レート
 - コーポレートアクション
 - 収集実行履歴と品質チェック
+
+フロントエンドは外部の市場データAPIを直接呼ばず、MarketPilotバックエンドに価格を
+要求します。これにより、シークレット、provider選定、キャッシュ、FX換算、評価ルールを
+サーバー側で管理できます。
 
 #### リサーチデータ
 

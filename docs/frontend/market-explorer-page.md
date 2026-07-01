@@ -9,7 +9,7 @@
 ## Branch
 
 - `feature/market-explorer-page`
-- Status: fixture-based UI implementation complete
+- Status: fixture UI complete; first backend market quote API connection added
 - Route: `/[locale]/markets`
 - Access: authenticated dashboard layout
 
@@ -25,6 +25,9 @@
 - US, Korean, and Japanese instrument table
 - localized prices for USD, KRW, and JPY
 - price change, volume, sparkline, AI score, sorting, and watchlist interaction
+- server-side loading of `GET /market-data/quotes`
+- API quote overlay for matching `symbol + currency` instruments
+- quote source badge in the price column
 - empty states for filtered instruments and AI signals
 - market breadth by country
 - strongest-sector and unusual-volume highlights
@@ -48,11 +51,18 @@ only to this page. Shared components such as `Panel`, `SectionHeader`,
 Filtering and sorting are implemented as pure functions outside the React
 component so they can be tested and reused when API data is connected.
 
-## Data and AI boundary
+## Data and API boundary
 
-All prices, signals, scores, timestamps, and market summaries are fixtures.
-The UI clearly identifies fixture analysis and does not represent the values as
-live market data or personalized investment advice.
+The market table still uses fixture instruments for the universe, metadata,
+signals, scores, timestamps, and summaries. Matching prices can now be
+overlaid from the backend `GET /market-data/quotes` endpoint. The current
+backend quote source is still `fixture`, not a live external market-data
+provider.
+
+This is the first Backend-for-Frontend style boundary for market prices: the
+web app asks MarketPilot's API for quotes instead of calling a third-party
+market-data API directly. That keeps API keys, provider changes, caching, FX,
+and portfolio valuation rules on the backend side.
 
 The current AI summary is deterministic UI logic based on breadth, average
 price change, sector leadership, and volume. It is not an LLM or predictive
@@ -63,10 +73,13 @@ model result.
 - ESLint passed
 - production build and TypeScript checks passed
 - `/[locale]/markets` is protected by the authenticated dashboard layout
+- Browser check reached the login redirect; the market table itself still
+  requires an authenticated session for visual verification
 
 ## Deferred work
 
 - select delayed-data providers for the US, Korea, and Japan
+- replace fixture quote provider with an external or cached provider
 - replace fixture instruments with server/API data
 - record source and collection timestamps for every quote
 - persist watchlists per authenticated user
@@ -83,7 +96,7 @@ model result.
 ### 브랜치
 
 - `feature/market-explorer-page`
-- 상태: fixture 기반 UI 구현 완료
+- 상태: fixture UI 완료, 백엔드 시장 현재가 API 첫 연결 추가
 - 라우트: `/[locale]/markets`
 - 접근 권한: 로그인된 대시보드 레이아웃
 
@@ -98,6 +111,9 @@ model result.
 - 미국, 한국 및 일본 종목 표
 - USD, KRW 및 JPY 통화별 가격 표시
 - 등락률, 거래량, 미니 차트, AI 점수, 정렬 및 관심 종목 기능
+- 서버에서 `GET /market-data/quotes` 현재가 조회
+- `symbol + currency`가 일치하는 종목에 API 현재가 덮어쓰기
+- 가격 컬럼에 현재가 출처 배지 표시
 - 종목과 AI 신호 검색 결과 없음 상태
 - 국가별 시장 확산도
 - 강세 섹터 및 이상 거래량 요약
@@ -121,11 +137,17 @@ model result.
 `Sparkline`을 사용합니다. 필터와 정렬 계산은 React 컴포넌트 밖의 순수 함수로
 분리하여 API 연결과 테스트에서 재사용할 수 있도록 했습니다.
 
-### 데이터 및 AI 경계
+### 데이터 및 API 경계
 
-현재 가격, 신호, 점수, 분석 시점 및 시장 요약은 모두 fixture입니다. UI에서
-fixture 분석임을 명시하며 실시간 시장 데이터나 개인화된 투자 조언처럼 표현하지
-않습니다.
+시장 표의 종목군, 메타데이터, 신호, 점수, 분석 시점 및 요약은 아직 fixture입니다.
+다만 `symbol + currency`가 일치하는 가격은 백엔드 `GET /market-data/quotes`
+endpoint에서 받은 값으로 덮어쓸 수 있습니다. 현재 백엔드 현재가 출처도 아직
+`fixture`이며, 실시간 외부 시장 데이터 제공자는 아닙니다.
+
+이 구조는 시장 가격을 위한 첫 Backend-for-Frontend 형태의 경계입니다. 웹앱이
+외부 시세 API를 직접 호출하지 않고 MarketPilot API에 현재가를 요청합니다. 이렇게
+하면 API key, 제공자 교체, 캐시, 환율, 포트폴리오 평가 규칙을 백엔드에서 관리할 수
+있습니다.
 
 현재 AI 시장 요약은 시장 확산도, 평균 등락률, 섹터 강도 및 거래량을 사용하는
 결정적인 UI 로직입니다. LLM 또는 예측 모델 결과가 아닙니다.
@@ -135,10 +157,13 @@ fixture 분석임을 명시하며 실시간 시장 데이터나 개인화된 투
 - ESLint 통과
 - Production build 및 TypeScript 검사 통과
 - `/[locale]/markets`는 로그인된 대시보드 레이아웃으로 보호
+- 브라우저 확인은 로그인 화면 redirect까지 확인했으며, 시장 표 자체는 로그인 세션이
+  있어야 시각적으로 확인 가능
 
 ### 후속 작업
 
 - 미국, 한국 및 일본 지연 시세 제공자 선정
+- fixture 현재가 provider를 외부 또는 캐시 provider로 교체
 - fixture 종목을 서버/API 데이터로 교체
 - 모든 시세에 출처와 수집 시점 기록
 - 로그인 사용자별 관심 종목 저장
@@ -155,7 +180,7 @@ fixture 분석임을 명시하며 실시간 시장 데이터나 개인화된 투
 ### ブランチ
 
 - `feature/market-explorer-page`
-- 状態: fixtureベースのUI実装完了
+- 状態: fixture UI完了、バックエンド市場価格APIの初期接続を追加
 - ルート: `/[locale]/markets`
 - アクセス: 認証済みダッシュボードレイアウト
 
@@ -170,6 +195,9 @@ fixture 분석임을 명시하며 실시간 시장 데이터나 개인화된 투
 - 米国、韓国、日本の銘柄表
 - USD、KRW、JPYの通貨別価格表示
 - 騰落率、出来高、ミニチャート、AIスコア、並び替え、ウォッチリスト
+- サーバー側で`GET /market-data/quotes`を取得
+- `symbol + currency`が一致する銘柄にAPI価格を上書き
+- 価格列に価格ソースのバッジを表示
 - 銘柄とAIシグナルの空状態
 - 国別の市場の広がり
 - 強いセクターと異常出来高の要約
@@ -192,10 +220,17 @@ fixture 분석임을 명시하며 실시간 시장 데이터나 개인화된 투
 共通の`Sparkline`を使用します。フィルターと並び替えはReactコンポーネント外の
 純粋関数として分離し、API接続とテストで再利用できる構造にしています。
 
-### データとAIの境界
+### データとAPIの境界
 
-現在の価格、シグナル、スコア、分析時刻、市場要約はすべてfixtureです。
-リアルタイム市場データや個別投資助言として表示しません。
+市場表の銘柄ユニバース、メタデータ、シグナル、スコア、分析時刻、要約はまだ
+fixtureです。ただし、`symbol + currency`が一致する価格はバックエンドの
+`GET /market-data/quotes` endpointの値で上書きできます。現在のバックエンド価格
+ソースもまだ`fixture`であり、外部のリアルタイム市場データ提供者ではありません。
+
+これは市場価格向けの最初のBackend-for-Frontend境界です。Webアプリが外部の
+市場データAPIを直接呼ぶのではなく、MarketPilot APIに価格を要求します。これに
+より、API key、提供者の変更、キャッシュ、為替、ポートフォリオ評価ルールを
+バックエンド側で管理できます。
 
 現在のAI市場要約は、市場の広がり、平均騰落率、セクター強度、出来高に基づく
 決定的なUIロジックであり、LLMや予測モデルの結果ではありません。
@@ -205,11 +240,14 @@ fixture 분석임을 명시하며 실시간 시장 데이터나 개인화된 투
 - ESLint成功
 - Production buildとTypeScriptチェック成功
 - `/[locale]/markets`は認証済みダッシュボードレイアウトで保護
+- ブラウザ確認ではログイン画面へのredirectまで確認。市場表自体の視覚確認には
+  認証済みセッションが必要
 
 ### 今後の作業
 
 - 米国、韓国、日本向け遅延市場データ提供者の選定
-- fixtureをサーバー/APIデータへ置換
+- fixture価格providerを外部またはキャッシュproviderへ置換
+- fixture銘柄をサーバー/APIデータへ置換
 - 各価格に出典と収集時刻を記録
 - ユーザー別ウォッチリストの永続化
 - 検証済みシグナル・モデル出力の接続

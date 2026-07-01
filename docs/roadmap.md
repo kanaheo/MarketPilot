@@ -113,12 +113,20 @@ Exit: The repository clearly demonstrates full-stack, data, ML, and AWS skills.
 
 ## Immediate next milestone
 
-Dashboard, portfolio, market-explorer, and strategy-simulation fixture screens
-are complete. Finish the remaining Phase 1 foundation:
+The project is currently focused on the portfolio positions and market-data
+boundary work. Portfolio creation, cash activity, paper order history, order
+execution, holdings, realized P/L, unrealized P/L, and first quote API wiring
+are in place.
 
-1. add the PWA manifest and install support
-2. add frontend tests for critical interactions and accessibility
-3. verify the complete authenticated flow on desktop and mobile
+Next milestone:
+
+1. design FX handling between portfolio base currency and instrument currency
+2. connect an external or cached market quote provider behind the backend quote
+   boundary
+3. visually verify authenticated portfolio and market screens after the quote
+   wiring
+4. add focused tests for portfolio valuation, market quote mapping, and core UI
+   workflows
 
 ---
 
@@ -232,12 +240,16 @@ are complete. Finish the remaining Phase 1 foundation:
 
 ### 바로 다음 목표
 
-대시보드, 포트폴리오, 시장 탐색 및 전략 시뮬레이션 fixture 화면을 완료했습니다.
-남은 1단계 기반 작업을 마무리합니다.
+현재 프로젝트는 포트폴리오 보유 종목과 시장 데이터 경계 작업에 집중하고 있습니다.
+포트폴리오 생성, 현금 활동, 모의주문 기록, 주문 체결, 보유 종목, 실현 손익,
+미실현 손익 및 첫 현재가 API 연결이 준비되었습니다.
 
-1. PWA 매니페스트 및 설치 지원
-2. 주요 상호작용과 접근성 프론트엔드 테스트
-3. 전체 인증 흐름의 PC 및 모바일 검증
+다음 목표:
+
+1. 포트폴리오 기준 통화와 종목 통화 사이의 환율 처리 설계
+2. 백엔드 현재가 경계 뒤에 외부 또는 캐시 기반 현재가 provider 연결
+3. 현재가 연결 이후 로그인된 포트폴리오 및 시장 화면 시각 검증
+4. 포트폴리오 평가, 시장 현재가 매핑 및 핵심 UI 흐름 테스트 추가
 
 ---
 
@@ -351,9 +363,13 @@ are complete. Finish the remaining Phase 1 foundation:
 
 ### 直近のマイルストーン
 
-ダッシュボード、ポートフォリオ、市場検索、戦略シミュレーションのfixture画面が
-完了しました。残りのフェーズ1基盤作業を仕上げます。
+現在は、ポートフォリオ保有銘柄と市場データ境界の作業に集中しています。
+ポートフォリオ作成、現金履歴、ペーパー注文履歴、注文約定、保有銘柄、実現損益、
+未実現損益、初期の価格API接続が用意されています。
 
-1. PWAマニフェストとインストール対応
-2. 主要操作とアクセシビリティのフロントエンドテスト
-3. 認証フロー全体のPC・モバイル検証
+次の目標:
+
+1. ポートフォリオ基準通貨と銘柄通貨の間のFX処理を設計
+2. バックエンド価格境界の背後に外部またはキャッシュ型providerを接続
+3. 価格接続後の認証済みポートフォリオ・市場画面を視覚確認
+4. ポートフォリオ評価、価格マッピング、主要UIフローのテストを追加
