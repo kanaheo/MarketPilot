@@ -41,9 +41,9 @@ incrementally while preserving reproducibility and auditability.
 - holding quote currency, valuation currency, and valuation FX rate fields
 - quote and FX source/collection metadata in market-data and portfolio responses
 - reserved cash and reserved sell-quantity checks for pending orders
-- fixture-backed market quote provider boundary
+- cached market quote provider boundary with fixture fallback
 - `GET /market-data/quotes` endpoint
-- fixture-backed FX rate provider boundary
+- cached FX rate provider boundary with fixture fallback
 - `GET /market-data/fx-rates` endpoint
 - Alembic migration management
 - passing endpoint test
@@ -83,16 +83,19 @@ Cross-currency execution rows can exist for seeded/demo and future provider
 flows, but the public order form intentionally keeps new manual orders on the
 portfolio base-currency path for now.
 
-Market quotes are currently fixture-backed but are exposed through a provider
-boundary and `GET /market-data/quotes`, so the implementation can later switch
-to an external or cached provider without making the frontend call a third
-party directly. Quote responses include `source` and `collected_at`.
+Market quotes are currently fixture-backed but are exposed through a cached
+provider boundary and `GET /market-data/quotes`, so the implementation can
+later switch to an external provider without making the frontend call a third
+party directly. The backend can use an external provider first, cache successful
+responses for `MARKETPILOT_MARKET_DATA_CACHE_TTL_SECONDS`, and fall back to
+fixtures when the provider is unavailable. Quote responses include `source` and
+`collected_at`.
 
-FX rates are also fixture-backed behind a provider boundary. The first API
-surface returns a single pair rate for supported currencies and includes
-`source` and `collected_at`. Order executions store the execution-time FX rate
-snapshot, and cross-currency portfolio valuation uses the current FX provider
-rate.
+FX rates are also fixture-backed behind the same cached provider pattern. The
+first API surface returns a single pair rate for supported currencies and
+includes `source` and `collected_at`. Order executions store the execution-time
+FX rate snapshot, and cross-currency portfolio valuation uses the current FX
+provider rate.
 
 ---
 
@@ -135,9 +138,9 @@ MarketPilot은 모듈형 FastAPI 백엔드를 사용합니다. PostgreSQL 기반
 - 보유 종목 현재가 통화, 평가 통화 및 평가 환율 필드
 - 시장 데이터와 포트폴리오 응답의 현재가·환율 출처 및 수집 시각 metadata
 - 대기 주문에 대한 예약 현금 및 예약 매도 수량 검사
-- fixture 기반 시장 현재가 provider 경계
+- fixture fallback이 있는 cached 시장 현재가 provider 경계
 - `GET /market-data/quotes` endpoint
-- fixture 기반 환율 provider 경계
+- fixture fallback이 있는 cached 환율 provider 경계
 - `GET /market-data/fx-rates` endpoint
 - Alembic 마이그레이션 관리
 - 통과하는 endpoint 테스트
@@ -171,15 +174,17 @@ provider 값을 사용해 포트폴리오 기준 통화로 계산합니다.
 서로 다른 통화의 execution row는 데모 seed와 향후 provider 흐름을 위해 존재할 수
 있지만, 공개 주문 폼은 현재 수동 신규 주문을 포트폴리오 기준 통화 흐름으로 유지합니다.
 
-시장 현재가는 아직 fixture 기반이지만 provider 경계와 `GET /market-data/quotes`를
-통해 노출됩니다. 따라서 이후 외부 또는 캐시 provider로 바꾸더라도 프론트엔드가
-외부 API를 직접 호출하지 않아도 됩니다. 현재가 응답에는 `source`와 `collected_at`이
-포함됩니다.
+시장 현재가는 아직 fixture 기반이지만 cache가 붙은 provider 경계와
+`GET /market-data/quotes`를 통해 노출됩니다. 따라서 이후 외부 provider로 바꾸더라도
+프론트엔드가 외부 API를 직접 호출하지 않아도 됩니다. 백엔드는 외부 provider를 먼저
+사용하고, 성공 응답은 `MARKETPILOT_MARKET_DATA_CACHE_TTL_SECONDS` 동안 cache하며,
+provider가 사용할 수 없으면 fixture로 fallback할 수 있습니다. 현재가 응답에는
+`source`와 `collected_at`이 포함됩니다.
 
-환율도 provider 경계 뒤에 fixture로 준비했습니다. 첫 API는 지원 통화 사이의 단일
-환율을 반환하며 `source`와 `collected_at`을 포함합니다. 주문 체결 기록에는 체결 시점
-환율 snapshot을 저장하고, 서로 다른 통화의 포트폴리오 평가는 현재 FX provider rate를
-사용합니다.
+환율도 같은 cached provider pattern 뒤에 fixture로 준비했습니다. 첫 API는 지원 통화
+사이의 단일 환율을 반환하며 `source`와 `collected_at`을 포함합니다. 주문 체결 기록에는
+체결 시점 환율 snapshot을 저장하고, 서로 다른 통화의 포트폴리오 평가는 현재 FX
+provider rate를 사용합니다.
 
 ---
 
@@ -222,9 +227,9 @@ PostgreSQLベースのポートフォリオ、市場データ、バックテス�
 - 保有銘柄の価格通貨、評価通貨、評価FXレート項目
 - 市場データとポートフォリオ応答の価格・FX出所と収集時刻metadata
 - 待機注文に対する予約現金と予約売却数量の検査
-- fixtureベースの市場価格provider境界
+- fixture fallback付きcached市場価格provider境界
 - `GET /market-data/quotes` endpoint
-- fixtureベースのFXレートprovider境界
+- fixture fallback付きcached FXレートprovider境界
 - `GET /market-data/fx-rates` endpoint
 - Alembicマイグレーション管理
 - 成功するendpointテスト
@@ -259,12 +264,14 @@ JPYです。
 通貨が異なるexecution rowはデモseedや将来のproviderフロー向けに存在できますが、
 公開注文フォームでは当面、手動の新規注文をポートフォリオ基準通貨フローに維持します。
 
-市場価格はまだfixtureベースですが、provider境界と`GET /market-data/quotes`を通じて
-公開しています。そのため後で外部またはキャッシュ型providerへ切り替えても、
-フロントエンドが外部APIを直接呼ぶ必要はありません。価格レスポンスには`source`と
-`collected_at`を含めます。
+市場価格はまだfixtureベースですが、cache付きprovider境界と
+`GET /market-data/quotes`を通じて公開しています。そのため後で外部providerへ
+切り替えても、フロントエンドが外部APIを直接呼ぶ必要はありません。バックエンドは
+外部providerを先に使用し、成功レスポンスを
+`MARKETPILOT_MARKET_DATA_CACHE_TTL_SECONDS`の間cacheし、providerが利用できない場合は
+fixtureへfallbackできます。価格レスポンスには`source`と`collected_at`を含めます。
 
-FXレートもprovider境界の背後にfixtureとして用意しています。最初のAPIは対応通貨
-間の単一レートを返し、`source`と`collected_at`を含めます。注文約定記録には約定時点の
-FXレートsnapshotを保存し、通貨が異なるポートフォリオ評価は現在のFX provider rateを
-使用します。
+FXレートも同じcached provider patternの背後にfixtureとして用意しています。最初のAPIは
+対応通貨間の単一レートを返し、`source`と`collected_at`を含めます。注文約定記録には
+約定時点のFXレートsnapshotを保存し、通貨が異なるポートフォリオ評価は現在のFX
+provider rateを使用します。
