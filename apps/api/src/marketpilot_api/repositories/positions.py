@@ -41,29 +41,36 @@ class HoldingAccumulator:
     currency: str
     quantity: Decimal = Decimal("0")
     cost_basis: Decimal = Decimal("0")
+    valuation_cost_basis: Decimal = Decimal("0")
     realized_profit_loss: Decimal = Decimal("0")
 
     def apply_execution(self, execution: OrderExecution) -> None:
+        execution_fx_rate = (
+            execution.execution_fx_rate or VALUATION_FX_RATE_IDENTITY
+        )
         if execution.side == "BUY":
             self.quantity += execution.quantity
             self.cost_basis += execution.gross_amount
+            self.valuation_cost_basis += (
+                execution.gross_amount * execution_fx_rate
+            )
             return
 
         if self.quantity <= 0:
             return
 
         average_price = self.average_price
+        average_valuation_price = self.average_valuation_price
         sold_quantity = min(execution.quantity, self.quantity)
-        execution_fx_rate = (
-            execution.execution_fx_rate or VALUATION_FX_RATE_IDENTITY
-        )
         self.realized_profit_loss += (
-            execution.price - average_price
-        ) * sold_quantity * execution_fx_rate
-        self.quantity -= sold_quantity
+            execution.price * execution_fx_rate - average_valuation_price
+        ) * sold_quantity
+        self.valuation_cost_basis -= average_valuation_price * sold_quantity
         self.cost_basis -= average_price * sold_quantity
+        self.quantity -= sold_quantity
         if self.quantity == 0:
             self.cost_basis = Decimal("0")
+            self.valuation_cost_basis = Decimal("0")
 
     @property
     def average_price(self) -> Decimal:
@@ -71,6 +78,25 @@ class HoldingAccumulator:
             return Decimal("0")
 
         return self.cost_basis / self.quantity
+
+    @property
+    def average_valuation_price(self) -> Decimal:
+        if self.quantity <= 0:
+            return Decimal("0")
+
+        return self.valuation_cost_basis / self.quantity
+
+    def unrealized_profit_loss(self, market_value: Decimal) -> Decimal:
+        return market_value - self.valuation_cost_basis
+
+    def return_rate(self, market_value: Decimal) -> Decimal:
+        if self.valuation_cost_basis <= 0:
+            return Decimal("0")
+
+        return (
+            self.unrealized_profit_loss(market_value)
+            / self.valuation_cost_basis
+        )
 
 
 def _list_order_executions(
@@ -180,18 +206,10 @@ def get_portfolio_position_summary(
             valuation_currency=valuation_currency,
         )
         market_value = accumulator.quantity * current_price * valuation_fx_rate
-        holding_unrealized_profit_loss = (
-            current_price - average_price
-        ) * accumulator.quantity * valuation_fx_rate
-        holding_return_rate = (
-            (
-                (current_price - average_price)
-                * accumulator.quantity
-                / accumulator.cost_basis
-            )
-            if accumulator.cost_basis > 0
-            else Decimal("0")
+        holding_unrealized_profit_loss = accumulator.unrealized_profit_loss(
+            market_value
         )
+        holding_return_rate = accumulator.return_rate(market_value)
         invested_value += market_value
         unrealized_profit_loss += holding_unrealized_profit_loss
 

@@ -59,6 +59,9 @@ occurrence time, and append immutable ledger events. Withdrawals lock the
 portfolio row and reject amounts above the current cash balance.
 Holding prices keep the quote currency, while market value and unrealized P/L
 are valued in the portfolio base currency with the current FX provider rate.
+Realized P/L uses the execution-time FX snapshots, while unrealized P/L
+compares current base-currency market value with the remaining base-currency
+cost basis.
 
 Manual paper orders can be submitted, listed, updated, cancelled, deleted, and
 executed per owned portfolio. Execution creates an immutable execution record,
@@ -141,6 +144,8 @@ transaction으로 저장합니다. 포트폴리오 목록은 항상 인증된 DB
 거부합니다.
 보유 종목 가격은 현재가 통화를 유지하고, 평가금액과 미실현 손익은 현재 환율
 provider 값을 사용해 포트폴리오 기준 통화로 계산합니다.
+실현 손익은 체결 시점 환율 snapshot을 사용하고, 미실현 손익은 현재 기준 통화
+평가금액과 남아 있는 기준 통화 원가를 비교해 계산합니다.
 
 소유한 포트폴리오별로 수동 모의주문을 접수, 조회, 수정, 취소, 삭제 및 체결할 수
 있습니다. 체결은 변경 불가능한 execution 기록을 만들고, 주문을 `FILLED`로 바꾸며,
@@ -219,6 +224,8 @@ JPYです。
 超える金額を拒否します。
 保有銘柄の価格は価格通貨を維持し、評価額と未実現損益は現在のFX providerレートで
 ポートフォリオ基準通貨に換算します。
+実現損益は約定時点のFXレートsnapshotを使用し、未実現損益は現在の基準通貨評価額と
+残っている基準通貨の取得原価を比較して計算します。
 
 所有するポートフォリオごとに手動ペーパー注文を登録、取得、編集、取消、削除、
 約定できます。約定は変更不可のexecution記録を作成し、注文を`FILLED`に変更し、
