@@ -23,19 +23,31 @@ const FX_RATE_FORMAT_OPTIONS = {
   minimumFractionDigits: 0,
 } as const satisfies Intl.NumberFormatOptions;
 
-function buildFxBadgeTitle(
+function buildFxBadgeDetails(
   holding: PortfolioHoldingsProps["holdings"][number],
   locale: PortfolioHoldingsProps["locale"],
   messages: PortfolioHoldingsProps["messages"],
 ) {
+  const source = `${messages.fxBadgeSource}: ${holding.valuationFxSource}`;
   const collectedAt = holding.valuationFxCollectedAt
-    ? ` · ${messages.fxBadgeCollectedAt}: ${formatDateTime(
+    ? `${messages.fxBadgeCollectedAt}: ${formatDateTime(
         holding.valuationFxCollectedAt,
         locale,
       )}`
-    : "";
+    : null;
+  const ariaLabel = [
+    `${messages.fxBadge} ${holding.quoteCurrency}→${holding.valuationCurrency}`,
+    source,
+    collectedAt,
+  ]
+    .filter((item): item is string => item !== null)
+    .join(" · ");
 
-  return `${messages.fxBadge} ${holding.quoteCurrency}→${holding.valuationCurrency} · ${messages.fxBadgeSource}: ${holding.valuationFxSource}${collectedAt}`;
+  return {
+    ariaLabel,
+    collectedAt,
+    source,
+  };
 }
 
 export function PortfolioHoldings({
@@ -74,12 +86,19 @@ export function PortfolioHoldings({
             <span role="columnheader">{messages.columns.returnRate}</span>
           </div>
 
-          {holdings.map((holding) => (
-            <div
-              className="portfolio-holdings-row portfolio-holdings-row-live"
-              key={holding.symbol}
-              role="row"
-            >
+          {holdings.map((holding) => {
+            const fxBadgeDetails = buildFxBadgeDetails(
+              holding,
+              locale,
+              messages,
+            );
+
+            return (
+              <div
+                className="portfolio-holdings-row portfolio-holdings-row-live"
+                key={holding.symbol}
+                role="row"
+              >
               <div className="asset-cell" role="cell">
                 <AssetMark color={holding.color} symbol={holding.symbol} />
                 <span>
@@ -87,18 +106,27 @@ export function PortfolioHoldings({
                   <small>{holding.name}</small>
                   {holding.quoteCurrency ===
                   holding.valuationCurrency ? null : (
-                    <small
+                    <span
+                      aria-label={fxBadgeDetails.ariaLabel}
                       className="holding-fx-badge"
-                      title={buildFxBadgeTitle(holding, locale, messages)}
+                      tabIndex={0}
                     >
-                      {messages.fxBadge} {holding.quoteCurrency}
-                      {"→"}
-                      {holding.valuationCurrency} ·{" "}
-                      {holding.valuationFxRate.toLocaleString(
-                        locale,
-                        FX_RATE_FORMAT_OPTIONS,
-                      )}
-                    </small>
+                      <span className="holding-fx-badge-label">
+                        {messages.fxBadge} {holding.quoteCurrency}
+                        {"→"}
+                        {holding.valuationCurrency} ·{" "}
+                        {holding.valuationFxRate.toLocaleString(
+                          locale,
+                          FX_RATE_FORMAT_OPTIONS,
+                        )}
+                      </span>
+                      <span className="holding-fx-tooltip" role="tooltip">
+                        <span>{fxBadgeDetails.source}</span>
+                        {fxBadgeDetails.collectedAt ? (
+                          <span>{fxBadgeDetails.collectedAt}</span>
+                        ) : null}
+                      </span>
+                    </span>
                   )}
                 </span>
               </div>
@@ -183,8 +211,9 @@ export function PortfolioHoldings({
                   {formatPercent(holding.returnRate, locale)}
                 </TrendValue>
               </HoldingChangeValue>
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
       ) : (
         <EmptyState
