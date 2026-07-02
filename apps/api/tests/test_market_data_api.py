@@ -3,6 +3,9 @@ from fastapi.testclient import TestClient
 from marketpilot_api.main import app
 
 
+FIXTURE_COLLECTED_AT = "2026-07-01T00:00:00Z"
+
+
 def test_list_market_quotes_returns_fixture_quotes() -> None:
     with TestClient(app) as client:
         response = client.get("/market-data/quotes")
@@ -14,6 +17,7 @@ def test_list_market_quotes_returns_fixture_quotes() -> None:
         "currency": "USD",
         "current_price": "195.0000",
         "source": "fixture",
+        "collected_at": FIXTURE_COLLECTED_AT,
     } in quotes
 
 
@@ -28,6 +32,7 @@ def test_list_market_quotes_filters_by_currency() -> None:
             "currency": "JPY",
             "current_price": "2800.0000",
             "source": "fixture",
+            "collected_at": FIXTURE_COLLECTED_AT,
         }
     ]
 
@@ -56,6 +61,7 @@ def test_retrieve_fx_rate_returns_fixture_rate() -> None:
         "quote_currency": "KRW",
         "rate": "1380.000000",
         "source": "fixture",
+        "collected_at": FIXTURE_COLLECTED_AT,
     }
 
 
@@ -72,4 +78,5 @@ def test_retrieve_fx_rate_returns_identity_rate() -> None:
         "quote_currency": "JPY",
         "rate": "1.000000",
         "source": "fixture",
+        "collected_at": FIXTURE_COLLECTED_AT,
     }

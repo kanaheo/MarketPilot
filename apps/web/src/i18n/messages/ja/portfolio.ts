@@ -95,6 +95,8 @@ export const portfolio = {
     title: "保有銘柄",
     description: "現在のペーパーポジション · 現金を除く",
     fxBadge: "FX",
+    fxBadgeCollectedAt: "収集時刻",
+    fxBadgeSource: "出所",
     shareUnit: "株",
     columns: {
       asset: "資産",

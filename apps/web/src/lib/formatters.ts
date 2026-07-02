@@ -47,6 +47,18 @@ export function formatShortDate(value: string, locale: Locale) {
   }).format(new Date(value));
 }
 
+export function formatDateTime(value: string, locale: Locale) {
+  return new Intl.DateTimeFormat(localeCodes[locale], {
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    month: "short",
+    timeZone: "UTC",
+    timeZoneName: "short",
+    year: "numeric",
+  }).format(new Date(value));
+}
+
 export function formatMarketPrice(
   value: number,
   currency: "USD" | "KRW" | "JPY",

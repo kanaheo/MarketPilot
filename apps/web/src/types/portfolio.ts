@@ -218,6 +218,10 @@ export type PortfolioHolding = Readonly<{
   quoteCurrency: SupportedCurrency;
   valuationCurrency: SupportedCurrency;
   valuationFxRate: number;
+  currentPriceSource: string;
+  currentPriceCollectedAt: string | null;
+  valuationFxSource: string;
+  valuationFxCollectedAt: string | null;
   quantity: number;
   averagePrice: number;
   currentPrice: number;

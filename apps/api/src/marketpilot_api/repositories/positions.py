@@ -1,13 +1,14 @@
 import uuid
 from dataclasses import dataclass
+from datetime import datetime
 from decimal import Decimal
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from marketpilot_api.models import OrderExecution
-from marketpilot_api.repositories.fx_rates import get_fx_rate
-from marketpilot_api.repositories.price_quotes import get_current_price
+from marketpilot_api.repositories.fx_rates import FxRate, get_fx_rate
+from marketpilot_api.repositories.price_quotes import MarketQuote, get_market_quote
 
 VALUATION_FX_RATE_IDENTITY = Decimal("1.000000")
 
@@ -25,6 +26,10 @@ class PortfolioHolding:
     quote_currency: str
     valuation_currency: str
     valuation_fx_rate: Decimal
+    current_price_source: str = "execution_fallback"
+    current_price_collected_at: datetime | None = None
+    valuation_fx_source: str = "fixture"
+    valuation_fx_collected_at: datetime | None = None
 
 
 @dataclass(frozen=True)
@@ -140,28 +145,35 @@ def build_holding_accumulators(
     return holdings_by_symbol
 
 
-def _get_current_price(
+def _get_current_quote(
     *,
     average_price: Decimal,
     currency: str,
     symbol: str,
-) -> Decimal:
-    return get_current_price(symbol=symbol, currency=currency) or average_price
+) -> MarketQuote:
+    quote = get_market_quote(symbol=symbol, currency=currency)
+    if quote is not None:
+        return quote
+
+    return MarketQuote(
+        symbol=symbol,
+        currency=currency,
+        current_price=average_price,
+        source="execution_fallback",
+        collected_at=None,
+    )
 
 
 def _get_valuation_fx_rate(
     *,
     quote_currency: str,
     valuation_currency: str,
-) -> Decimal:
+) -> FxRate | None:
     fx_rate = get_fx_rate(
         base_currency=quote_currency,
         quote_currency=valuation_currency,
     )
-    if fx_rate is None:
-        return VALUATION_FX_RATE_IDENTITY
-
-    return fx_rate.rate
+    return fx_rate
 
 
 def list_portfolio_holdings(
@@ -196,7 +208,7 @@ def get_portfolio_position_summary(
             continue
 
         average_price = accumulator.average_price
-        current_price = _get_current_price(
+        current_quote = _get_current_quote(
             average_price=average_price,
             currency=accumulator.currency,
             symbol=accumulator.symbol,
@@ -205,7 +217,16 @@ def get_portfolio_position_summary(
             quote_currency=accumulator.currency,
             valuation_currency=valuation_currency,
         )
-        market_value = accumulator.quantity * current_price * valuation_fx_rate
+        valuation_fx_rate_value = (
+            valuation_fx_rate.rate
+            if valuation_fx_rate is not None
+            else VALUATION_FX_RATE_IDENTITY
+        )
+        market_value = (
+            accumulator.quantity
+            * current_quote.current_price
+            * valuation_fx_rate_value
+        )
         holding_unrealized_profit_loss = accumulator.unrealized_profit_loss(
             market_value
         )
@@ -218,14 +239,26 @@ def get_portfolio_position_summary(
                 symbol=accumulator.symbol,
                 quantity=accumulator.quantity,
                 average_price=average_price,
-                current_price=current_price,
+                current_price=current_quote.current_price,
                 market_value=market_value,
                 unrealized_profit_loss=holding_unrealized_profit_loss,
                 return_rate=holding_return_rate,
                 currency=valuation_currency,
                 quote_currency=accumulator.currency,
                 valuation_currency=valuation_currency,
-                valuation_fx_rate=valuation_fx_rate,
+                valuation_fx_rate=valuation_fx_rate_value,
+                current_price_source=current_quote.source,
+                current_price_collected_at=current_quote.collected_at,
+                valuation_fx_source=(
+                    valuation_fx_rate.source
+                    if valuation_fx_rate is not None
+                    else "unavailable"
+                ),
+                valuation_fx_collected_at=(
+                    valuation_fx_rate.collected_at
+                    if valuation_fx_rate is not None
+                    else None
+                ),
             )
         )
 

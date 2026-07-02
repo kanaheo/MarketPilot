@@ -27,6 +27,7 @@
   unrealized profit/loss
 - quote-currency display for average/current prices and base-currency display
   for valuation fields
+- FX badge for cross-currency holdings, using the portfolio valuation FX rate
 - animated value-change highlights for holdings after fills
 - cash-activity list backed by ledger events
 - BUY and SELL paper orders
@@ -57,6 +58,8 @@ unauthenticated request to `/{locale}/login`.
 - realized profit/loss is calculated from sell execution price versus average
   cost
 - unrealized profit/loss and return rate use the current price when available
+- cross-currency market value and unrealized P/L use the current FX provider
+  rate, while realized P/L uses execution-time FX snapshots
 - pending SELL orders reserve position quantity
 - pending LIMIT BUY orders reserve cash
 - pending MARKET BUY orders reserve cash only when a current price is available
@@ -72,7 +75,7 @@ unauthenticated request to `/{locale}/login`.
 ## Deferred work
 
 - connect an external or cached market-data provider
-- design and implement FX handling for base currency versus instrument currency
+- expand FX handling beyond the current fixture provider path
 - make the period tabs change the chart dataset
 - add loading, empty, and error states for remote data
 - add portfolio calculation and UI tests
@@ -100,6 +103,9 @@ unauthenticated request to `/{locale}/login`.
 - S&P 500 비교선이 포함된 포트폴리오 가치 차트
 - 자산 배분 도넛 차트
 - 수량, 평균 매수가, 현재가, 평가금액, 미실현 손익을 표시하는 보유 종목 표
+- 평균가와 현재가는 종목 현재가 통화로 표시하고, 평가금액과 미실현 손익은
+  포트폴리오 기준 통화로 표시
+- 다른 통화 보유 종목에는 포트폴리오 평가 환율을 사용하는 FX 배지 표시
 - 체결 후 보유 종목 값 변화 하이라이트
 - 원장 이벤트 기반 현금 활동 목록
 - BUY 및 SELL 모의주문
@@ -131,6 +137,8 @@ action에 둡니다.
 - 미실현 손익과 수익률은 사용 가능한 현재가를 기준으로 계산
 - 평균가와 현재가는 현재가 통화로 표시하고, 평가금액과 미실현 손익은 포트폴리오
   기준 통화로 표시
+- 서로 다른 통화의 평가금액과 미실현 손익은 현재 FX provider rate를 사용하고,
+  실현 손익은 체결 시점 FX snapshot을 사용
 - 대기 SELL 주문은 보유 수량을 예약
 - 대기 LIMIT BUY 주문은 현금을 예약
 - 대기 MARKET BUY 주문은 현재가가 있을 때만 현금을 예약
@@ -146,7 +154,7 @@ action에 둡니다.
 ### 후속 작업
 
 - 외부 또는 캐시 기반 시장 현재가 provider 연결
-- 포트폴리오 기준 통화와 종목 통화가 다를 때의 환율 처리 설계 및 구현
+- 현재 fixture provider 경로를 넘어서는 환율 처리 확장
 - 기간 탭에 실제 차트 데이터 전환 기능 추가
 - 원격 데이터용 loading, empty 및 error 상태 추가
 - 포트폴리오 계산 및 UI 테스트 추가
@@ -174,6 +182,9 @@ action에 둡니다.
 - S&P 500比較線を含むポートフォリオ価値チャート
 - 資産配分ドーナツチャート
 - 数量、平均取得価格、現在値、評価額、未実現損益を表示する保有銘柄表
+- 平均価格と現在値は銘柄の価格通貨で表示し、評価額と未実現損益は
+  ポートフォリオ基準通貨で表示
+- 通貨が異なる保有銘柄にはポートフォリオ評価FXレートのbadgeを表示
 - 約定後の保有銘柄値の変化ハイライト
 - 元帳イベントに基づく現金アクティビティ
 - BUY/SELLペーパー注文
@@ -205,6 +216,8 @@ Componentとし、API呼び出しや認証に関わる処理はServer Component�
 - 未実現損益と収益率は利用可能な現在値を基準に計算
 - 平均価格と現在値は価格通貨で表示し、評価額と未実現損益はポートフォリオ
   基準通貨で表示
+- 通貨が異なる評価額と未実現損益は現在のFX provider rateを使い、実現損益は
+  約定時点のFX snapshotを使う
 - 待機中SELL注文は保有数量を予約
 - 待機中LIMIT BUY注文は現金を予約
 - 待機中MARKET BUY注文は現在値がある場合のみ現金を予約
@@ -220,7 +233,7 @@ Componentとし、API呼び出しや認証に関わる処理はServer Component�
 ### 今後の作業
 
 - 外部またはキャッシュ型の市場価格providerを接続
-- ポートフォリオ基準通貨と銘柄通貨が異なる場合のFX処理を設計・実装
+- 現在のfixture provider経路を超えたFX処理の拡張
 - 期間タブによるチャートデータ切り替え
 - リモートデータ向けloading、empty、error状態
 - ポートフォリオ計算とUIテスト

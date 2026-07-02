@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from decimal import Decimal
 
 FixtureFxRateKey = tuple[str, str]
@@ -10,6 +11,7 @@ class FxRate:
     quote_currency: str
     rate: Decimal
     source: str
+    collected_at: datetime
 
 
 FIXTURE_FX_RATES: dict[FixtureFxRateKey, Decimal] = {
@@ -17,6 +19,7 @@ FIXTURE_FX_RATES: dict[FixtureFxRateKey, Decimal] = {
     ("USD", "JPY"): Decimal("160.000000"),
     ("JPY", "KRW"): Decimal("8.625000"),
 }
+FIXTURE_FX_COLLECTED_AT = datetime(2026, 7, 1, tzinfo=timezone.utc)
 
 
 def get_fixture_fx_rate(
@@ -62,4 +65,5 @@ def get_fx_rate(
         quote_currency=quote_currency.upper(),
         rate=rate,
         source="fixture",
+        collected_at=FIXTURE_FX_COLLECTED_AT,
     )

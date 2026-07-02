@@ -39,6 +39,7 @@ incrementally while preserving reproducibility and auditability.
 - cash ledger entries for BUY and SELL executions
 - holdings, average cost, realized P/L, unrealized P/L, and return calculations
 - holding quote currency, valuation currency, and valuation FX rate fields
+- quote and FX source/collection metadata in market-data and portfolio responses
 - reserved cash and reserved sell-quantity checks for pending orders
 - fixture-backed market quote provider boundary
 - `GET /market-data/quotes` endpoint
@@ -61,7 +62,10 @@ Holding prices keep the quote currency, while market value and unrealized P/L
 are valued in the portfolio base currency with the current FX provider rate.
 Realized P/L uses the execution-time FX snapshots, while unrealized P/L
 compares current base-currency market value with the remaining base-currency
-cost basis.
+cost basis. Holding responses also expose the current-price source,
+current-price collection timestamp, valuation FX source, and valuation FX
+collection timestamp, so the UI can show whether a value came from a fixture,
+fallback execution price, or a future cached/external provider.
 
 Manual paper orders can be submitted, listed, updated, cancelled, deleted, and
 executed per owned portfolio. Execution creates an immutable execution record,
@@ -82,12 +86,13 @@ portfolio base-currency path for now.
 Market quotes are currently fixture-backed but are exposed through a provider
 boundary and `GET /market-data/quotes`, so the implementation can later switch
 to an external or cached provider without making the frontend call a third
-party directly.
+party directly. Quote responses include `source` and `collected_at`.
 
 FX rates are also fixture-backed behind a provider boundary. The first API
-surface returns a single pair rate for supported currencies. Order executions
-store the execution-time FX rate snapshot, and cross-currency portfolio
-valuation should use current FX rates in a later step.
+surface returns a single pair rate for supported currencies and includes
+`source` and `collected_at`. Order executions store the execution-time FX rate
+snapshot, and cross-currency portfolio valuation uses the current FX provider
+rate.
 
 ---
 
@@ -128,6 +133,7 @@ MarketPilot은 모듈형 FastAPI 백엔드를 사용합니다. PostgreSQL 기반
 - BUY 및 SELL 체결에 대한 현금 원장 기록
 - 보유 종목, 평균 매수가, 실현 손익, 미실현 손익 및 수익률 계산
 - 보유 종목 현재가 통화, 평가 통화 및 평가 환율 필드
+- 시장 데이터와 포트폴리오 응답의 현재가·환율 출처 및 수집 시각 metadata
 - 대기 주문에 대한 예약 현금 및 예약 매도 수량 검사
 - fixture 기반 시장 현재가 provider 경계
 - `GET /market-data/quotes` endpoint
@@ -148,7 +154,10 @@ transaction으로 저장합니다. 포트폴리오 목록은 항상 인증된 DB
 보유 종목 가격은 현재가 통화를 유지하고, 평가금액과 미실현 손익은 현재 환율
 provider 값을 사용해 포트폴리오 기준 통화로 계산합니다.
 실현 손익은 체결 시점 환율 snapshot을 사용하고, 미실현 손익은 현재 기준 통화
-평가금액과 남아 있는 기준 통화 원가를 비교해 계산합니다.
+평가금액과 남아 있는 기준 통화 원가를 비교해 계산합니다. 보유 종목 응답에는
+현재가 출처, 현재가 수집 시각, 평가 환율 출처, 평가 환율 수집 시각도 포함합니다.
+그래서 화면은 값이 fixture인지, 체결가 fallback인지, 나중의 캐시/외부 provider
+값인지 구분할 수 있습니다.
 
 소유한 포트폴리오별로 수동 모의주문을 접수, 조회, 수정, 취소, 삭제 및 체결할 수
 있습니다. 체결은 변경 불가능한 execution 기록을 만들고, 주문을 `FILLED`로 바꾸며,
@@ -164,11 +173,13 @@ provider 값을 사용해 포트폴리오 기준 통화로 계산합니다.
 
 시장 현재가는 아직 fixture 기반이지만 provider 경계와 `GET /market-data/quotes`를
 통해 노출됩니다. 따라서 이후 외부 또는 캐시 provider로 바꾸더라도 프론트엔드가
-외부 API를 직접 호출하지 않아도 됩니다.
+외부 API를 직접 호출하지 않아도 됩니다. 현재가 응답에는 `source`와 `collected_at`이
+포함됩니다.
 
 환율도 provider 경계 뒤에 fixture로 준비했습니다. 첫 API는 지원 통화 사이의 단일
-환율을 반환합니다. 주문 체결 기록에는 체결 시점 환율 snapshot을 저장하고, 서로 다른
-통화의 포트폴리오 평가는 이후 단계에서 현재 환율을 사용하도록 연결해야 합니다.
+환율을 반환하며 `source`와 `collected_at`을 포함합니다. 주문 체결 기록에는 체결 시점
+환율 snapshot을 저장하고, 서로 다른 통화의 포트폴리오 평가는 현재 FX provider rate를
+사용합니다.
 
 ---
 
@@ -209,6 +220,7 @@ PostgreSQLベースのポートフォリオ、市場データ、バックテス�
 - BUY/SELL約定に対する現金元帳記録
 - 保有銘柄、平均取得価格、実現損益、未実現損益、収益率の計算
 - 保有銘柄の価格通貨、評価通貨、評価FXレート項目
+- 市場データとポートフォリオ応答の価格・FX出所と収集時刻metadata
 - 待機注文に対する予約現金と予約売却数量の検査
 - fixtureベースの市場価格provider境界
 - `GET /market-data/quotes` endpoint
@@ -230,7 +242,10 @@ JPYです。
 保有銘柄の価格は価格通貨を維持し、評価額と未実現損益は現在のFX providerレートで
 ポートフォリオ基準通貨に換算します。
 実現損益は約定時点のFXレートsnapshotを使用し、未実現損益は現在の基準通貨評価額と
-残っている基準通貨の取得原価を比較して計算します。
+残っている基準通貨の取得原価を比較して計算します。保有銘柄レスポンスには、
+現在値の出所、現在値の収集時刻、評価FXの出所、評価FXの収集時刻も含めます。
+これにより、画面はfixture、約定価格fallback、将来のキャッシュ/外部provider値を
+区別できます。
 
 所有するポートフォリオごとに手動ペーパー注文を登録、取得、編集、取消、削除、
 約定できます。約定は変更不可のexecution記録を作成し、注文を`FILLED`に変更し、
@@ -246,8 +261,10 @@ JPYです。
 
 市場価格はまだfixtureベースですが、provider境界と`GET /market-data/quotes`を通じて
 公開しています。そのため後で外部またはキャッシュ型providerへ切り替えても、
-フロントエンドが外部APIを直接呼ぶ必要はありません。
+フロントエンドが外部APIを直接呼ぶ必要はありません。価格レスポンスには`source`と
+`collected_at`を含めます。
 
 FXレートもprovider境界の背後にfixtureとして用意しています。最初のAPIは対応通貨
-間の単一レートを返します。注文約定記録には約定時点のFXレートsnapshotを保存し、
-通貨が異なるポートフォリオ評価は後続ステップで現在のFXレートへ接続します。
+間の単一レートを返し、`source`と`collected_at`を含めます。注文約定記録には約定時点の
+FXレートsnapshotを保存し、通貨が異なるポートフォリオ評価は現在のFX provider rateを
+使用します。

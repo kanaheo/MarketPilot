@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Iterable
 
@@ -11,6 +12,7 @@ class MarketQuote:
     currency: str
     current_price: Decimal
     source: str
+    collected_at: datetime | None
 
 
 FIXTURE_CURRENT_PRICES: dict[FixturePriceKey, Decimal] = {
@@ -18,6 +20,7 @@ FIXTURE_CURRENT_PRICES: dict[FixturePriceKey, Decimal] = {
     ("NVDA", "USD"): Decimal("125.0000"),
     ("7203", "JPY"): Decimal("2800.0000"),
 }
+FIXTURE_QUOTE_COLLECTED_AT = datetime(2026, 7, 1, tzinfo=timezone.utc)
 
 
 def get_fixture_current_price(
@@ -82,6 +85,7 @@ def list_market_quotes(
             currency=quote_currency,
             current_price=current_price,
             source="fixture",
+            collected_at=FIXTURE_QUOTE_COLLECTED_AT,
         )
         for symbol, quote_currency, current_price in list_fixture_current_prices(
             currency=currency,

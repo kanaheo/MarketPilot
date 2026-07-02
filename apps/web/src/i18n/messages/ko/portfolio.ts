@@ -93,6 +93,8 @@ export const portfolio = {
     title: "보유 종목",
     description: "현재 모의투자 포지션 · 현금 제외",
     fxBadge: "환율",
+    fxBadgeCollectedAt: "수집 시각",
+    fxBadgeSource: "출처",
     shareUnit: "주",
     columns: {
       asset: "자산",

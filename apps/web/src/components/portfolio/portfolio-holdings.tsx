@@ -6,7 +6,11 @@ import { Panel } from "@/components/common/panel";
 import { SectionHeader } from "@/components/common/section-header";
 import { TrendValue } from "@/components/common/trend-value";
 import { HoldingChangeValue } from "@/components/portfolio/holding-change-value";
-import { formatMarketPrice, formatPercent } from "@/lib/formatters";
+import {
+  formatDateTime,
+  formatMarketPrice,
+  formatPercent,
+} from "@/lib/formatters";
 import type { PortfolioHoldingsProps } from "@/types/portfolio";
 
 const HOLDING_QUANTITY_FORMAT_OPTIONS = {
@@ -18,6 +22,21 @@ const FX_RATE_FORMAT_OPTIONS = {
   maximumFractionDigits: 6,
   minimumFractionDigits: 0,
 } as const satisfies Intl.NumberFormatOptions;
+
+function buildFxBadgeTitle(
+  holding: PortfolioHoldingsProps["holdings"][number],
+  locale: PortfolioHoldingsProps["locale"],
+  messages: PortfolioHoldingsProps["messages"],
+) {
+  const collectedAt = holding.valuationFxCollectedAt
+    ? ` · ${messages.fxBadgeCollectedAt}: ${formatDateTime(
+        holding.valuationFxCollectedAt,
+        locale,
+      )}`
+    : "";
+
+  return `${messages.fxBadge} ${holding.quoteCurrency}→${holding.valuationCurrency} · ${messages.fxBadgeSource}: ${holding.valuationFxSource}${collectedAt}`;
+}
 
 export function PortfolioHoldings({
   holdings,
@@ -70,7 +89,7 @@ export function PortfolioHoldings({
                   holding.valuationCurrency ? null : (
                     <small
                       className="holding-fx-badge"
-                      title={`${messages.fxBadge} ${holding.quoteCurrency} ${holding.valuationCurrency}`}
+                      title={buildFxBadgeTitle(holding, locale, messages)}
                     >
                       {messages.fxBadge} {holding.quoteCurrency}
                       {"→"}

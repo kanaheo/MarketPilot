@@ -26,6 +26,7 @@ def list_market_quotes(
             currency=quote.currency,
             current_price=quote.current_price,
             source=quote.source,
+            collected_at=quote.collected_at,
         )
         for quote in list_provider_market_quotes(
             currency=currency,
@@ -55,4 +56,5 @@ def retrieve_fx_rate(
         quote_currency=fx_rate.quote_currency,
         rate=fx_rate.rate,
         source=fx_rate.source,
+        collected_at=fx_rate.collected_at,
     )

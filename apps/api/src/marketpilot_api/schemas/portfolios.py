@@ -90,6 +90,10 @@ class PortfolioHoldingResponse(BaseModel):
     quote_currency: SupportedCurrency
     valuation_currency: SupportedCurrency
     valuation_fx_rate: Decimal
+    current_price_source: str
+    current_price_collected_at: datetime | None
+    valuation_fx_source: str
+    valuation_fx_collected_at: datetime | None
 
 
 class PortfolioDetailResponse(PortfolioResponse):

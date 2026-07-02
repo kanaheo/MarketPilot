@@ -21,6 +21,9 @@ from marketpilot_api.schemas.portfolios import (
 )
 
 
+FIXTURE_COLLECTED_AT = datetime(2026, 7, 1, tzinfo=timezone.utc)
+
+
 def test_create_portfolio_adds_initial_deposit_in_one_commit() -> None:
     session = MagicMock()
     user_id = uuid.uuid4()
@@ -173,6 +176,10 @@ def test_get_portfolio_detail_filters_owner_and_limits_transactions() -> None:
             quote_currency="USD",
             valuation_currency="USD",
             valuation_fx_rate=Decimal("1.000000"),
+            current_price_source="fixture",
+            current_price_collected_at=FIXTURE_COLLECTED_AT,
+            valuation_fx_source="fixture",
+            valuation_fx_collected_at=FIXTURE_COLLECTED_AT,
         )
     ]
 
@@ -256,6 +263,10 @@ def test_get_portfolio_detail_resets_average_price_after_closed_position() -> No
             quote_currency="USD",
             valuation_currency="USD",
             valuation_fx_rate=Decimal("1.000000"),
+            current_price_source="fixture",
+            current_price_collected_at=FIXTURE_COLLECTED_AT,
+            valuation_fx_source="fixture",
+            valuation_fx_collected_at=FIXTURE_COLLECTED_AT,
         )
     ]
 
@@ -313,6 +324,10 @@ def test_get_portfolio_detail_falls_back_to_average_price_without_quote() -> Non
             quote_currency="USD",
             valuation_currency="USD",
             valuation_fx_rate=Decimal("1.000000"),
+            current_price_source="execution_fallback",
+            current_price_collected_at=None,
+            valuation_fx_source="fixture",
+            valuation_fx_collected_at=FIXTURE_COLLECTED_AT,
         )
     ]
 
@@ -374,6 +389,10 @@ def test_get_portfolio_detail_values_holdings_in_base_currency() -> None:
             quote_currency="USD",
             valuation_currency="KRW",
             valuation_fx_rate=Decimal("1380.000000"),
+            current_price_source="fixture",
+            current_price_collected_at=FIXTURE_COLLECTED_AT,
+            valuation_fx_source="fixture",
+            valuation_fx_collected_at=FIXTURE_COLLECTED_AT,
         )
     ]
 
@@ -434,6 +453,10 @@ def test_get_portfolio_detail_includes_unrealized_fx_gain() -> None:
             quote_currency="USD",
             valuation_currency="KRW",
             valuation_fx_rate=Decimal("1380.000000"),
+            current_price_source="execution_fallback",
+            current_price_collected_at=None,
+            valuation_fx_source="fixture",
+            valuation_fx_collected_at=FIXTURE_COLLECTED_AT,
         )
     ]
 
