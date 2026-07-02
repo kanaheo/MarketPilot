@@ -1,12 +1,16 @@
 import uuid
 from dataclasses import dataclass
+from datetime import datetime
 from decimal import Decimal
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from marketpilot_api.models import OrderExecution
-from marketpilot_api.repositories.price_quotes import get_current_price
+from marketpilot_api.repositories.fx_rates import FxRate, get_fx_rate
+from marketpilot_api.repositories.price_quotes import MarketQuote, get_market_quote
+
+VALUATION_FX_RATE_IDENTITY = Decimal("1.000000")
 
 
 @dataclass(frozen=True)
@@ -19,6 +23,13 @@ class PortfolioHolding:
     unrealized_profit_loss: Decimal
     return_rate: Decimal
     currency: str
+    quote_currency: str
+    valuation_currency: str
+    valuation_fx_rate: Decimal
+    current_price_source: str = "execution_fallback"
+    current_price_collected_at: datetime | None = None
+    valuation_fx_source: str = "fixture"
+    valuation_fx_collected_at: datetime | None = None
 
 
 @dataclass(frozen=True)
@@ -35,26 +46,36 @@ class HoldingAccumulator:
     currency: str
     quantity: Decimal = Decimal("0")
     cost_basis: Decimal = Decimal("0")
+    valuation_cost_basis: Decimal = Decimal("0")
     realized_profit_loss: Decimal = Decimal("0")
 
     def apply_execution(self, execution: OrderExecution) -> None:
+        execution_fx_rate = (
+            execution.execution_fx_rate or VALUATION_FX_RATE_IDENTITY
+        )
         if execution.side == "BUY":
             self.quantity += execution.quantity
             self.cost_basis += execution.gross_amount
+            self.valuation_cost_basis += (
+                execution.gross_amount * execution_fx_rate
+            )
             return
 
         if self.quantity <= 0:
             return
 
         average_price = self.average_price
+        average_valuation_price = self.average_valuation_price
         sold_quantity = min(execution.quantity, self.quantity)
         self.realized_profit_loss += (
-            execution.price - average_price
+            execution.price * execution_fx_rate - average_valuation_price
         ) * sold_quantity
-        self.quantity -= sold_quantity
+        self.valuation_cost_basis -= average_valuation_price * sold_quantity
         self.cost_basis -= average_price * sold_quantity
+        self.quantity -= sold_quantity
         if self.quantity == 0:
             self.cost_basis = Decimal("0")
+            self.valuation_cost_basis = Decimal("0")
 
     @property
     def average_price(self) -> Decimal:
@@ -62,6 +83,25 @@ class HoldingAccumulator:
             return Decimal("0")
 
         return self.cost_basis / self.quantity
+
+    @property
+    def average_valuation_price(self) -> Decimal:
+        if self.quantity <= 0:
+            return Decimal("0")
+
+        return self.valuation_cost_basis / self.quantity
+
+    def unrealized_profit_loss(self, market_value: Decimal) -> Decimal:
+        return market_value - self.valuation_cost_basis
+
+    def return_rate(self, market_value: Decimal) -> Decimal:
+        if self.valuation_cost_basis <= 0:
+            return Decimal("0")
+
+        return (
+            self.unrealized_profit_loss(market_value)
+            / self.valuation_cost_basis
+        )
 
 
 def _list_order_executions(
@@ -105,23 +145,47 @@ def build_holding_accumulators(
     return holdings_by_symbol
 
 
-def _get_current_price(
+def _get_current_quote(
     *,
     average_price: Decimal,
     currency: str,
     symbol: str,
-) -> Decimal:
-    return get_current_price(symbol=symbol, currency=currency) or average_price
+) -> MarketQuote:
+    quote = get_market_quote(symbol=symbol, currency=currency)
+    if quote is not None:
+        return quote
+
+    return MarketQuote(
+        symbol=symbol,
+        currency=currency,
+        current_price=average_price,
+        source="execution_fallback",
+        collected_at=None,
+    )
+
+
+def _get_valuation_fx_rate(
+    *,
+    quote_currency: str,
+    valuation_currency: str,
+) -> FxRate | None:
+    fx_rate = get_fx_rate(
+        base_currency=quote_currency,
+        quote_currency=valuation_currency,
+    )
+    return fx_rate
 
 
 def list_portfolio_holdings(
     session: Session,
     *,
     portfolio_id: uuid.UUID,
+    valuation_currency: str,
 ) -> list[PortfolioHolding]:
     return get_portfolio_position_summary(
         session,
         portfolio_id=portfolio_id,
+        valuation_currency=valuation_currency,
     ).holdings
 
 
@@ -129,6 +193,7 @@ def get_portfolio_position_summary(
     session: Session,
     *,
     portfolio_id: uuid.UUID,
+    valuation_currency: str,
 ) -> PortfolioPositionSummary:
     holdings = []
     invested_value = Decimal("0")
@@ -143,20 +208,29 @@ def get_portfolio_position_summary(
             continue
 
         average_price = accumulator.average_price
-        current_price = _get_current_price(
+        current_quote = _get_current_quote(
             average_price=average_price,
             currency=accumulator.currency,
             symbol=accumulator.symbol,
         )
-        market_value = accumulator.quantity * current_price
-        holding_unrealized_profit_loss = (
-            current_price - average_price
-        ) * accumulator.quantity
-        holding_return_rate = (
-            holding_unrealized_profit_loss / accumulator.cost_basis
-            if accumulator.cost_basis > 0
-            else Decimal("0")
+        valuation_fx_rate = _get_valuation_fx_rate(
+            quote_currency=accumulator.currency,
+            valuation_currency=valuation_currency,
         )
+        valuation_fx_rate_value = (
+            valuation_fx_rate.rate
+            if valuation_fx_rate is not None
+            else VALUATION_FX_RATE_IDENTITY
+        )
+        market_value = (
+            accumulator.quantity
+            * current_quote.current_price
+            * valuation_fx_rate_value
+        )
+        holding_unrealized_profit_loss = accumulator.unrealized_profit_loss(
+            market_value
+        )
+        holding_return_rate = accumulator.return_rate(market_value)
         invested_value += market_value
         unrealized_profit_loss += holding_unrealized_profit_loss
 
@@ -165,11 +239,26 @@ def get_portfolio_position_summary(
                 symbol=accumulator.symbol,
                 quantity=accumulator.quantity,
                 average_price=average_price,
-                current_price=current_price,
+                current_price=current_quote.current_price,
                 market_value=market_value,
                 unrealized_profit_loss=holding_unrealized_profit_loss,
                 return_rate=holding_return_rate,
-                currency=accumulator.currency,
+                currency=valuation_currency,
+                quote_currency=accumulator.currency,
+                valuation_currency=valuation_currency,
+                valuation_fx_rate=valuation_fx_rate_value,
+                current_price_source=current_quote.source,
+                current_price_collected_at=current_quote.collected_at,
+                valuation_fx_source=(
+                    valuation_fx_rate.source
+                    if valuation_fx_rate is not None
+                    else "unavailable"
+                ),
+                valuation_fx_collected_at=(
+                    valuation_fx_rate.collected_at
+                    if valuation_fx_rate is not None
+                    else None
+                ),
             )
         )
 

@@ -42,6 +42,13 @@ export type PortfolioHoldingApiItem = Readonly<{
   unrealized_profit_loss: string;
   return_rate: string;
   currency: SupportedCurrency;
+  quote_currency: SupportedCurrency;
+  valuation_currency: SupportedCurrency;
+  valuation_fx_rate: string;
+  current_price_source: string;
+  current_price_collected_at: string | null;
+  valuation_fx_source: string;
+  valuation_fx_collected_at: string | null;
 }>;
 
 export type PortfolioDetailApiItem = PortfolioApiItem &
@@ -113,4 +120,5 @@ export type MarketQuoteApiItem = Readonly<{
   currency: SupportedCurrency;
   current_price: string;
   source: "fixture";
+  collected_at: string;
 }>;

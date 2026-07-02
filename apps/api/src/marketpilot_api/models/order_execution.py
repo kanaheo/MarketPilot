@@ -43,6 +43,14 @@ class OrderExecution(CreatedAtMixin, Base):
         nullable=False,
     )
     currency: Mapped[str] = mapped_column(String(3), nullable=False)
+    portfolio_base_currency: Mapped[str] = mapped_column(
+        String(3),
+        nullable=False,
+    )
+    execution_fx_rate: Mapped[Decimal] = mapped_column(
+        Numeric(20, 6),
+        nullable=False,
+    )
     executed_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

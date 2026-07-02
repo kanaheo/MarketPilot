@@ -92,6 +92,9 @@ export const portfolio = {
   holdings: {
     title: "보유 종목",
     description: "현재 모의투자 포지션 · 현금 제외",
+    fxBadge: "환율",
+    fxBadgeCollectedAt: "수집 시각",
+    fxBadgeSource: "출처",
     shareUnit: "주",
     columns: {
       asset: "자산",
@@ -166,6 +169,8 @@ export const portfolio = {
     title: "모의주문 기록",
     description:
       "선택한 포트폴리오에 시장가 또는 지정가 주문을 대기 상태로 기록합니다.",
+    currencyPolicy:
+      "현재 주문은 선택한 포트폴리오의 기준 통화로 기록됩니다. 다른 통화 종목 평가는 FX 경로로 계산됩니다.",
     fields: {
       symbol: {
         label: "종목 심볼",

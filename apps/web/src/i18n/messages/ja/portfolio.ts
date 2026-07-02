@@ -94,6 +94,9 @@ export const portfolio = {
   holdings: {
     title: "保有銘柄",
     description: "現在のペーパーポジション · 現金を除く",
+    fxBadge: "FX",
+    fxBadgeCollectedAt: "収集時刻",
+    fxBadgeSource: "出所",
     shareUnit: "株",
     columns: {
       asset: "資産",
@@ -171,6 +174,8 @@ export const portfolio = {
     title: "ペーパー注文を記録",
     description:
       "選択中のポートフォリオに市場注文または指値注文を待機状態で記録します。",
+    currencyPolicy:
+      "現在、新規注文は選択中のポートフォリオ基準通貨で記録します。通貨が異なる保有銘柄はFX経路で評価します。",
     fields: {
       symbol: {
         label: "銘柄シンボル",

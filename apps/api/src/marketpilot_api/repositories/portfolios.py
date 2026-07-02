@@ -158,6 +158,7 @@ def get_portfolio_detail(
     position_summary = get_portfolio_position_summary(
         session,
         portfolio_id=portfolio.id,
+        valuation_currency=portfolio.base_currency,
     )
     total_value = current_cash + position_summary.invested_value
     total_profit_loss = total_value - net_contributions

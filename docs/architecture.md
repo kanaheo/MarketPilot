@@ -69,6 +69,12 @@ Cash transactions use types such as `INITIAL_DEPOSIT`, `DEPOSIT`,
 `WITHDRAWAL`, `FEE`, and `DIVIDEND`. Balances are derived from ledger events
 instead of silently overwriting a seed-money field.
 
+Portfolio accounting separates the portfolio base currency from the
+instrument or quote currency. Executions should preserve the FX rate used at
+fill time, while valuation uses the latest available FX rate from the market
+data boundary. This prevents historical realized P/L from changing when a
+newer FX rate arrives.
+
 ### Market data
 
 - instrument metadata
@@ -82,6 +88,9 @@ instead of silently overwriting a seed-money field.
 The frontend should request quotes from MarketPilot's backend instead of
 calling third-party market-data APIs directly. This keeps secrets, provider
 selection, caching, FX conversion, and valuation rules on the server side.
+FX rates follow the same rule: screens request them through MarketPilot's
+backend, and the backend decides source, cache, timestamp, and conversion
+rules.
 
 ### Research data
 
@@ -228,6 +237,11 @@ MarketPilot/
 `DIVIDEND` 등의 유형을 사용합니다. 시드머니 필드를 덮어쓰지 않고 원장 이벤트를
 기반으로 잔액을 계산합니다.
 
+포트폴리오 회계에서는 포트폴리오 기준 통화와 종목 또는 현재가 통화를 분리합니다.
+체결 기록에는 체결 시점에 사용한 환율을 저장하고, 현재 평가는 시장 데이터 경계에서
+가져온 최신 환율을 사용합니다. 이렇게 해야 나중에 환율이 바뀌어도 이미 확정된
+실현 손익이 흔들리지 않습니다.
+
 #### 시장 데이터
 
 - 종목 메타데이터
@@ -241,6 +255,8 @@ MarketPilot/
 프론트엔드는 외부 시장 데이터 API를 직접 호출하지 않고 MarketPilot 백엔드에 현재가를
 요청합니다. 이렇게 하면 비밀값, 제공자 선택, 캐시, 환율 변환 및 평가 규칙을 서버
 쪽에서 관리할 수 있습니다.
+환율도 같은 규칙을 따릅니다. 화면은 MarketPilot 백엔드에 환율을 요청하고, 백엔드는
+출처, 캐시, 수집 시각 및 변환 규칙을 결정합니다.
 
 #### 연구 데이터
 
@@ -388,6 +404,11 @@ MarketPilot/
 `DIVIDEND`などの種類を使用します。初期資金フィールドを上書きするのではなく、
 台帳イベントから残高を算出します。
 
+ポートフォリオ会計では、ポートフォリオの基準通貨と銘柄または価格の通貨を
+分離します。約定記録には約定時点で使用したFXレートを保存し、現在評価には
+市場データ境界から取得した最新FXレートを使います。これにより、後から為替が
+変わっても確定済みの実現損益が変動しません。
+
 #### 市場データ
 
 - 銘柄メタデータ
@@ -401,6 +422,8 @@ MarketPilot/
 フロントエンドは外部の市場データAPIを直接呼ばず、MarketPilotバックエンドに価格を
 要求します。これにより、シークレット、provider選定、キャッシュ、FX換算、評価ルールを
 サーバー側で管理できます。
+FXレートも同じルールに従います。画面はMarketPilotバックエンドにFXレートを要求し、
+バックエンドが出典、キャッシュ、収集時刻、変換ルールを決定します。
 
 #### リサーチデータ
 

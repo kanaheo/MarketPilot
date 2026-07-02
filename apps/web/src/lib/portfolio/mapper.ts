@@ -96,12 +96,19 @@ export function mapPortfolioPageData(
     color: getHoldingColor(holding.symbol),
     currency: holding.currency,
     currentPrice: Number(holding.current_price),
+    currentPriceCollectedAt: holding.current_price_collected_at,
+    currentPriceSource: holding.current_price_source,
     marketValue: Number(holding.market_value),
     name: holding.symbol,
+    quoteCurrency: holding.quote_currency,
     quantity: Number(holding.quantity),
     returnRate: Number(holding.return_rate),
     symbol: holding.symbol,
     unrealizedProfitLoss: Number(holding.unrealized_profit_loss),
+    valuationCurrency: holding.valuation_currency,
+    valuationFxCollectedAt: holding.valuation_fx_collected_at,
+    valuationFxRate: Number(holding.valuation_fx_rate),
+    valuationFxSource: holding.valuation_fx_source,
   }));
 
   return {

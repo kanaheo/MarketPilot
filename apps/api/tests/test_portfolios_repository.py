@@ -21,6 +21,9 @@ from marketpilot_api.schemas.portfolios import (
 )
 
 
+FIXTURE_COLLECTED_AT = datetime(2026, 7, 1, tzinfo=timezone.utc)
+
+
 def test_create_portfolio_adds_initial_deposit_in_one_commit() -> None:
     session = MagicMock()
     user_id = uuid.uuid4()
@@ -170,6 +173,13 @@ def test_get_portfolio_detail_filters_owner_and_limits_transactions() -> None:
             unrealized_profit_loss=Decimal("190.000000000000"),
             return_rate=Decimal("0.950000000000"),
             currency="USD",
+            quote_currency="USD",
+            valuation_currency="USD",
+            valuation_fx_rate=Decimal("1.000000"),
+            current_price_source="fixture",
+            current_price_collected_at=FIXTURE_COLLECTED_AT,
+            valuation_fx_source="fixture",
+            valuation_fx_collected_at=FIXTURE_COLLECTED_AT,
         )
     ]
 
@@ -250,6 +260,13 @@ def test_get_portfolio_detail_resets_average_price_after_closed_position() -> No
             unrealized_profit_loss=Decimal("-5.000000000000"),
             return_rate=Decimal("-0.025000000000"),
             currency="USD",
+            quote_currency="USD",
+            valuation_currency="USD",
+            valuation_fx_rate=Decimal("1.000000"),
+            current_price_source="fixture",
+            current_price_collected_at=FIXTURE_COLLECTED_AT,
+            valuation_fx_source="fixture",
+            valuation_fx_collected_at=FIXTURE_COLLECTED_AT,
         )
     ]
 
@@ -304,8 +321,205 @@ def test_get_portfolio_detail_falls_back_to_average_price_without_quote() -> Non
             unrealized_profit_loss=Decimal("0E-12"),
             return_rate=Decimal("0"),
             currency="USD",
+            quote_currency="USD",
+            valuation_currency="USD",
+            valuation_fx_rate=Decimal("1.000000"),
+            current_price_source="execution_fallback",
+            current_price_collected_at=None,
+            valuation_fx_source="fixture",
+            valuation_fx_collected_at=FIXTURE_COLLECTED_AT,
         )
     ]
+
+
+def test_get_portfolio_detail_values_holdings_in_base_currency() -> None:
+    session = MagicMock()
+    user_id = uuid.uuid4()
+    portfolio = Portfolio(
+        id=uuid.uuid4(),
+        user_id=user_id,
+        name="KRW portfolio",
+        base_currency="KRW",
+    )
+    session.scalar.side_effect = [
+        portfolio,
+        Decimal("1000000.0000"),
+        Decimal("1000000.0000"),
+    ]
+    session.scalars.return_value.all.side_effect = [
+        [],
+        [
+            OrderExecution(
+                id=uuid.uuid4(),
+                order_id=uuid.uuid4(),
+                portfolio_id=portfolio.id,
+                symbol="AAPL",
+                side="BUY",
+                quantity=Decimal("1.00000000"),
+                price=Decimal("100.0000"),
+                gross_amount=Decimal("100.0000"),
+                currency="USD",
+                portfolio_base_currency="KRW",
+                execution_fx_rate=Decimal("1380.000000"),
+                executed_at=datetime(2026, 1, 1, tzinfo=timezone.utc),
+            ),
+        ],
+    ]
+
+    result = get_portfolio_detail(
+        session,
+        portfolio_id=portfolio.id,
+        user_id=user_id,
+    )
+
+    assert result is not None
+    assert result.invested_value == Decimal("269100.00000000000000")
+    assert result.total_value == Decimal("1269100.00000000000000")
+    assert result.unrealized_profit_loss == Decimal("131100.00000000000000")
+    assert result.holdings == [
+        PortfolioHolding(
+            symbol="AAPL",
+            quantity=Decimal("1.00000000"),
+            average_price=Decimal("100.0000"),
+            current_price=Decimal("195.0000"),
+            market_value=Decimal("269100.00000000000000"),
+            unrealized_profit_loss=Decimal("131100.00000000000000"),
+            return_rate=Decimal("0.950000000000"),
+            currency="KRW",
+            quote_currency="USD",
+            valuation_currency="KRW",
+            valuation_fx_rate=Decimal("1380.000000"),
+            current_price_source="fixture",
+            current_price_collected_at=FIXTURE_COLLECTED_AT,
+            valuation_fx_source="fixture",
+            valuation_fx_collected_at=FIXTURE_COLLECTED_AT,
+        )
+    ]
+
+
+def test_get_portfolio_detail_includes_unrealized_fx_gain() -> None:
+    session = MagicMock()
+    user_id = uuid.uuid4()
+    portfolio = Portfolio(
+        id=uuid.uuid4(),
+        user_id=user_id,
+        name="KRW portfolio",
+        base_currency="KRW",
+    )
+    session.scalar.side_effect = [
+        portfolio,
+        Decimal("1000000.0000"),
+        Decimal("1000000.0000"),
+    ]
+    session.scalars.return_value.all.side_effect = [
+        [],
+        [
+            OrderExecution(
+                id=uuid.uuid4(),
+                order_id=uuid.uuid4(),
+                portfolio_id=portfolio.id,
+                symbol="UNKNOWN",
+                side="BUY",
+                quantity=Decimal("2.00000000"),
+                price=Decimal("75.0000"),
+                gross_amount=Decimal("150.0000"),
+                currency="USD",
+                portfolio_base_currency="KRW",
+                execution_fx_rate=Decimal("1000.000000"),
+                executed_at=datetime(2026, 1, 1, tzinfo=timezone.utc),
+            ),
+        ],
+    ]
+
+    result = get_portfolio_detail(
+        session,
+        portfolio_id=portfolio.id,
+        user_id=user_id,
+    )
+
+    assert result is not None
+    assert result.invested_value == Decimal("207000.00000000000000")
+    assert result.unrealized_profit_loss == Decimal("57000.00000000000000")
+    assert result.holdings == [
+        PortfolioHolding(
+            symbol="UNKNOWN",
+            quantity=Decimal("2.00000000"),
+            average_price=Decimal("75.0000"),
+            current_price=Decimal("75.0000"),
+            market_value=Decimal("207000.00000000000000"),
+            unrealized_profit_loss=Decimal("57000.00000000000000"),
+            return_rate=Decimal("0.380000000000"),
+            currency="KRW",
+            quote_currency="USD",
+            valuation_currency="KRW",
+            valuation_fx_rate=Decimal("1380.000000"),
+            current_price_source="execution_fallback",
+            current_price_collected_at=None,
+            valuation_fx_source="fixture",
+            valuation_fx_collected_at=FIXTURE_COLLECTED_AT,
+        )
+    ]
+
+
+def test_get_portfolio_detail_includes_realized_fx_gain() -> None:
+    session = MagicMock()
+    user_id = uuid.uuid4()
+    portfolio = Portfolio(
+        id=uuid.uuid4(),
+        user_id=user_id,
+        name="KRW portfolio",
+        base_currency="KRW",
+    )
+    session.scalar.side_effect = [
+        portfolio,
+        Decimal("1038000.0000"),
+        Decimal("1000000.0000"),
+    ]
+    session.scalars.return_value.all.side_effect = [
+        [],
+        [
+            OrderExecution(
+                id=uuid.uuid4(),
+                order_id=uuid.uuid4(),
+                portfolio_id=portfolio.id,
+                symbol="UNKNOWN",
+                side="BUY",
+                quantity=Decimal("1.00000000"),
+                price=Decimal("100.0000"),
+                gross_amount=Decimal("100.0000"),
+                currency="USD",
+                portfolio_base_currency="KRW",
+                execution_fx_rate=Decimal("1000.000000"),
+                executed_at=datetime(2026, 1, 1, tzinfo=timezone.utc),
+            ),
+            OrderExecution(
+                id=uuid.uuid4(),
+                order_id=uuid.uuid4(),
+                portfolio_id=portfolio.id,
+                symbol="UNKNOWN",
+                side="SELL",
+                quantity=Decimal("1.00000000"),
+                price=Decimal("100.0000"),
+                gross_amount=Decimal("100.0000"),
+                currency="USD",
+                portfolio_base_currency="KRW",
+                execution_fx_rate=Decimal("1380.000000"),
+                executed_at=datetime(2026, 1, 2, tzinfo=timezone.utc),
+            ),
+        ],
+    ]
+
+    result = get_portfolio_detail(
+        session,
+        portfolio_id=portfolio.id,
+        user_id=user_id,
+    )
+
+    assert result is not None
+    assert result.realized_profit_loss == Decimal("38000.000000000000")
+    assert result.unrealized_profit_loss == Decimal("0")
+    assert result.total_profit_loss == Decimal("38000.0000")
+    assert result.holdings == []
 
 
 def test_create_deposit_uses_portfolio_currency_and_commits() -> None:

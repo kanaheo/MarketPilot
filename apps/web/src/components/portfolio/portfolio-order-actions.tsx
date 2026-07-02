@@ -15,11 +15,7 @@ import {
 } from "@/lib/portfolio/order-quantity";
 import type { Locale } from "@/types/i18n";
 import type { PortfolioMessages } from "@/types/i18n/portfolio";
-import type {
-  OrderExecuteActionResult,
-  OrderUpdateActionResult,
-  PortfolioOrder,
-} from "@/types/portfolio";
+import type { OrderExecuteActionResult, OrderUpdateActionResult, PortfolioOrder } from "@/types/portfolio";
 
 const INITIAL_EXECUTE_RESULT: OrderExecuteActionResult = { ok: true };
 const INITIAL_UPDATE_RESULT: OrderUpdateActionResult = { ok: true };
@@ -31,19 +27,14 @@ type PortfolioOrderActionsProps = Readonly<{
   portfolioId: string;
 }>;
 
-export function PortfolioOrderActions({
-  locale,
-  messages,
-  order,
-  portfolioId,
-}: PortfolioOrderActionsProps) {
+export function PortfolioOrderActions({ locale, messages, order, portfolioId }: PortfolioOrderActionsProps) {
   const [executionResult, executeAction, isExecuting] = useActionState(
     executeOrderFormAction.bind(null, locale, portfolioId, order.id),
-    INITIAL_EXECUTE_RESULT,
+    INITIAL_EXECUTE_RESULT
   );
   const [updateResult, updateAction, isUpdating] = useActionState(
     updateOrderAction.bind(null, locale, portfolioId, order.id),
-    INITIAL_UPDATE_RESULT,
+    INITIAL_UPDATE_RESULT
   );
 
   const isPending = order.status === "PENDING";
@@ -73,11 +64,7 @@ export function PortfolioOrderActions({
                 step={ORDER_QUANTITY_INPUT_STEP}
                 type="number"
               />
-              <button
-                className="order-update-button"
-                disabled={isBusy}
-                type="submit"
-              >
+              <button className="order-update-button text-nowrap" disabled={isBusy} type="submit">
                 {isUpdating ? messages.updateSubmitting : messages.update}
               </button>
             </form>
@@ -91,28 +78,13 @@ export function PortfolioOrderActions({
                 step="0.0001"
                 type="number"
               />
-              <button
-                className="order-execute-button"
-                disabled={isBusy}
-                type="submit"
-              >
+              <button className="order-execute-button text-nowrap" disabled={isBusy} type="submit">
                 {isExecuting ? messages.executeSubmitting : messages.execute}
               </button>
             </form>
             <div className="order-secondary-actions">
-              <form
-                action={cancelOrderAction.bind(
-                  null,
-                  locale,
-                  portfolioId,
-                  order.id,
-                )}
-              >
-                <button
-                  className="order-cancel-button"
-                  disabled={isBusy}
-                  type="submit"
-                >
+              <form action={cancelOrderAction.bind(null, locale, portfolioId, order.id)}>
+                <button className="order-cancel-button text-nowrap" disabled={isBusy} type="submit">
                   {messages.cancel}
                 </button>
               </form>
@@ -122,14 +94,8 @@ export function PortfolioOrderActions({
       ) : null}
       {canDelete && !isPending ? (
         <div className="order-secondary-actions">
-          <form
-            action={deleteOrderAction.bind(null, locale, portfolioId, order.id)}
-          >
-            <button
-              className="order-delete-button"
-              disabled={isBusy}
-              type="submit"
-            >
+          <form action={deleteOrderAction.bind(null, locale, portfolioId, order.id)}>
+            <button className="order-delete-button" disabled={isBusy} type="submit">
               {messages.delete}
             </button>
           </form>

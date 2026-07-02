@@ -92,6 +92,9 @@ export const portfolio = {
   holdings: {
     title: "Holdings",
     description: "Current paper positions · cash excluded",
+    fxBadge: "FX",
+    fxBadgeCollectedAt: "Collected",
+    fxBadgeSource: "Source",
     shareUnit: " sh",
     columns: {
       asset: "Asset",
@@ -168,6 +171,8 @@ export const portfolio = {
     title: "Record paper order",
     description:
       "Record a market or limit order for the selected portfolio as pending.",
+    currencyPolicy:
+      "New orders are currently recorded in the selected portfolio base currency. Cross-currency holdings are valued through the FX path.",
     fields: {
       symbol: {
         label: "Symbol",

@@ -79,6 +79,13 @@ export default async function PortfolioPage({
         portfolios={selectorItems}
         selectedPortfolioId={selectedPortfolio.id}
       />
+      <details className="portfolio-create-drawer" id="new-portfolio">
+        <summary>{messages.portfolio.selector.createAnother}</summary>
+        <PortfolioCreateForm
+          locale={locale}
+          messages={messages.portfolio.createForm}
+        />
+      </details>
       <PortfolioSummary
         currency={portfolio.currency}
         currentCash={portfolio.currentCash}

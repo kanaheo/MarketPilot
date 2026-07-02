@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 
 from pydantic import BaseModel
@@ -10,3 +11,12 @@ class MarketQuoteResponse(BaseModel):
     currency: SupportedCurrency
     current_price: Decimal
     source: str
+    collected_at: datetime
+
+
+class FxRateResponse(BaseModel):
+    base_currency: SupportedCurrency
+    quote_currency: SupportedCurrency
+    rate: Decimal
+    source: str
+    collected_at: datetime
