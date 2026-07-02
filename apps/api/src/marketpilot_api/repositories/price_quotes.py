@@ -1,12 +1,21 @@
+import json
+import os
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
-from typing import Iterable, Protocol
+from typing import Callable, Iterable, Mapping, Protocol
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
 
+from pydantic import SecretStr
+
+from marketpilot_api.core.config import Settings
 from marketpilot_api.core.config import get_settings
 
 FixturePriceKey = tuple[str, str]
 MarketQuoteCacheKey = tuple[str | None, tuple[str, ...] | None]
+FinnhubQuoteTransport = Callable[[str, SecretStr], Mapping[str, object]]
+FINNHUB_QUOTE_URL = "https://finnhub.io/api/v1/quote"
 
 
 @dataclass(frozen=True)
@@ -56,6 +65,40 @@ class FixtureMarketQuoteProvider:
         ]
 
 
+class FinnhubMarketQuoteProvider:
+    def __init__(
+        self,
+        *,
+        api_key: SecretStr,
+        transport: FinnhubQuoteTransport | None = None,
+    ) -> None:
+        self._api_key = api_key
+        self._transport = transport or _fetch_finnhub_quote_payload
+
+    def list_market_quotes(
+        self,
+        *,
+        currency: str | None = None,
+        symbols: Iterable[str] | None = None,
+    ) -> list[MarketQuote]:
+        normalized_currency = currency.upper() if currency is not None else None
+        if normalized_currency is not None and normalized_currency != "USD":
+            return []
+
+        normalized_symbols = _normalize_symbols(symbols)
+        if len(normalized_symbols) == 0:
+            return []
+
+        quotes: list[MarketQuote] = []
+        for symbol in normalized_symbols:
+            payload = self._transport(symbol, self._api_key)
+            quote = _parse_finnhub_quote_payload(symbol=symbol, payload=payload)
+            if quote is not None:
+                quotes.append(quote)
+
+        return sorted(quotes, key=lambda quote: (quote.currency, quote.symbol))
+
+
 FIXTURE_CURRENT_PRICES: dict[FixturePriceKey, Decimal] = {
     ("AAPL", "USD"): Decimal("195.0000"),
     ("NVDA", "USD"): Decimal("125.0000"),
@@ -64,6 +107,7 @@ FIXTURE_CURRENT_PRICES: dict[FixturePriceKey, Decimal] = {
 FIXTURE_QUOTE_COLLECTED_AT = datetime(2026, 7, 1, tzinfo=timezone.utc)
 _fixture_provider = FixtureMarketQuoteProvider()
 _external_provider: MarketQuoteProvider | None = None
+_external_provider_is_configured = False
 _quote_cache: dict[MarketQuoteCacheKey, MarketQuoteCacheEntry] = {}
 
 
@@ -142,8 +186,10 @@ def configure_market_quote_provider(
     provider: MarketQuoteProvider | None,
 ) -> None:
     global _external_provider
+    global _external_provider_is_configured
 
     _external_provider = provider
+    _external_provider_is_configured = True
     clear_market_quote_cache()
 
 
@@ -156,9 +202,10 @@ def _fetch_uncached_market_quotes(
     currency: str | None = None,
     symbols: Iterable[str] | None = None,
 ) -> list[MarketQuote]:
-    if _external_provider is not None:
+    provider = _get_external_market_quote_provider()
+    if provider is not None:
         try:
-            quotes = _external_provider.list_market_quotes(
+            quotes = provider.list_market_quotes(
                 currency=currency,
                 symbols=symbols,
             )
@@ -169,6 +216,27 @@ def _fetch_uncached_market_quotes(
             return sorted(quotes, key=lambda quote: (quote.currency, quote.symbol))
 
     return _fixture_provider.list_market_quotes(currency=currency, symbols=symbols)
+
+
+def _get_external_market_quote_provider() -> MarketQuoteProvider | None:
+    if _external_provider_is_configured:
+        return _external_provider
+
+    return _get_settings_market_quote_provider(settings=get_settings())
+
+
+def _get_settings_market_quote_provider(
+    *,
+    settings: Settings,
+) -> MarketQuoteProvider | None:
+    if os.environ.get("PYTEST_CURRENT_TEST") is not None:
+        return None
+    if settings.market_data_quote_provider != "finnhub":
+        return None
+    if settings.finnhub_api_key is None:
+        return None
+
+    return FinnhubMarketQuoteProvider(api_key=settings.finnhub_api_key)
 
 
 def _get_market_quote_cache_key(
@@ -183,6 +251,21 @@ def _get_market_quote_cache_key(
         else None
     )
     return (normalized_currency, normalized_symbols)
+
+
+def _normalize_symbols(symbols: Iterable[str] | None) -> tuple[str, ...]:
+    if symbols is None:
+        return ()
+
+    return tuple(
+        sorted(
+            {
+                symbol.strip().upper()
+                for symbol in symbols
+                if len(symbol.strip()) > 0
+            }
+        )
+    )
 
 
 def _get_cached_market_quotes(
@@ -215,3 +298,76 @@ def _set_cached_market_quotes(
         quotes=list(quotes),
         expires_at=now + timedelta(seconds=ttl_seconds),
     )
+
+
+def _fetch_finnhub_quote_payload(
+    symbol: str,
+    api_key: SecretStr,
+) -> Mapping[str, object]:
+    query = urlencode(
+        {
+            "symbol": symbol,
+            "token": api_key.get_secret_value(),
+        }
+    )
+    request = Request(
+        f"{FINNHUB_QUOTE_URL}?{query}",
+        headers={
+            "Accept": "application/json",
+            "User-Agent": "MarketPilot API",
+        },
+    )
+    with urlopen(request, timeout=5) as response:
+        payload = json.load(response)
+
+    if not isinstance(payload, dict):
+        return {}
+
+    return payload
+
+
+def _parse_finnhub_quote_payload(
+    *,
+    symbol: str,
+    payload: Mapping[str, object],
+) -> MarketQuote | None:
+    current_price = _parse_decimal(payload.get("c"))
+    if current_price is None or current_price <= Decimal("0"):
+        return None
+
+    collected_at = _parse_unix_timestamp(payload.get("t"))
+    if collected_at is None:
+        return None
+
+    return MarketQuote(
+        symbol=symbol.upper(),
+        currency="USD",
+        current_price=current_price,
+        source="finnhub",
+        collected_at=collected_at,
+    )
+
+
+def _parse_decimal(value: object) -> Decimal | None:
+    if value is None:
+        return None
+
+    try:
+        return Decimal(str(value))
+    except Exception:
+        return None
+
+
+def _parse_unix_timestamp(value: object) -> datetime | None:
+    if value is None:
+        return None
+
+    try:
+        timestamp = int(str(value))
+    except ValueError:
+        return None
+
+    if timestamp <= 0:
+        return None
+
+    return datetime.fromtimestamp(timestamp, tz=timezone.utc)

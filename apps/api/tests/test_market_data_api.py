@@ -3,6 +3,7 @@ from decimal import Decimal
 from typing import Iterable
 
 from fastapi.testclient import TestClient
+from pydantic import SecretStr
 import pytest
 
 from marketpilot_api.main import app
@@ -11,6 +12,7 @@ from marketpilot_api.repositories.fx_rates import (
     configure_fx_rate_provider,
 )
 from marketpilot_api.repositories.price_quotes import (
+    FinnhubMarketQuoteProvider,
     MarketQuote,
     configure_market_quote_provider,
 )
@@ -59,6 +61,24 @@ class FailingMarketQuoteProvider:
         symbols: Iterable[str] | None = None,
     ) -> list[MarketQuote]:
         raise RuntimeError("provider unavailable")
+
+
+class FakeFinnhubQuoteTransport:
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, str]] = []
+
+    def __call__(self, symbol: str, api_key: SecretStr) -> dict[str, object]:
+        self.calls.append((symbol, api_key.get_secret_value()))
+        return {
+            "c": 430.12,
+            "d": 1.5,
+            "dp": 0.35,
+            "h": 431,
+            "l": 425,
+            "o": 426,
+            "pc": 428.62,
+            "t": 1782950400,
+        }
 
 
 class CountingFxRateProvider:
@@ -215,6 +235,40 @@ def test_list_market_quotes_falls_back_to_fixture_when_provider_fails() -> None:
             "collected_at": FIXTURE_COLLECTED_AT,
         }
     ]
+
+
+def test_finnhub_market_quote_provider_maps_quote_payload() -> None:
+    transport = FakeFinnhubQuoteTransport()
+    provider = FinnhubMarketQuoteProvider(
+        api_key=SecretStr("test-finnhub-key"),
+        transport=transport,
+    )
+
+    quotes = provider.list_market_quotes(symbols=["msft"])
+
+    assert transport.calls == [("MSFT", "test-finnhub-key")]
+    assert quotes == [
+        MarketQuote(
+            symbol="MSFT",
+            currency="USD",
+            current_price=Decimal("430.12"),
+            source="finnhub",
+            collected_at=datetime(2026, 7, 2, tzinfo=timezone.utc),
+        )
+    ]
+
+
+def test_finnhub_market_quote_provider_skips_non_usd_currency() -> None:
+    transport = FakeFinnhubQuoteTransport()
+    provider = FinnhubMarketQuoteProvider(
+        api_key=SecretStr("test-finnhub-key"),
+        transport=transport,
+    )
+
+    quotes = provider.list_market_quotes(currency="JPY", symbols=["7203"])
+
+    assert quotes == []
+    assert transport.calls == []
 
 
 def test_retrieve_fx_rate_uses_cached_external_provider_result() -> None:
