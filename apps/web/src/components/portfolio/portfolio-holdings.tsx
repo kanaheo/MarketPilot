@@ -14,6 +14,11 @@ const HOLDING_QUANTITY_FORMAT_OPTIONS = {
   minimumFractionDigits: 0,
 } as const satisfies Intl.NumberFormatOptions;
 
+const FX_RATE_FORMAT_OPTIONS = {
+  maximumFractionDigits: 6,
+  minimumFractionDigits: 0,
+} as const satisfies Intl.NumberFormatOptions;
+
 export function PortfolioHoldings({
   holdings,
   locale,
@@ -61,6 +66,21 @@ export function PortfolioHoldings({
                 <span>
                   <strong>{holding.symbol}</strong>
                   <small>{holding.name}</small>
+                  {holding.quoteCurrency ===
+                  holding.valuationCurrency ? null : (
+                    <small
+                      className="holding-fx-badge"
+                      title={`${messages.fxBadge} ${holding.quoteCurrency} ${holding.valuationCurrency}`}
+                    >
+                      {messages.fxBadge} {holding.quoteCurrency}
+                      {"→"}
+                      {holding.valuationCurrency} ·{" "}
+                      {holding.valuationFxRate.toLocaleString(
+                        locale,
+                        FX_RATE_FORMAT_OPTIONS,
+                      )}
+                    </small>
+                  )}
                 </span>
               </div>
               <HoldingChangeValue

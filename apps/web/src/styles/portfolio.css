@@ -748,6 +748,23 @@
   font-size: 10px;
 }
 
+.portfolio-holdings-row .asset-cell .holding-fx-badge {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  align-items: center;
+  gap: 3px;
+  margin-top: 6px;
+  border: 1px solid #cfe2dd;
+  border-radius: 999px;
+  background: var(--color-primary-soft);
+  padding: 2px 7px;
+  color: var(--color-primary);
+  font-size: 9px;
+  font-weight: 780;
+  line-height: 1.3;
+}
+
 .portfolio-holdings-row .numeric-cell,
 .portfolio-holdings-row .trend-value {
   font-size: 11px;

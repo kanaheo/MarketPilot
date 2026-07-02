@@ -92,6 +92,7 @@ export const portfolio = {
   holdings: {
     title: "Holdings",
     description: "Current paper positions · cash excluded",
+    fxBadge: "FX",
     shareUnit: " sh",
     columns: {
       asset: "Asset",

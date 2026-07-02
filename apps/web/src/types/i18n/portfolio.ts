@@ -85,6 +85,7 @@ export type PortfolioMessages = Readonly<{
   holdings: {
     title: string;
     description: string;
+    fxBadge: string;
     shareUnit: string;
     columns: {
       asset: string;

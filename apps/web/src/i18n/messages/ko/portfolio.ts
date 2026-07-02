@@ -92,6 +92,7 @@ export const portfolio = {
   holdings: {
     title: "보유 종목",
     description: "현재 모의투자 포지션 · 현금 제외",
+    fxBadge: "환율",
     shareUnit: "주",
     columns: {
       asset: "자산",
