@@ -75,6 +75,9 @@ provider boundary to convert the order amount into the portfolio base currency.
 New order creation still keeps the current base-currency flow until the
 portfolio valuation response can expose quote currency and valuation currency
 separately.
+Cross-currency execution rows can exist for seeded/demo and future provider
+flows, but the public order form intentionally keeps new manual orders on the
+portfolio base-currency path for now.
 
 Market quotes are currently fixture-backed but are exposed through a provider
 boundary and `GET /market-data/quotes`, so the implementation can later switch
@@ -156,6 +159,8 @@ provider 값을 사용해 포트폴리오 기준 통화로 계산합니다.
 현금 원장 기록은 환율 provider 경계를 사용해 주문 금액을 포트폴리오 기준 통화로
 변환합니다. 다만 신규 주문 생성은 포트폴리오 평가 응답이 현재가 통화와 평가 통화를
 분리해서 내려줄 수 있을 때까지 기존 기준 통화 흐름을 유지합니다.
+서로 다른 통화의 execution row는 데모 seed와 향후 provider 흐름을 위해 존재할 수
+있지만, 공개 주문 폼은 현재 수동 신규 주문을 포트폴리오 기준 통화 흐름으로 유지합니다.
 
 시장 현재가는 아직 fixture 기반이지만 provider 경계와 `GET /market-data/quotes`를
 통해 노출됩니다. 따라서 이후 외부 또는 캐시 provider로 바꾸더라도 프론트엔드가
@@ -236,6 +241,8 @@ JPYです。
 現金元帳記録はFX provider境界で注文金額をポートフォリオ基準通貨へ変換します。
 ただし、新規注文作成はポートフォリオ評価レスポンスが価格通貨と評価通貨を分離して
 返せるようになるまで、既存の基準通貨フローを維持します。
+通貨が異なるexecution rowはデモseedや将来のproviderフロー向けに存在できますが、
+公開注文フォームでは当面、手動の新規注文をポートフォリオ基準通貨フローに維持します。
 
 市場価格はまだfixtureベースですが、provider境界と`GET /market-data/quotes`を通じて
 公開しています。そのため後で外部またはキャッシュ型providerへ切り替えても、

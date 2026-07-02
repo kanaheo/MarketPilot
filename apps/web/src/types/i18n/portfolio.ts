@@ -159,6 +159,7 @@ export type PortfolioMessages = Readonly<{
   orderForm: {
     title: string;
     description: string;
+    currencyPolicy: string;
     fields: {
       symbol: {
         label: string;

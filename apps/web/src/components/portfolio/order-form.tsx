@@ -106,6 +106,7 @@ export function OrderForm({
           <p>{messages.description}</p>
         </div>
       </div>
+      <p className="order-form-currency-policy">{messages.currencyPolicy}</p>
 
       <form
         className="portfolio-create-form"
