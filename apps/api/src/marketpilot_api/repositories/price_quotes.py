@@ -2,7 +2,7 @@ import json
 import os
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import Callable, Iterable, Mapping, Protocol
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -25,6 +25,15 @@ class MarketQuote:
     current_price: Decimal
     source: str
     collected_at: datetime | None
+
+
+@dataclass(frozen=True)
+class MarketQuoteProviderStatus:
+    configured_provider: str
+    active_provider: str
+    fallback_provider: str
+    finnhub_api_key_configured: bool
+    cache_ttl_seconds: int
 
 
 class MarketQuoteProvider(Protocol):
@@ -91,7 +100,10 @@ class FinnhubMarketQuoteProvider:
 
         quotes: list[MarketQuote] = []
         for symbol in normalized_symbols:
-            payload = self._transport(symbol, self._api_key)
+            try:
+                payload = self._transport(symbol, self._api_key)
+            except Exception:
+                continue
             quote = _parse_finnhub_quote_payload(symbol=symbol, payload=payload)
             if quote is not None:
                 quotes.append(quote)
@@ -213,9 +225,35 @@ def _fetch_uncached_market_quotes(
             quotes = []
 
         if len(quotes) > 0:
-            return sorted(quotes, key=lambda quote: (quote.currency, quote.symbol))
+            merged_quotes = _merge_fixture_fallback_quotes(
+                currency=currency,
+                symbols=symbols,
+                provider_quotes=quotes,
+            )
+            return sorted(
+                merged_quotes,
+                key=lambda quote: (quote.currency, quote.symbol),
+            )
 
     return _fixture_provider.list_market_quotes(currency=currency, symbols=symbols)
+
+
+def get_market_quote_provider_status() -> MarketQuoteProviderStatus:
+    settings = get_settings()
+    active_provider = "fixture"
+    if (
+        settings.market_data_quote_provider == "finnhub"
+        and settings.finnhub_api_key is not None
+    ):
+        active_provider = "finnhub"
+
+    return MarketQuoteProviderStatus(
+        configured_provider=settings.market_data_quote_provider,
+        active_provider=active_provider,
+        fallback_provider="fixture",
+        finnhub_api_key_configured=settings.finnhub_api_key is not None,
+        cache_ttl_seconds=settings.market_data_cache_ttl_seconds,
+    )
 
 
 def _get_external_market_quote_provider() -> MarketQuoteProvider | None:
@@ -251,6 +289,38 @@ def _get_market_quote_cache_key(
         else None
     )
     return (normalized_currency, normalized_symbols)
+
+
+def _merge_fixture_fallback_quotes(
+    *,
+    currency: str | None = None,
+    symbols: Iterable[str] | None = None,
+    provider_quotes: list[MarketQuote],
+) -> list[MarketQuote]:
+    normalized_symbols = _normalize_symbols(symbols)
+    if len(normalized_symbols) == 0:
+        return provider_quotes
+
+    provider_quote_keys = {
+        (quote.symbol.upper(), quote.currency.upper())
+        for quote in provider_quotes
+    }
+    fallback_quotes = [
+        MarketQuote(
+            symbol=symbol,
+            currency=quote_currency,
+            current_price=current_price,
+            source="fixture",
+            collected_at=FIXTURE_QUOTE_COLLECTED_AT,
+        )
+        for symbol, quote_currency, current_price in list_fixture_current_prices(
+            currency=currency,
+            symbols=normalized_symbols,
+        )
+        if (symbol, quote_currency) not in provider_quote_keys
+    ]
+
+    return [*provider_quotes, *fallback_quotes]
 
 
 def _normalize_symbols(symbols: Iterable[str] | None) -> tuple[str, ...]:
@@ -331,8 +401,15 @@ def _parse_finnhub_quote_payload(
     symbol: str,
     payload: Mapping[str, object],
 ) -> MarketQuote | None:
+    if "error" in payload:
+        return None
+
     current_price = _parse_decimal(payload.get("c"))
-    if current_price is None or current_price <= Decimal("0"):
+    if (
+        current_price is None
+        or not current_price.is_finite()
+        or current_price <= Decimal("0")
+    ):
         return None
 
     collected_at = _parse_unix_timestamp(payload.get("t"))
@@ -354,7 +431,7 @@ def _parse_decimal(value: object) -> Decimal | None:
 
     try:
         return Decimal(str(value))
-    except Exception:
+    except (InvalidOperation, ValueError):
         return None
 
 

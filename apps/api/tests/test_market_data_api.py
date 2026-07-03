@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 from pydantic import SecretStr
 import pytest
 
+from marketpilot_api.core.config import get_settings
 from marketpilot_api.main import app
 from marketpilot_api.repositories.fx_rates import (
     FxRate,
@@ -79,6 +80,31 @@ class FakeFinnhubQuoteTransport:
             "pc": 428.62,
             "t": 1782950400,
         }
+
+
+class PartialFinnhubQuoteTransport:
+    def __call__(self, symbol: str, api_key: SecretStr) -> dict[str, object]:
+        if symbol == "AAPL":
+            return {
+                "c": 294.38,
+                "t": 1782950400,
+            }
+
+        return {
+            "c": 0,
+            "t": 0,
+        }
+
+
+class FailingSymbolFinnhubQuoteTransport:
+    def __call__(self, symbol: str, api_key: SecretStr) -> dict[str, object]:
+        if symbol == "AAPL":
+            return {
+                "c": 294.38,
+                "t": 1782950400,
+            }
+
+        raise RuntimeError("symbol request failed")
 
 
 class CountingFxRateProvider:
@@ -269,6 +295,81 @@ def test_finnhub_market_quote_provider_skips_non_usd_currency() -> None:
 
     assert quotes == []
     assert transport.calls == []
+
+
+def test_list_market_quotes_fills_missing_provider_symbols_from_fixture() -> None:
+    provider = FinnhubMarketQuoteProvider(
+        api_key=SecretStr("test-finnhub-key"),
+        transport=PartialFinnhubQuoteTransport(),
+    )
+    configure_market_quote_provider(provider)
+
+    with TestClient(app) as client:
+        response = client.get(
+            "/market-data/quotes",
+            params=[("symbols", "AAPL"), ("symbols", "NVDA")],
+        )
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "symbol": "AAPL",
+            "currency": "USD",
+            "current_price": "294.38",
+            "source": "finnhub",
+            "collected_at": "2026-07-02T00:00:00Z",
+        },
+        {
+            "symbol": "NVDA",
+            "currency": "USD",
+            "current_price": "125.0000",
+            "source": "fixture",
+            "collected_at": FIXTURE_COLLECTED_AT,
+        },
+    ]
+
+
+def test_finnhub_market_quote_provider_keeps_successful_symbol_when_one_fails() -> None:
+    provider = FinnhubMarketQuoteProvider(
+        api_key=SecretStr("test-finnhub-key"),
+        transport=FailingSymbolFinnhubQuoteTransport(),
+    )
+
+    quotes = provider.list_market_quotes(symbols=["AAPL", "NVDA"])
+
+    assert quotes == [
+        MarketQuote(
+            symbol="AAPL",
+            currency="USD",
+            current_price=Decimal("294.38"),
+            source="finnhub",
+            collected_at=datetime(2026, 7, 2, tzinfo=timezone.utc),
+        )
+    ]
+
+
+def test_retrieve_quote_provider_status_hides_finnhub_api_key(
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("MARKETPILOT_MARKET_DATA_QUOTE_PROVIDER", "finnhub")
+    monkeypatch.setenv("MARKETPILOT_FINNHUB_API_KEY", "test-finnhub-key")
+    monkeypatch.setenv("MARKETPILOT_MARKET_DATA_CACHE_TTL_SECONDS", "60")
+    get_settings.cache_clear()
+
+    with TestClient(app) as client:
+        response = client.get("/market-data/quote-provider-status")
+
+    get_settings.cache_clear()
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "configured_provider": "finnhub",
+        "active_provider": "finnhub",
+        "fallback_provider": "fixture",
+        "finnhub_api_key_configured": True,
+        "cache_ttl_seconds": 60,
+    }
+    assert "test-finnhub-key" not in response.text
 
 
 def test_retrieve_fx_rate_uses_cached_external_provider_result() -> None:

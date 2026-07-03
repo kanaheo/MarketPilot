@@ -14,6 +14,14 @@ class MarketQuoteResponse(BaseModel):
     collected_at: datetime
 
 
+class MarketQuoteProviderStatusResponse(BaseModel):
+    configured_provider: str
+    active_provider: str
+    fallback_provider: str
+    finnhub_api_key_configured: bool
+    cache_ttl_seconds: int
+
+
 class FxRateResponse(BaseModel):
     base_currency: SupportedCurrency
     quote_currency: SupportedCurrency

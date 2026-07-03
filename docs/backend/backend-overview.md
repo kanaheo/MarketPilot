@@ -43,6 +43,7 @@ incrementally while preserving reproducibility and auditability.
 - reserved cash and reserved sell-quantity checks for pending orders
 - cached market quote provider boundary with fixture fallback and Finnhub adapter
 - `GET /market-data/quotes` endpoint
+- `GET /market-data/quote-provider-status` diagnostic endpoint without secrets
 - cached FX rate provider boundary with fixture fallback
 - `GET /market-data/fx-rates` endpoint
 - Alembic migration management
@@ -90,7 +91,12 @@ The default source is the local fixture provider. When
 `MARKETPILOT_FINNHUB_API_KEY` are present, the backend can request Finnhub
 quotes for USD symbols, cache successful responses for
 `MARKETPILOT_MARKET_DATA_CACHE_TTL_SECONDS`, and fall back to fixtures when the
-provider is unavailable. Quote responses include `source` and `collected_at`.
+provider is unavailable. When only part of a requested symbol batch is returned
+by the external provider, the backend keeps successful external quotes and fills
+missing fixture symbols from the fixture provider. Quote responses include
+`source` and `collected_at`. `GET /market-data/quote-provider-status` reports
+the configured provider, active provider, fallback provider, cache TTL, and
+whether a Finnhub key is configured without returning the key itself.
 
 FX rates are also fixture-backed behind the same cached provider pattern. The
 first API surface returns a single pair rate for supported currencies and
@@ -141,6 +147,7 @@ MarketPilot은 모듈형 FastAPI 백엔드를 사용합니다. PostgreSQL 기반
 - 대기 주문에 대한 예약 현금 및 예약 매도 수량 검사
 - fixture fallback과 Finnhub adapter가 있는 cached 시장 현재가 provider 경계
 - `GET /market-data/quotes` endpoint
+- 비밀값을 노출하지 않는 `GET /market-data/quote-provider-status` 진단 endpoint
 - fixture fallback이 있는 cached 환율 provider 경계
 - `GET /market-data/fx-rates` endpoint
 - Alembic 마이그레이션 관리
@@ -180,8 +187,11 @@ provider 값을 사용해 포트폴리오 기준 통화로 계산합니다.
 로컬 fixture provider입니다. `MARKETPILOT_MARKET_DATA_QUOTE_PROVIDER=finnhub`와
 `MARKETPILOT_FINNHUB_API_KEY`가 있으면 백엔드가 USD 종목의 Finnhub 현재가를 요청하고,
 성공 응답은 `MARKETPILOT_MARKET_DATA_CACHE_TTL_SECONDS` 동안 cache하며, provider가
-사용할 수 없으면 fixture로 fallback할 수 있습니다. 현재가 응답에는 `source`와
-`collected_at`이 포함됩니다.
+사용할 수 없으면 fixture로 fallback할 수 있습니다. 요청한 종목 묶음 중 일부만 외부
+provider에서 반환되면, 성공한 외부 현재가는 유지하고 fixture에 있는 누락 종목만
+fixture provider에서 보충합니다. 현재가 응답에는 `source`와 `collected_at`이 포함됩니다.
+`GET /market-data/quote-provider-status`는 설정 provider, 활성 provider, fallback provider,
+cache TTL, Finnhub key 설정 여부만 반환하고 key 값 자체는 반환하지 않습니다.
 
 환율도 같은 cached provider pattern 뒤에 fixture로 준비했습니다. 첫 API는 지원 통화
 사이의 단일 환율을 반환하며 `source`와 `collected_at`을 포함합니다. 주문 체결 기록에는
@@ -231,6 +241,7 @@ PostgreSQLベースのポートフォリオ、市場データ、バックテス�
 - 待機注文に対する予約現金と予約売却数量の検査
 - fixture fallbackとFinnhub adapter付きcached市場価格provider境界
 - `GET /market-data/quotes` endpoint
+- secretを返さない`GET /market-data/quote-provider-status`診断endpoint
 - fixture fallback付きcached FXレートprovider境界
 - `GET /market-data/fx-rates` endpoint
 - Alembicマイグレーション管理
@@ -271,8 +282,11 @@ JPYです。
 fixture providerです。`MARKETPILOT_MARKET_DATA_QUOTE_PROVIDER=finnhub`と
 `MARKETPILOT_FINNHUB_API_KEY`がある場合、バックエンドはUSD銘柄のFinnhub現在値を取得し、
 成功レスポンスを`MARKETPILOT_MARKET_DATA_CACHE_TTL_SECONDS`の間cacheし、providerが
-利用できない場合はfixtureへfallbackできます。価格レスポンスには`source`と
-`collected_at`を含めます。
+利用できない場合はfixtureへfallbackできます。要求した銘柄の一部だけが外部providerから
+返った場合、成功した外部価格は保持し、fixtureにある不足銘柄だけfixture providerで
+補完します。価格レスポンスには`source`と`collected_at`を含めます。
+`GET /market-data/quote-provider-status`は設定provider、active provider、fallback
+provider、cache TTL、Finnhub key設定有無だけを返し、key値自体は返しません。
 
 FXレートも同じcached provider patternの背後にfixtureとして用意しています。最初のAPIは
 対応通貨間の単一レートを返し、`source`と`collected_at`を含めます。注文約定記録には

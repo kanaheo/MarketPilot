@@ -51,6 +51,8 @@ secret verifies short-lived tokens for authenticated user APIs.
 server should request Finnhub quotes from the backend. Optional settings such
 as `MARKETPILOT_DATABASE_URL` normally do not need local overrides. Never
 commit `.env`.
+Check the active quote provider without exposing secrets at
+`GET /market-data/quote-provider-status`.
 
 ### Database, migrations, and API
 
@@ -134,6 +136,8 @@ MARKETPILOT_FINNHUB_API_KEY=
 `MARKETPILOT_FINNHUB_API_KEY`가 있고 로컬 API 서버가 백엔드에서 Finnhub 현재가를
 요청해야 할 때만 `finnhub`로 바꿉니다. `MARKETPILOT_DATABASE_URL` 같은 선택 설정은
 일반적인 로컬 개발에서는 변경하지 않아도 됩니다. `.env`는 커밋하지 않습니다.
+비밀값을 노출하지 않고 활성 현재가 provider를 확인하려면
+`GET /market-data/quote-provider-status`를 호출합니다.
 
 ### DB, 마이그레이션, API 실행
 
@@ -218,6 +222,8 @@ MARKETPILOT_FINNHUB_API_KEY=
 Finnhubの現在値を取得する場合だけ`finnhub`に変更します。
 `MARKETPILOT_DATABASE_URL`などの任意設定は通常のローカル開発では変更不要です。
 `.env`はコミットしません。
+secretを公開せずactiveな価格providerを確認するには、
+`GET /market-data/quote-provider-status`を呼び出します。
 
 ### DB、マイグレーション、APIの実行
 
