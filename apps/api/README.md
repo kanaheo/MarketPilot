@@ -24,6 +24,7 @@ source .venv/bin/activate
 alembic upgrade head
 uvicorn marketpilot_api.main:app --reload
 python -m pytest
+python -m marketpilot_api.commands.collect_market_quotes --symbols AAPL NVDA --currency USD
 ```
 
 Create `.env` only for server-only overrides such as the internal user-sync
@@ -53,6 +54,7 @@ source .venv/bin/activate
 alembic upgrade head
 uvicorn marketpilot_api.main:app --reload
 python -m pytest
+python -m marketpilot_api.commands.collect_market_quotes --symbols AAPL NVDA --currency USD
 ```
 
 내부 사용자 동기화 비밀키처럼 서버 전용 값을 변경할 때만 `.env`를 만들며 커밋하지
@@ -83,6 +85,7 @@ source .venv/bin/activate
 alembic upgrade head
 uvicorn marketpilot_api.main:app --reload
 python -m pytest
+python -m marketpilot_api.commands.collect_market_quotes --symbols AAPL NVDA --currency USD
 ```
 
 内部ユーザー同期トークンなどサーバー専用値を上書きする場合のみ`.env`を作成し、

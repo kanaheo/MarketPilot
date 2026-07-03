@@ -79,6 +79,7 @@ uvicorn marketpilot_api.main:app --reload
 ```bash
 python -m pytest
 alembic current
+python -m marketpilot_api.commands.collect_market_quotes --symbols AAPL NVDA --currency USD
 ```
 
 From the repository root, stop PostgreSQL without deleting data:
@@ -164,6 +165,7 @@ uvicorn marketpilot_api.main:app --reload
 ```bash
 python -m pytest
 alembic current
+python -m marketpilot_api.commands.collect_market_quotes --symbols AAPL NVDA --currency USD
 ```
 
 저장소 루트에서 데이터는 유지하고 PostgreSQL만 중지합니다.
@@ -250,6 +252,7 @@ uvicorn marketpilot_api.main:app --reload
 ```bash
 python -m pytest
 alembic current
+python -m marketpilot_api.commands.collect_market_quotes --symbols AAPL NVDA --currency USD
 ```
 
 リポジトリルートでデータを残したままPostgreSQLを停止します。

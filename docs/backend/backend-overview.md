@@ -46,6 +46,7 @@ incrementally while preserving reproducibility and auditability.
 - `GET /market-data/quotes` endpoint
 - `POST /market-data/quote-snapshots/collect` endpoint
 - `GET /market-data/quote-snapshots` endpoint
+- `marketpilot_api.commands.collect_market_quotes` local collection command
 - `GET /market-data/quote-provider-status` diagnostic endpoint without secrets
 - cached FX rate provider boundary with fixture fallback
 - `GET /market-data/fx-rates` endpoint
@@ -108,6 +109,9 @@ provider boundary and stores collected symbol, currency, price, source, and
 collection time in `market_quote_snapshots` for later audit, backtest, and data
 pipeline work. `GET /market-data/quote-snapshots` returns stored snapshots in
 latest-first order with optional symbol, currency, and limit filters.
+The same collection path can run without the API server through
+`python -m marketpilot_api.commands.collect_market_quotes --symbols AAPL NVDA --currency USD`,
+which is the first local-friendly step toward a scheduled market-data job.
 
 FX rates are also fixture-backed behind the same cached provider pattern. The
 first API surface returns a single pair rate for supported currencies and
@@ -161,6 +165,7 @@ MarketPilot은 모듈형 FastAPI 백엔드를 사용합니다. PostgreSQL 기반
 - `GET /market-data/quotes` endpoint
 - `POST /market-data/quote-snapshots/collect` endpoint
 - `GET /market-data/quote-snapshots` endpoint
+- `marketpilot_api.commands.collect_market_quotes` 로컬 수집 command
 - 비밀값을 노출하지 않는 `GET /market-data/quote-provider-status` 진단 endpoint
 - fixture fallback이 있는 cached 환율 provider 경계
 - `GET /market-data/fx-rates` endpoint
@@ -214,6 +219,9 @@ symbol, currency, price, source, collection time을 `market_quote_snapshots`에 
 이 이력은 이후 감사, 백테스트, 데이터 파이프라인 작업에 사용합니다.
 `GET /market-data/quote-snapshots`는 저장된 snapshot을 최신순으로 반환하고 symbol,
 currency, limit 필터를 지원합니다.
+같은 수집 흐름은 API 서버 없이도
+`python -m marketpilot_api.commands.collect_market_quotes --symbols AAPL NVDA --currency USD`로
+실행할 수 있으며, 이는 이후 예약 market-data job으로 가기 위한 로컬 친화적인 첫 단계입니다.
 
 환율도 같은 cached provider pattern 뒤에 fixture로 준비했습니다. 첫 API는 지원 통화
 사이의 단일 환율을 반환하며 `source`와 `collected_at`을 포함합니다. 주문 체결 기록에는
@@ -266,6 +274,7 @@ PostgreSQLベースのポートフォリオ、市場データ、バックテス�
 - `GET /market-data/quotes` endpoint
 - `POST /market-data/quote-snapshots/collect` endpoint
 - `GET /market-data/quote-snapshots` endpoint
+- `marketpilot_api.commands.collect_market_quotes`ローカル収集command
 - secretを返さない`GET /market-data/quote-provider-status`診断endpoint
 - fixture fallback付きcached FXレートprovider境界
 - `GET /market-data/fx-rates` endpoint
@@ -320,6 +329,9 @@ currency、price、source、collection timeを`market_quote_snapshots`へ保存�
 この履歴は後続の監査、バックテスト、データパイプライン作業に使用します。
 `GET /market-data/quote-snapshots`は保存済みsnapshotを新しい順で返し、symbol、
 currency、limitフィルターをサポートします。
+同じ収集フローはAPIサーバーなしでも
+`python -m marketpilot_api.commands.collect_market_quotes --symbols AAPL NVDA --currency USD`で
+実行でき、将来のscheduled market-data jobに向けたローカル向けの第一歩です。
 
 FXレートも同じcached provider patternの背後にfixtureとして用意しています。最初のAPIは
 対応通貨間の単一レートを返し、`source`と`collected_at`を含めます。注文約定記録には
