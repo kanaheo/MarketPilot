@@ -22,6 +22,13 @@ class MarketQuoteProviderStatusResponse(BaseModel):
     cache_ttl_seconds: int
 
 
+class MarketQuoteSnapshotCollectionResponse(BaseModel):
+    requested_count: int
+    stored_count: int
+    skipped_count: int
+    quotes: list[MarketQuoteResponse]
+
+
 class FxRateResponse(BaseModel):
     base_currency: SupportedCurrency
     quote_currency: SupportedCurrency

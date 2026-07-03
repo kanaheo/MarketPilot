@@ -1,13 +1,18 @@
 from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Iterable
+from unittest.mock import MagicMock
 
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
 import pytest
 
 from marketpilot_api.core.config import get_settings
+from marketpilot_api.db.session import get_db_session
 from marketpilot_api.main import app
+from marketpilot_api.repositories.market_quote_snapshots import (
+    MarketQuoteSnapshotCollection,
+)
 from marketpilot_api.repositories.fx_rates import (
     FxRate,
     configure_fx_rate_provider,
@@ -27,9 +32,11 @@ EXTERNAL_COLLECTED_AT = datetime(2026, 7, 2, tzinfo=timezone.utc)
 def reset_market_data_providers() -> None:
     configure_market_quote_provider(None)
     configure_fx_rate_provider(None)
+    app.dependency_overrides.clear()
     yield
     configure_market_quote_provider(None)
     configure_fx_rate_provider(None)
+    app.dependency_overrides.clear()
 
 
 class CountingMarketQuoteProvider:
@@ -135,6 +142,13 @@ class FailingFxRateProvider:
         quote_currency: str,
     ) -> FxRate | None:
         raise RuntimeError("provider unavailable")
+
+
+def override_session(session):
+    def dependency_override():
+        yield session
+
+    return dependency_override
 
 
 def test_list_market_quotes_returns_fixture_quotes() -> None:
@@ -370,6 +384,50 @@ def test_retrieve_quote_provider_status_hides_finnhub_api_key(
         "cache_ttl_seconds": 60,
     }
     assert "test-finnhub-key" not in response.text
+
+
+def test_collect_market_quote_snapshots_records_provider_quotes(
+    monkeypatch,
+) -> None:
+    session = object()
+    provider = CountingMarketQuoteProvider()
+    configure_market_quote_provider(provider)
+    record_mock = MagicMock(
+        return_value=MarketQuoteSnapshotCollection(
+            snapshots=[object()],
+            skipped_count=0,
+        )
+    )
+    monkeypatch.setattr(
+        "marketpilot_api.routers.market_data.record_market_quote_snapshots",
+        record_mock,
+    )
+    app.dependency_overrides[get_db_session] = override_session(session)
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/market-data/quote-snapshots/collect",
+            params=[("symbols", "MSFT")],
+        )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "requested_count": 1,
+        "stored_count": 1,
+        "skipped_count": 0,
+        "quotes": [
+            {
+                "symbol": "MSFT",
+                "currency": "USD",
+                "current_price": "420.0000",
+                "source": "mock-external",
+                "collected_at": "2026-07-02T00:00:00Z",
+            }
+        ],
+    }
+    assert provider.call_count == 1
+    record_mock.assert_called_once()
+    assert record_mock.call_args.args[0] is session
 
 
 def test_retrieve_fx_rate_uses_cached_external_provider_result() -> None:

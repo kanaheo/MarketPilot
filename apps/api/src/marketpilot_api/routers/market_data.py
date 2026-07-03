@@ -1,14 +1,20 @@
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.orm import Session
 
+from marketpilot_api.db.session import get_db_session
 from marketpilot_api.repositories.fx_rates import get_fx_rate
+from marketpilot_api.repositories.market_quote_snapshots import (
+    record_market_quote_snapshots,
+)
 from marketpilot_api.repositories.price_quotes import (
     get_market_quote_provider_status,
     list_market_quotes as list_provider_market_quotes,
 )
 from marketpilot_api.schemas.market_data import (
     FxRateResponse,
+    MarketQuoteSnapshotCollectionResponse,
     MarketQuoteProviderStatusResponse,
     MarketQuoteResponse,
 )
@@ -51,6 +57,38 @@ def list_market_quotes(
             symbols=symbols,
         )
     ]
+
+
+@router.post(
+    "/quote-snapshots/collect",
+    response_model=MarketQuoteSnapshotCollectionResponse,
+)
+def collect_market_quote_snapshots(
+    session: Annotated[Session, Depends(get_db_session)],
+    currency: SupportedCurrency | None = None,
+    symbols: Annotated[list[str] | None, Query()] = None,
+) -> MarketQuoteSnapshotCollectionResponse:
+    quotes = list_provider_market_quotes(
+        currency=currency,
+        symbols=symbols,
+    )
+    collection = record_market_quote_snapshots(session, quotes=quotes)
+
+    return MarketQuoteSnapshotCollectionResponse(
+        requested_count=len(symbols) if symbols is not None else len(quotes),
+        stored_count=len(collection.snapshots),
+        skipped_count=collection.skipped_count,
+        quotes=[
+            MarketQuoteResponse(
+                symbol=quote.symbol,
+                currency=quote.currency,
+                current_price=quote.current_price,
+                source=quote.source,
+                collected_at=quote.collected_at,
+            )
+            for quote in quotes
+        ],
+    )
 
 
 @router.get("/fx-rates", response_model=FxRateResponse)
