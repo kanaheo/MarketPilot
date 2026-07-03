@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from marketpilot_api.db.session import get_db_session
 from marketpilot_api.repositories.fx_rates import get_fx_rate
 from marketpilot_api.repositories.market_quote_snapshots import (
+    list_market_quote_snapshots as list_recorded_market_quote_snapshots,
     record_market_quote_snapshots,
 )
 from marketpilot_api.repositories.price_quotes import (
@@ -15,6 +16,7 @@ from marketpilot_api.repositories.price_quotes import (
 from marketpilot_api.schemas.market_data import (
     FxRateResponse,
     MarketQuoteSnapshotCollectionResponse,
+    MarketQuoteSnapshotResponse,
     MarketQuoteProviderStatusResponse,
     MarketQuoteResponse,
 )
@@ -89,6 +91,37 @@ def collect_market_quote_snapshots(
             for quote in quotes
         ],
     )
+
+
+@router.get(
+    "/quote-snapshots",
+    response_model=list[MarketQuoteSnapshotResponse],
+)
+def list_market_quote_snapshots(
+    session: Annotated[Session, Depends(get_db_session)],
+    currency: SupportedCurrency | None = None,
+    symbols: Annotated[list[str] | None, Query()] = None,
+    limit: Annotated[int, Query(ge=1, le=200)] = 50,
+) -> list[MarketQuoteSnapshotResponse]:
+    snapshots = list_recorded_market_quote_snapshots(
+        session,
+        currency=currency,
+        symbols=symbols,
+        limit=limit,
+    )
+
+    return [
+        MarketQuoteSnapshotResponse(
+            id=snapshot.id,
+            symbol=snapshot.symbol,
+            currency=snapshot.currency,
+            current_price=snapshot.current_price,
+            source=snapshot.source,
+            collected_at=snapshot.collected_at,
+            created_at=snapshot.created_at,
+        )
+        for snapshot in snapshots
+    ]
 
 
 @router.get("/fx-rates", response_model=FxRateResponse)

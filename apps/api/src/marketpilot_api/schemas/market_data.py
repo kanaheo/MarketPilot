@@ -1,5 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
+from uuid import UUID
 
 from pydantic import BaseModel
 
@@ -27,6 +28,16 @@ class MarketQuoteSnapshotCollectionResponse(BaseModel):
     stored_count: int
     skipped_count: int
     quotes: list[MarketQuoteResponse]
+
+
+class MarketQuoteSnapshotResponse(BaseModel):
+    id: UUID
+    symbol: str
+    currency: SupportedCurrency
+    current_price: Decimal
+    source: str
+    collected_at: datetime
+    created_at: datetime
 
 
 class FxRateResponse(BaseModel):

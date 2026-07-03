@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Iterable
@@ -10,6 +11,7 @@ import pytest
 from marketpilot_api.core.config import get_settings
 from marketpilot_api.db.session import get_db_session
 from marketpilot_api.main import app
+from marketpilot_api.models import MarketQuoteSnapshot
 from marketpilot_api.repositories.market_quote_snapshots import (
     MarketQuoteSnapshotCollection,
 )
@@ -428,6 +430,65 @@ def test_collect_market_quote_snapshots_records_provider_quotes(
     assert provider.call_count == 1
     record_mock.assert_called_once()
     assert record_mock.call_args.args[0] is session
+
+
+def test_list_market_quote_snapshots_returns_recorded_quotes(
+    monkeypatch,
+) -> None:
+    session = object()
+    snapshot_id = uuid.uuid4()
+    created_at = datetime(2026, 7, 3, 9, 0, tzinfo=timezone.utc)
+    collected_at = datetime(2026, 7, 2, 20, 0, tzinfo=timezone.utc)
+    snapshot = MarketQuoteSnapshot(
+        id=snapshot_id,
+        symbol="AAPL",
+        currency="USD",
+        current_price=Decimal("294.3800"),
+        source="finnhub",
+        collected_at=collected_at,
+        created_at=created_at,
+    )
+    list_mock = MagicMock(return_value=[snapshot])
+    monkeypatch.setattr(
+        "marketpilot_api.routers.market_data.list_recorded_market_quote_snapshots",
+        list_mock,
+    )
+    app.dependency_overrides[get_db_session] = override_session(session)
+
+    with TestClient(app) as client:
+        response = client.get(
+            "/market-data/quote-snapshots",
+            params=[("symbols", "aapl"), ("currency", "USD"), ("limit", "20")],
+        )
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "id": str(snapshot_id),
+            "symbol": "AAPL",
+            "currency": "USD",
+            "current_price": "294.3800",
+            "source": "finnhub",
+            "collected_at": "2026-07-02T20:00:00Z",
+            "created_at": "2026-07-03T09:00:00Z",
+        }
+    ]
+    list_mock.assert_called_once_with(
+        session,
+        currency="USD",
+        symbols=["aapl"],
+        limit=20,
+    )
+
+
+def test_list_market_quote_snapshots_rejects_invalid_limit() -> None:
+    with TestClient(app) as client:
+        response = client.get(
+            "/market-data/quote-snapshots",
+            params={"limit": "0"},
+        )
+
+    assert response.status_code == 422
 
 
 def test_retrieve_fx_rate_uses_cached_external_provider_result() -> None:

@@ -1,6 +1,7 @@
 from collections.abc import Iterable
 from dataclasses import dataclass
 
+from sqlalchemy import Select, select
 from sqlalchemy.orm import Session
 
 from marketpilot_api.models import MarketQuoteSnapshot
@@ -44,3 +45,48 @@ def record_market_quote_snapshots(
         snapshots=snapshots,
         skipped_count=skipped_count,
     )
+
+
+def list_market_quote_snapshots(
+    session: Session,
+    *,
+    currency: str | None = None,
+    symbols: Iterable[str] | None = None,
+    limit: int = 50,
+) -> list[MarketQuoteSnapshot]:
+    statement = _build_market_quote_snapshot_query(
+        currency=currency,
+        symbols=symbols,
+        limit=limit,
+    )
+
+    return list(session.scalars(statement).all())
+
+
+def _build_market_quote_snapshot_query(
+    *,
+    currency: str | None = None,
+    symbols: Iterable[str] | None = None,
+    limit: int = 50,
+) -> Select[tuple[MarketQuoteSnapshot]]:
+    statement = select(MarketQuoteSnapshot)
+    normalized_currency = currency.upper() if currency is not None else None
+    normalized_symbols = (
+        sorted({symbol.strip().upper() for symbol in symbols if symbol.strip()})
+        if symbols is not None
+        else None
+    )
+
+    if normalized_currency is not None:
+        statement = statement.where(
+            MarketQuoteSnapshot.currency == normalized_currency
+        )
+    if normalized_symbols is not None:
+        statement = statement.where(
+            MarketQuoteSnapshot.symbol.in_(normalized_symbols)
+        )
+
+    return statement.order_by(
+        MarketQuoteSnapshot.collected_at.desc(),
+        MarketQuoteSnapshot.created_at.desc(),
+    ).limit(limit)
