@@ -1,6 +1,7 @@
 from functools import lru_cache
 from typing import Literal
 
+from pydantic import Field
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -12,6 +13,9 @@ class Settings(BaseSettings):
     debug: bool = False
     internal_api_token: SecretStr | None = None
     user_api_signing_secret: SecretStr | None = None
+    finnhub_api_key: SecretStr | None = None
+    market_data_quote_provider: Literal["fixture", "finnhub"] = "fixture"
+    market_data_cache_ttl_seconds: int = Field(default=300, ge=0)
     database_url: str = (
         "postgresql+psycopg://marketpilot:marketpilot@127.0.0.1:5432/"
         "marketpilot"

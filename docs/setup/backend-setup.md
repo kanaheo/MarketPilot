@@ -37,15 +37,22 @@ Store the generated value as `MARKETPILOT_INTERNAL_API_TOKEN`.
 ```dotenv
 MARKETPILOT_INTERNAL_API_TOKEN=
 MARKETPILOT_USER_API_SIGNING_SECRET=
+MARKETPILOT_MARKET_DATA_QUOTE_PROVIDER=fixture
+MARKETPILOT_FINNHUB_API_KEY=
 ```
 
 Generate a second value and store it as
 `MARKETPILOT_USER_API_SIGNING_SECRET`. Each value must match its counterpart
 in `apps/web/.env.local`, but the two values must be different from each
 other. The internal token is only for user synchronization. The signing
-secret verifies short-lived tokens for authenticated user APIs. Optional
-settings such as `MARKETPILOT_DATABASE_URL` normally do not need local
-overrides. Never commit `.env`.
+secret verifies short-lived tokens for authenticated user APIs.
+`MARKETPILOT_MARKET_DATA_QUOTE_PROVIDER` defaults to `fixture`. Set it to
+`finnhub` only when `MARKETPILOT_FINNHUB_API_KEY` is present and the local API
+server should request Finnhub quotes from the backend. Optional settings such
+as `MARKETPILOT_DATABASE_URL` normally do not need local overrides. Never
+commit `.env`.
+Check the active quote provider without exposing secrets at
+`GET /market-data/quote-provider-status`.
 
 ### Database, migrations, and API
 
@@ -72,6 +79,7 @@ uvicorn marketpilot_api.main:app --reload
 ```bash
 python -m pytest
 alembic current
+python -m marketpilot_api.commands.collect_market_quotes --symbols AAPL NVDA --currency USD
 ```
 
 From the repository root, stop PostgreSQL without deleting data:
@@ -117,14 +125,20 @@ openssl rand -hex 32
 ```dotenv
 MARKETPILOT_INTERNAL_API_TOKEN=
 MARKETPILOT_USER_API_SIGNING_SECRET=
+MARKETPILOT_MARKET_DATA_QUOTE_PROVIDER=fixture
+MARKETPILOT_FINNHUB_API_KEY=
 ```
 
 두 번째 값을 새로 생성해 `MARKETPILOT_USER_API_SIGNING_SECRET`에 입력합니다.
 각 값은 `apps/web/.env.local`의 같은 이름 값과 일치해야 하지만, 두 비밀값끼리는
 서로 달라야 합니다. 내부 토큰은 사용자 동기화에만 사용하고, 서명 비밀키는 로그인
-사용자 API의 짧은 수명 토큰 검증에 사용합니다. `MARKETPILOT_DATABASE_URL` 같은
-선택 설정은 일반적인 로컬 개발에서는 변경하지 않아도 됩니다. `.env`는 커밋하지
-않습니다.
+사용자 API의 짧은 수명 토큰 검증에 사용합니다.
+`MARKETPILOT_MARKET_DATA_QUOTE_PROVIDER`의 기본값은 `fixture`입니다.
+`MARKETPILOT_FINNHUB_API_KEY`가 있고 로컬 API 서버가 백엔드에서 Finnhub 현재가를
+요청해야 할 때만 `finnhub`로 바꿉니다. `MARKETPILOT_DATABASE_URL` 같은 선택 설정은
+일반적인 로컬 개발에서는 변경하지 않아도 됩니다. `.env`는 커밋하지 않습니다.
+비밀값을 노출하지 않고 활성 현재가 provider를 확인하려면
+`GET /market-data/quote-provider-status`를 호출합니다.
 
 ### DB, 마이그레이션, API 실행
 
@@ -151,6 +165,7 @@ uvicorn marketpilot_api.main:app --reload
 ```bash
 python -m pytest
 alembic current
+python -m marketpilot_api.commands.collect_market_quotes --symbols AAPL NVDA --currency USD
 ```
 
 저장소 루트에서 데이터는 유지하고 PostgreSQL만 중지합니다.
@@ -196,13 +211,21 @@ openssl rand -hex 32
 ```dotenv
 MARKETPILOT_INTERNAL_API_TOKEN=
 MARKETPILOT_USER_API_SIGNING_SECRET=
+MARKETPILOT_MARKET_DATA_QUOTE_PROVIDER=fixture
+MARKETPILOT_FINNHUB_API_KEY=
 ```
 
 2つ目の値を生成し、`MARKETPILOT_USER_API_SIGNING_SECRET`に設定します。各値は
 `apps/web/.env.local`の同名の値と一致させますが、2つのシークレット自体は別の
 値にします。内部トークンはユーザー同期専用で、署名シークレットは認証済み
-ユーザーAPI向けの短命トークン検証に使用します。`MARKETPILOT_DATABASE_URL`
-などの任意設定は通常のローカル開発では変更不要です。`.env`はコミットしません。
+ユーザーAPI向けの短命トークン検証に使用します。
+`MARKETPILOT_MARKET_DATA_QUOTE_PROVIDER`の既定値は`fixture`です。
+`MARKETPILOT_FINNHUB_API_KEY`があり、ローカルAPIサーバーがバックエンドから
+Finnhubの現在値を取得する場合だけ`finnhub`に変更します。
+`MARKETPILOT_DATABASE_URL`などの任意設定は通常のローカル開発では変更不要です。
+`.env`はコミットしません。
+secretを公開せずactiveな価格providerを確認するには、
+`GET /market-data/quote-provider-status`を呼び出します。
 
 ### DB、マイグレーション、APIの実行
 
@@ -229,6 +252,7 @@ uvicorn marketpilot_api.main:app --reload
 ```bash
 python -m pytest
 alembic current
+python -m marketpilot_api.commands.collect_market_quotes --symbols AAPL NVDA --currency USD
 ```
 
 リポジトリルートでデータを残したままPostgreSQLを停止します。

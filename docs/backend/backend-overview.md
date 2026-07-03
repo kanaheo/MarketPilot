@@ -40,10 +40,15 @@ incrementally while preserving reproducibility and auditability.
 - holdings, average cost, realized P/L, unrealized P/L, and return calculations
 - holding quote currency, valuation currency, and valuation FX rate fields
 - quote and FX source/collection metadata in market-data and portfolio responses
+- `market_quote_snapshots` table for collected quote audit history
 - reserved cash and reserved sell-quantity checks for pending orders
-- fixture-backed market quote provider boundary
+- cached market quote provider boundary with fixture fallback and Finnhub adapter
 - `GET /market-data/quotes` endpoint
-- fixture-backed FX rate provider boundary
+- `POST /market-data/quote-snapshots/collect` endpoint
+- `GET /market-data/quote-snapshots` endpoint
+- `marketpilot_api.commands.collect_market_quotes` local collection command
+- `GET /market-data/quote-provider-status` diagnostic endpoint without secrets
+- cached FX rate provider boundary with fixture fallback
 - `GET /market-data/fx-rates` endpoint
 - Alembic migration management
 - passing endpoint test
@@ -83,16 +88,36 @@ Cross-currency execution rows can exist for seeded/demo and future provider
 flows, but the public order form intentionally keeps new manual orders on the
 portfolio base-currency path for now.
 
-Market quotes are currently fixture-backed but are exposed through a provider
-boundary and `GET /market-data/quotes`, so the implementation can later switch
-to an external or cached provider without making the frontend call a third
-party directly. Quote responses include `source` and `collected_at`.
+Market quotes are exposed through a cached provider boundary and
+`GET /market-data/quotes`, so the frontend never calls a third party directly.
+The default source is the local fixture provider. When
+`MARKETPILOT_MARKET_DATA_QUOTE_PROVIDER=finnhub` and
+`MARKETPILOT_FINNHUB_API_KEY` are present, the backend can request Finnhub
+quotes for USD symbols, cache successful responses for
+`MARKETPILOT_MARKET_DATA_CACHE_TTL_SECONDS`, and fall back to fixtures when the
+provider is unavailable. When only part of a requested symbol batch is returned
+by the external provider, the backend keeps successful external quotes and fills
+missing fixture symbols from the fixture provider. Quote responses include
+`source` and `collected_at`. The runtime fallback order is external provider,
+latest stored quote snapshot, then fixture. Snapshot fallback quotes use a
+`<source>:snapshot` source label so the UI and tests can distinguish cached
+history from a live provider response. `GET /market-data/quote-provider-status` reports
+the configured provider, active provider, fallback provider, cache TTL, and
+whether a Finnhub key is configured without returning the key itself.
+`POST /market-data/quote-snapshots/collect` requests quotes through the same
+provider boundary and stores collected symbol, currency, price, source, and
+collection time in `market_quote_snapshots` for later audit, backtest, and data
+pipeline work. `GET /market-data/quote-snapshots` returns stored snapshots in
+latest-first order with optional symbol, currency, and limit filters.
+The same collection path can run without the API server through
+`python -m marketpilot_api.commands.collect_market_quotes --symbols AAPL NVDA --currency USD`,
+which is the first local-friendly step toward a scheduled market-data job.
 
-FX rates are also fixture-backed behind a provider boundary. The first API
-surface returns a single pair rate for supported currencies and includes
-`source` and `collected_at`. Order executions store the execution-time FX rate
-snapshot, and cross-currency portfolio valuation uses the current FX provider
-rate.
+FX rates are also fixture-backed behind the same cached provider pattern. The
+first API surface returns a single pair rate for supported currencies and
+includes `source` and `collected_at`. Order executions store the execution-time
+FX rate snapshot, and cross-currency portfolio valuation uses the current FX
+provider rate.
 
 ---
 
@@ -134,10 +159,15 @@ MarketPilot은 모듈형 FastAPI 백엔드를 사용합니다. PostgreSQL 기반
 - 보유 종목, 평균 매수가, 실현 손익, 미실현 손익 및 수익률 계산
 - 보유 종목 현재가 통화, 평가 통화 및 평가 환율 필드
 - 시장 데이터와 포트폴리오 응답의 현재가·환율 출처 및 수집 시각 metadata
+- 수집된 현재가 감사 이력을 위한 `market_quote_snapshots` 테이블
 - 대기 주문에 대한 예약 현금 및 예약 매도 수량 검사
-- fixture 기반 시장 현재가 provider 경계
+- fixture fallback과 Finnhub adapter가 있는 cached 시장 현재가 provider 경계
 - `GET /market-data/quotes` endpoint
-- fixture 기반 환율 provider 경계
+- `POST /market-data/quote-snapshots/collect` endpoint
+- `GET /market-data/quote-snapshots` endpoint
+- `marketpilot_api.commands.collect_market_quotes` 로컬 수집 command
+- 비밀값을 노출하지 않는 `GET /market-data/quote-provider-status` 진단 endpoint
+- fixture fallback이 있는 cached 환율 provider 경계
 - `GET /market-data/fx-rates` endpoint
 - Alembic 마이그레이션 관리
 - 통과하는 endpoint 테스트
@@ -171,15 +201,32 @@ provider 값을 사용해 포트폴리오 기준 통화로 계산합니다.
 서로 다른 통화의 execution row는 데모 seed와 향후 provider 흐름을 위해 존재할 수
 있지만, 공개 주문 폼은 현재 수동 신규 주문을 포트폴리오 기준 통화 흐름으로 유지합니다.
 
-시장 현재가는 아직 fixture 기반이지만 provider 경계와 `GET /market-data/quotes`를
-통해 노출됩니다. 따라서 이후 외부 또는 캐시 provider로 바꾸더라도 프론트엔드가
-외부 API를 직접 호출하지 않아도 됩니다. 현재가 응답에는 `source`와 `collected_at`이
-포함됩니다.
+시장 현재가는 cache가 붙은 provider 경계와 `GET /market-data/quotes`를 통해
+노출됩니다. 그래서 프론트엔드가 외부 API를 직접 호출하지 않아도 됩니다. 기본 source는
+로컬 fixture provider입니다. `MARKETPILOT_MARKET_DATA_QUOTE_PROVIDER=finnhub`와
+`MARKETPILOT_FINNHUB_API_KEY`가 있으면 백엔드가 USD 종목의 Finnhub 현재가를 요청하고,
+성공 응답은 `MARKETPILOT_MARKET_DATA_CACHE_TTL_SECONDS` 동안 cache하며, provider가
+사용할 수 없으면 fixture로 fallback할 수 있습니다. 요청한 종목 묶음 중 일부만 외부
+provider에서 반환되면, 성공한 외부 현재가는 유지하고 fixture에 있는 누락 종목만
+fixture provider에서 보충합니다. 현재가 응답에는 `source`와 `collected_at`이 포함됩니다.
+실행 중 fallback 순서는 외부 provider, 최신 저장 quote snapshot, fixture입니다. snapshot
+fallback 현재가는 `<source>:snapshot` source label을 사용해서 화면과 테스트가 live provider
+응답과 저장 이력을 구분할 수 있습니다.
+`GET /market-data/quote-provider-status`는 설정 provider, 활성 provider, fallback provider,
+cache TTL, Finnhub key 설정 여부만 반환하고 key 값 자체는 반환하지 않습니다.
+`POST /market-data/quote-snapshots/collect`는 같은 provider 경계를 통해 현재가를 요청한 뒤
+symbol, currency, price, source, collection time을 `market_quote_snapshots`에 저장합니다.
+이 이력은 이후 감사, 백테스트, 데이터 파이프라인 작업에 사용합니다.
+`GET /market-data/quote-snapshots`는 저장된 snapshot을 최신순으로 반환하고 symbol,
+currency, limit 필터를 지원합니다.
+같은 수집 흐름은 API 서버 없이도
+`python -m marketpilot_api.commands.collect_market_quotes --symbols AAPL NVDA --currency USD`로
+실행할 수 있으며, 이는 이후 예약 market-data job으로 가기 위한 로컬 친화적인 첫 단계입니다.
 
-환율도 provider 경계 뒤에 fixture로 준비했습니다. 첫 API는 지원 통화 사이의 단일
-환율을 반환하며 `source`와 `collected_at`을 포함합니다. 주문 체결 기록에는 체결 시점
-환율 snapshot을 저장하고, 서로 다른 통화의 포트폴리오 평가는 현재 FX provider rate를
-사용합니다.
+환율도 같은 cached provider pattern 뒤에 fixture로 준비했습니다. 첫 API는 지원 통화
+사이의 단일 환율을 반환하며 `source`와 `collected_at`을 포함합니다. 주문 체결 기록에는
+체결 시점 환율 snapshot을 저장하고, 서로 다른 통화의 포트폴리오 평가는 현재 FX
+provider rate를 사용합니다.
 
 ---
 
@@ -221,10 +268,15 @@ PostgreSQLベースのポートフォリオ、市場データ、バックテス�
 - 保有銘柄、平均取得価格、実現損益、未実現損益、収益率の計算
 - 保有銘柄の価格通貨、評価通貨、評価FXレート項目
 - 市場データとポートフォリオ応答の価格・FX出所と収集時刻metadata
+- 収集した価格の監査履歴用`market_quote_snapshots`テーブル
 - 待機注文に対する予約現金と予約売却数量の検査
-- fixtureベースの市場価格provider境界
+- fixture fallbackとFinnhub adapter付きcached市場価格provider境界
 - `GET /market-data/quotes` endpoint
-- fixtureベースのFXレートprovider境界
+- `POST /market-data/quote-snapshots/collect` endpoint
+- `GET /market-data/quote-snapshots` endpoint
+- `marketpilot_api.commands.collect_market_quotes`ローカル収集command
+- secretを返さない`GET /market-data/quote-provider-status`診断endpoint
+- fixture fallback付きcached FXレートprovider境界
 - `GET /market-data/fx-rates` endpoint
 - Alembicマイグレーション管理
 - 成功するendpointテスト
@@ -259,12 +311,29 @@ JPYです。
 通貨が異なるexecution rowはデモseedや将来のproviderフロー向けに存在できますが、
 公開注文フォームでは当面、手動の新規注文をポートフォリオ基準通貨フローに維持します。
 
-市場価格はまだfixtureベースですが、provider境界と`GET /market-data/quotes`を通じて
-公開しています。そのため後で外部またはキャッシュ型providerへ切り替えても、
-フロントエンドが外部APIを直接呼ぶ必要はありません。価格レスポンスには`source`と
-`collected_at`を含めます。
+市場価格はcache付きprovider境界と`GET /market-data/quotes`を通じて公開しています。
+そのためフロントエンドが外部APIを直接呼ぶ必要はありません。既定のsourceはローカル
+fixture providerです。`MARKETPILOT_MARKET_DATA_QUOTE_PROVIDER=finnhub`と
+`MARKETPILOT_FINNHUB_API_KEY`がある場合、バックエンドはUSD銘柄のFinnhub現在値を取得し、
+成功レスポンスを`MARKETPILOT_MARKET_DATA_CACHE_TTL_SECONDS`の間cacheし、providerが
+利用できない場合はfixtureへfallbackできます。要求した銘柄の一部だけが外部providerから
+返った場合、成功した外部価格は保持し、fixtureにある不足銘柄だけfixture providerで
+補完します。価格レスポンスには`source`と`collected_at`を含めます。
+実行時のfallback順序は、外部provider、最新の保存済みquote snapshot、fixtureです。
+snapshot fallback価格は`<source>:snapshot` source labelを使用し、UIとテストがlive
+provider応答と保存履歴を区別できます。
+`GET /market-data/quote-provider-status`は設定provider、active provider、fallback
+provider、cache TTL、Finnhub key設定有無だけを返し、key値自体は返しません。
+`POST /market-data/quote-snapshots/collect`は同じprovider境界で価格を取得し、symbol、
+currency、price、source、collection timeを`market_quote_snapshots`へ保存します。
+この履歴は後続の監査、バックテスト、データパイプライン作業に使用します。
+`GET /market-data/quote-snapshots`は保存済みsnapshotを新しい順で返し、symbol、
+currency、limitフィルターをサポートします。
+同じ収集フローはAPIサーバーなしでも
+`python -m marketpilot_api.commands.collect_market_quotes --symbols AAPL NVDA --currency USD`で
+実行でき、将来のscheduled market-data jobに向けたローカル向けの第一歩です。
 
-FXレートもprovider境界の背後にfixtureとして用意しています。最初のAPIは対応通貨
-間の単一レートを返し、`source`と`collected_at`を含めます。注文約定記録には約定時点の
-FXレートsnapshotを保存し、通貨が異なるポートフォリオ評価は現在のFX provider rateを
-使用します。
+FXレートも同じcached provider patternの背後にfixtureとして用意しています。最初のAPIは
+対応通貨間の単一レートを返し、`source`と`collected_at`を含めます。注文約定記録には
+約定時点のFXレートsnapshotを保存し、通貨が異なるポートフォリオ評価は現在のFX
+provider rateを使用します。
