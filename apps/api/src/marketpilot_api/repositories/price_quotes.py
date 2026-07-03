@@ -1,5 +1,4 @@
 import json
-import os
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal, InvalidOperation
@@ -82,9 +81,6 @@ class SnapshotMarketQuoteProvider:
         currency: str | None = None,
         symbols: Iterable[str] | None = None,
     ) -> list[MarketQuote]:
-        if os.environ.get("PYTEST_CURRENT_TEST") is not None:
-            return []
-
         from marketpilot_api.repositories.market_quote_snapshots import (
             list_latest_market_quote_snapshots,
         )
@@ -153,6 +149,8 @@ FIXTURE_CURRENT_PRICES: dict[FixturePriceKey, Decimal] = {
 FIXTURE_QUOTE_COLLECTED_AT = datetime(2026, 7, 1, tzinfo=timezone.utc)
 _fixture_provider = FixtureMarketQuoteProvider()
 _snapshot_provider = SnapshotMarketQuoteProvider()
+_snapshot_provider_override: MarketQuoteProvider | None = None
+_snapshot_provider_is_configured = False
 _external_provider: MarketQuoteProvider | None = None
 _external_provider_is_configured = False
 _quote_cache: dict[MarketQuoteCacheKey, MarketQuoteCacheEntry] = {}
@@ -240,6 +238,17 @@ def configure_market_quote_provider(
     clear_market_quote_cache()
 
 
+def configure_market_quote_snapshot_provider(
+    provider: MarketQuoteProvider | None,
+) -> None:
+    global _snapshot_provider_override
+    global _snapshot_provider_is_configured
+
+    _snapshot_provider_override = provider
+    _snapshot_provider_is_configured = True
+    clear_market_quote_cache()
+
+
 def clear_market_quote_cache() -> None:
     _quote_cache.clear()
 
@@ -302,12 +311,17 @@ def _get_external_market_quote_provider() -> MarketQuoteProvider | None:
     return _get_settings_market_quote_provider(settings=get_settings())
 
 
+def _get_snapshot_market_quote_provider() -> MarketQuoteProvider | None:
+    if _snapshot_provider_is_configured:
+        return _snapshot_provider_override
+
+    return _snapshot_provider
+
+
 def _get_settings_market_quote_provider(
     *,
     settings: Settings,
 ) -> MarketQuoteProvider | None:
-    if os.environ.get("PYTEST_CURRENT_TEST") is not None:
-        return None
     if settings.market_data_quote_provider != "finnhub":
         return None
     if settings.finnhub_api_key is None:
@@ -350,14 +364,19 @@ def _merge_fallback_quotes(
         (quote.symbol.upper(), quote.currency.upper())
         for quote in provider_quotes
     }
-    snapshot_quotes = [
-        quote
-        for quote in _snapshot_provider.list_market_quotes(
-            currency=currency,
-            symbols=normalized_symbols,
-        )
-        if (quote.symbol.upper(), quote.currency.upper()) not in provider_quote_keys
-    ]
+    snapshot_provider = _get_snapshot_market_quote_provider()
+    snapshot_quotes = (
+        [
+            quote
+            for quote in snapshot_provider.list_market_quotes(
+                currency=currency,
+                symbols=normalized_symbols,
+            )
+            if (quote.symbol.upper(), quote.currency.upper()) not in provider_quote_keys
+        ]
+        if snapshot_provider is not None
+        else []
+    )
     snapshot_quote_keys = {
         (quote.symbol.upper(), quote.currency.upper())
         for quote in snapshot_quotes

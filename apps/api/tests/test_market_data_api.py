@@ -23,6 +23,7 @@ from marketpilot_api.repositories.price_quotes import (
     FinnhubMarketQuoteProvider,
     MarketQuote,
     configure_market_quote_provider,
+    configure_market_quote_snapshot_provider,
 )
 
 
@@ -33,10 +34,12 @@ EXTERNAL_COLLECTED_AT = datetime(2026, 7, 2, tzinfo=timezone.utc)
 @pytest.fixture(autouse=True)
 def reset_market_data_providers() -> None:
     configure_market_quote_provider(None)
+    configure_market_quote_snapshot_provider(None)
     configure_fx_rate_provider(None)
     app.dependency_overrides.clear()
     yield
     configure_market_quote_provider(None)
+    configure_market_quote_snapshot_provider(None)
     configure_fx_rate_provider(None)
     app.dependency_overrides.clear()
 
@@ -81,6 +84,37 @@ class EmptyMarketQuoteProvider:
         symbols: Iterable[str] | None = None,
     ) -> list[MarketQuote]:
         return []
+
+
+class StaticSnapshotMarketQuoteProvider:
+    def __init__(self, quotes: list[MarketQuote]) -> None:
+        self._quotes = quotes
+
+    def list_market_quotes(
+        self,
+        *,
+        currency: str | None = None,
+        symbols: Iterable[str] | None = None,
+    ) -> list[MarketQuote]:
+        normalized_currency = currency.upper() if currency is not None else None
+        normalized_symbols = (
+            {symbol.strip().upper() for symbol in symbols if symbol.strip()}
+            if symbols is not None
+            else None
+        )
+
+        return [
+            quote
+            for quote in self._quotes
+            if (
+                normalized_currency is None
+                or quote.currency == normalized_currency
+            )
+            and (
+                normalized_symbols is None
+                or quote.symbol in normalized_symbols
+            )
+        ]
 
 
 class FakeFinnhubQuoteTransport:
@@ -161,14 +195,6 @@ def override_session(session):
         yield session
 
     return dependency_override
-
-
-class FakeSnapshotSession:
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc, traceback) -> None:
-        return None
 
 
 def test_list_market_quotes_returns_fixture_quotes() -> None:
@@ -300,23 +326,16 @@ def test_list_market_quotes_falls_back_to_fixture_when_provider_fails() -> None:
 def test_list_market_quotes_uses_latest_snapshot_before_fixture(
     monkeypatch,
 ) -> None:
-    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
-    snapshot = MarketQuoteSnapshot(
+    snapshot_quote = MarketQuote(
         symbol="AAPL",
         currency="USD",
         current_price=Decimal("294.3800"),
-        source="finnhub",
+        source="finnhub:snapshot",
         collected_at=EXTERNAL_COLLECTED_AT,
     )
     configure_market_quote_provider(EmptyMarketQuoteProvider())
-    monkeypatch.setattr(
-        "marketpilot_api.repositories.price_quotes.SessionLocal",
-        lambda: FakeSnapshotSession(),
-    )
-    monkeypatch.setattr(
-        "marketpilot_api.repositories.market_quote_snapshots."
-        "list_latest_market_quote_snapshots",
-        MagicMock(return_value=[snapshot]),
+    configure_market_quote_snapshot_provider(
+        StaticSnapshotMarketQuoteProvider([snapshot_quote])
     )
 
     with TestClient(app) as client:
@@ -340,23 +359,16 @@ def test_list_market_quotes_uses_latest_snapshot_before_fixture(
 def test_list_market_quotes_fills_missing_snapshot_symbols_from_fixture(
     monkeypatch,
 ) -> None:
-    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
-    snapshot = MarketQuoteSnapshot(
+    snapshot_quote = MarketQuote(
         symbol="AAPL",
         currency="USD",
         current_price=Decimal("294.3800"),
-        source="finnhub",
+        source="finnhub:snapshot",
         collected_at=EXTERNAL_COLLECTED_AT,
     )
     configure_market_quote_provider(EmptyMarketQuoteProvider())
-    monkeypatch.setattr(
-        "marketpilot_api.repositories.price_quotes.SessionLocal",
-        lambda: FakeSnapshotSession(),
-    )
-    monkeypatch.setattr(
-        "marketpilot_api.repositories.market_quote_snapshots."
-        "list_latest_market_quote_snapshots",
-        MagicMock(return_value=[snapshot]),
+    configure_market_quote_snapshot_provider(
+        StaticSnapshotMarketQuoteProvider([snapshot_quote])
     )
 
     with TestClient(app) as client:
