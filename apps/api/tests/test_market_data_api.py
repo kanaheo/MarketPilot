@@ -73,6 +73,16 @@ class FailingMarketQuoteProvider:
         raise RuntimeError("provider unavailable")
 
 
+class EmptyMarketQuoteProvider:
+    def list_market_quotes(
+        self,
+        *,
+        currency: str | None = None,
+        symbols: Iterable[str] | None = None,
+    ) -> list[MarketQuote]:
+        return []
+
+
 class FakeFinnhubQuoteTransport:
     def __init__(self) -> None:
         self.calls: list[tuple[str, str]] = []
@@ -151,6 +161,14 @@ def override_session(session):
         yield session
 
     return dependency_override
+
+
+class FakeSnapshotSession:
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, traceback) -> None:
+        return None
 
 
 def test_list_market_quotes_returns_fixture_quotes() -> None:
@@ -279,6 +297,93 @@ def test_list_market_quotes_falls_back_to_fixture_when_provider_fails() -> None:
     ]
 
 
+def test_list_market_quotes_uses_latest_snapshot_before_fixture(
+    monkeypatch,
+) -> None:
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+    snapshot = MarketQuoteSnapshot(
+        symbol="AAPL",
+        currency="USD",
+        current_price=Decimal("294.3800"),
+        source="finnhub",
+        collected_at=EXTERNAL_COLLECTED_AT,
+    )
+    configure_market_quote_provider(EmptyMarketQuoteProvider())
+    monkeypatch.setattr(
+        "marketpilot_api.repositories.price_quotes.SessionLocal",
+        lambda: FakeSnapshotSession(),
+    )
+    monkeypatch.setattr(
+        "marketpilot_api.repositories.market_quote_snapshots."
+        "list_latest_market_quote_snapshots",
+        MagicMock(return_value=[snapshot]),
+    )
+
+    with TestClient(app) as client:
+        response = client.get(
+            "/market-data/quotes",
+            params=[("symbols", "AAPL")],
+        )
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "symbol": "AAPL",
+            "currency": "USD",
+            "current_price": "294.3800",
+            "source": "finnhub:snapshot",
+            "collected_at": "2026-07-02T00:00:00Z",
+        }
+    ]
+
+
+def test_list_market_quotes_fills_missing_snapshot_symbols_from_fixture(
+    monkeypatch,
+) -> None:
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+    snapshot = MarketQuoteSnapshot(
+        symbol="AAPL",
+        currency="USD",
+        current_price=Decimal("294.3800"),
+        source="finnhub",
+        collected_at=EXTERNAL_COLLECTED_AT,
+    )
+    configure_market_quote_provider(EmptyMarketQuoteProvider())
+    monkeypatch.setattr(
+        "marketpilot_api.repositories.price_quotes.SessionLocal",
+        lambda: FakeSnapshotSession(),
+    )
+    monkeypatch.setattr(
+        "marketpilot_api.repositories.market_quote_snapshots."
+        "list_latest_market_quote_snapshots",
+        MagicMock(return_value=[snapshot]),
+    )
+
+    with TestClient(app) as client:
+        response = client.get(
+            "/market-data/quotes",
+            params=[("symbols", "AAPL"), ("symbols", "NVDA")],
+        )
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "symbol": "AAPL",
+            "currency": "USD",
+            "current_price": "294.3800",
+            "source": "finnhub:snapshot",
+            "collected_at": "2026-07-02T00:00:00Z",
+        },
+        {
+            "symbol": "NVDA",
+            "currency": "USD",
+            "current_price": "125.0000",
+            "source": "fixture",
+            "collected_at": FIXTURE_COLLECTED_AT,
+        },
+    ]
+
+
 def test_finnhub_market_quote_provider_maps_quote_payload() -> None:
     transport = FakeFinnhubQuoteTransport()
     provider = FinnhubMarketQuoteProvider(
@@ -381,7 +486,7 @@ def test_retrieve_quote_provider_status_hides_finnhub_api_key(
     assert response.json() == {
         "configured_provider": "finnhub",
         "active_provider": "finnhub",
-        "fallback_provider": "fixture",
+        "fallback_provider": "snapshot-cache,fixture",
         "finnhub_api_key_configured": True,
         "cache_ttl_seconds": 60,
     }

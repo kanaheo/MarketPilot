@@ -63,6 +63,41 @@ def list_market_quote_snapshots(
     return list(session.scalars(statement).all())
 
 
+def list_latest_market_quote_snapshots(
+    session: Session,
+    *,
+    currency: str | None = None,
+    symbols: Iterable[str] | None = None,
+) -> list[MarketQuoteSnapshot]:
+    normalized_symbols = (
+        sorted({symbol.strip().upper() for symbol in symbols if symbol.strip()})
+        if symbols is not None
+        else None
+    )
+    snapshot_map: dict[tuple[str, str], MarketQuoteSnapshot] = {}
+
+    for snapshot in list_market_quote_snapshots(
+        session,
+        currency=currency,
+        symbols=normalized_symbols,
+        limit=500,
+    ):
+        snapshot_key = (snapshot.symbol, snapshot.currency)
+        if snapshot_key not in snapshot_map:
+            snapshot_map[snapshot_key] = snapshot
+
+        if (
+            normalized_symbols is not None
+            and len(snapshot_map) >= len(normalized_symbols)
+        ):
+            break
+
+    return sorted(
+        snapshot_map.values(),
+        key=lambda snapshot: (snapshot.currency, snapshot.symbol),
+    )
+
+
 def _build_market_quote_snapshot_query(
     *,
     currency: str | None = None,

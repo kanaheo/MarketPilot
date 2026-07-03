@@ -97,7 +97,10 @@ quotes for USD symbols, cache successful responses for
 provider is unavailable. When only part of a requested symbol batch is returned
 by the external provider, the backend keeps successful external quotes and fills
 missing fixture symbols from the fixture provider. Quote responses include
-`source` and `collected_at`. `GET /market-data/quote-provider-status` reports
+`source` and `collected_at`. The runtime fallback order is external provider,
+latest stored quote snapshot, then fixture. Snapshot fallback quotes use a
+`<source>:snapshot` source label so the UI and tests can distinguish cached
+history from a live provider response. `GET /market-data/quote-provider-status` reports
 the configured provider, active provider, fallback provider, cache TTL, and
 whether a Finnhub key is configured without returning the key itself.
 `POST /market-data/quote-snapshots/collect` requests quotes through the same
@@ -201,6 +204,9 @@ provider 값을 사용해 포트폴리오 기준 통화로 계산합니다.
 사용할 수 없으면 fixture로 fallback할 수 있습니다. 요청한 종목 묶음 중 일부만 외부
 provider에서 반환되면, 성공한 외부 현재가는 유지하고 fixture에 있는 누락 종목만
 fixture provider에서 보충합니다. 현재가 응답에는 `source`와 `collected_at`이 포함됩니다.
+실행 중 fallback 순서는 외부 provider, 최신 저장 quote snapshot, fixture입니다. snapshot
+fallback 현재가는 `<source>:snapshot` source label을 사용해서 화면과 테스트가 live provider
+응답과 저장 이력을 구분할 수 있습니다.
 `GET /market-data/quote-provider-status`는 설정 provider, 활성 provider, fallback provider,
 cache TTL, Finnhub key 설정 여부만 반환하고 key 값 자체는 반환하지 않습니다.
 `POST /market-data/quote-snapshots/collect`는 같은 provider 경계를 통해 현재가를 요청한 뒤
@@ -304,6 +310,9 @@ fixture providerです。`MARKETPILOT_MARKET_DATA_QUOTE_PROVIDER=finnhub`と
 利用できない場合はfixtureへfallbackできます。要求した銘柄の一部だけが外部providerから
 返った場合、成功した外部価格は保持し、fixtureにある不足銘柄だけfixture providerで
 補完します。価格レスポンスには`source`と`collected_at`を含めます。
+実行時のfallback順序は、外部provider、最新の保存済みquote snapshot、fixtureです。
+snapshot fallback価格は`<source>:snapshot` source labelを使用し、UIとテストがlive
+provider応答と保存履歴を区別できます。
 `GET /market-data/quote-provider-status`は設定provider、active provider、fallback
 provider、cache TTL、Finnhub key設定有無だけを返し、key値自体は返しません。
 `POST /market-data/quote-snapshots/collect`は同じprovider境界で価格を取得し、symbol、

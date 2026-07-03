@@ -11,6 +11,7 @@ from pydantic import SecretStr
 
 from marketpilot_api.core.config import Settings
 from marketpilot_api.core.config import get_settings
+from marketpilot_api.db.session import SessionLocal
 
 FixturePriceKey = tuple[str, str]
 MarketQuoteCacheKey = tuple[str | None, tuple[str, ...] | None]
@@ -74,6 +75,39 @@ class FixtureMarketQuoteProvider:
         ]
 
 
+class SnapshotMarketQuoteProvider:
+    def list_market_quotes(
+        self,
+        *,
+        currency: str | None = None,
+        symbols: Iterable[str] | None = None,
+    ) -> list[MarketQuote]:
+        if os.environ.get("PYTEST_CURRENT_TEST") is not None:
+            return []
+
+        from marketpilot_api.repositories.market_quote_snapshots import (
+            list_latest_market_quote_snapshots,
+        )
+
+        with SessionLocal() as session:
+            snapshots = list_latest_market_quote_snapshots(
+                session,
+                currency=currency,
+                symbols=symbols,
+            )
+
+        return [
+            MarketQuote(
+                symbol=snapshot.symbol,
+                currency=snapshot.currency,
+                current_price=snapshot.current_price,
+                source=f"{snapshot.source}:snapshot",
+                collected_at=snapshot.collected_at,
+            )
+            for snapshot in snapshots
+        ]
+
+
 class FinnhubMarketQuoteProvider:
     def __init__(
         self,
@@ -118,6 +152,7 @@ FIXTURE_CURRENT_PRICES: dict[FixturePriceKey, Decimal] = {
 }
 FIXTURE_QUOTE_COLLECTED_AT = datetime(2026, 7, 1, tzinfo=timezone.utc)
 _fixture_provider = FixtureMarketQuoteProvider()
+_snapshot_provider = SnapshotMarketQuoteProvider()
 _external_provider: MarketQuoteProvider | None = None
 _external_provider_is_configured = False
 _quote_cache: dict[MarketQuoteCacheKey, MarketQuoteCacheEntry] = {}
@@ -225,7 +260,7 @@ def _fetch_uncached_market_quotes(
             quotes = []
 
         if len(quotes) > 0:
-            merged_quotes = _merge_fixture_fallback_quotes(
+            merged_quotes = _merge_fallback_quotes(
                 currency=currency,
                 symbols=symbols,
                 provider_quotes=quotes,
@@ -235,7 +270,11 @@ def _fetch_uncached_market_quotes(
                 key=lambda quote: (quote.currency, quote.symbol),
             )
 
-    return _fixture_provider.list_market_quotes(currency=currency, symbols=symbols)
+    return _merge_fallback_quotes(
+        currency=currency,
+        symbols=symbols,
+        provider_quotes=[],
+    )
 
 
 def get_market_quote_provider_status() -> MarketQuoteProviderStatus:
@@ -250,7 +289,7 @@ def get_market_quote_provider_status() -> MarketQuoteProviderStatus:
     return MarketQuoteProviderStatus(
         configured_provider=settings.market_data_quote_provider,
         active_provider=active_provider,
-        fallback_provider="fixture",
+        fallback_provider="snapshot-cache,fixture",
         finnhub_api_key_configured=settings.finnhub_api_key is not None,
         cache_ttl_seconds=settings.market_data_cache_ttl_seconds,
     )
@@ -291,7 +330,7 @@ def _get_market_quote_cache_key(
     return (normalized_currency, normalized_symbols)
 
 
-def _merge_fixture_fallback_quotes(
+def _merge_fallback_quotes(
     *,
     currency: str | None = None,
     symbols: Iterable[str] | None = None,
@@ -299,11 +338,29 @@ def _merge_fixture_fallback_quotes(
 ) -> list[MarketQuote]:
     normalized_symbols = _normalize_symbols(symbols)
     if len(normalized_symbols) == 0:
-        return provider_quotes
+        if len(provider_quotes) > 0:
+            return provider_quotes
+
+        return _fixture_provider.list_market_quotes(
+            currency=currency,
+            symbols=symbols,
+        )
 
     provider_quote_keys = {
         (quote.symbol.upper(), quote.currency.upper())
         for quote in provider_quotes
+    }
+    snapshot_quotes = [
+        quote
+        for quote in _snapshot_provider.list_market_quotes(
+            currency=currency,
+            symbols=normalized_symbols,
+        )
+        if (quote.symbol.upper(), quote.currency.upper()) not in provider_quote_keys
+    ]
+    snapshot_quote_keys = {
+        (quote.symbol.upper(), quote.currency.upper())
+        for quote in snapshot_quotes
     }
     fallback_quotes = [
         MarketQuote(
@@ -318,9 +375,10 @@ def _merge_fixture_fallback_quotes(
             symbols=normalized_symbols,
         )
         if (symbol, quote_currency) not in provider_quote_keys
+        and (symbol, quote_currency) not in snapshot_quote_keys
     ]
 
-    return [*provider_quotes, *fallback_quotes]
+    return [*provider_quotes, *snapshot_quotes, *fallback_quotes]
 
 
 def _normalize_symbols(symbols: Iterable[str] | None) -> tuple[str, ...]:
