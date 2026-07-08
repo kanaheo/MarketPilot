@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 
 from marketpilot_api.models import MarketQuoteSnapshot
 from marketpilot_api.repositories.market_quote_snapshots import (
+    filter_fresh_market_quote_symbols,
     list_latest_market_quote_snapshots,
     list_market_quote_snapshots,
     record_market_quote_snapshots,
@@ -118,3 +119,35 @@ def test_list_latest_market_quote_snapshots_returns_one_per_symbol() -> None:
     )
 
     assert result == [latest_snapshot, nvda_snapshot]
+
+
+def test_filter_fresh_market_quote_symbols_returns_stale_symbols() -> None:
+    fresh_snapshot = MarketQuoteSnapshot(
+        symbol="AAPL",
+        currency="USD",
+        current_price=Decimal("294.3800"),
+        source="finnhub",
+        collected_at=datetime(2026, 7, 2, 0, 4, tzinfo=timezone.utc),
+    )
+    stale_snapshot = MarketQuoteSnapshot(
+        symbol="NVDA",
+        currency="USD",
+        current_price=Decimal("125.0000"),
+        source="finnhub",
+        collected_at=datetime(2026, 7, 1, tzinfo=timezone.utc),
+    )
+    session = MagicMock()
+    session.scalars.return_value.all.return_value = [
+        fresh_snapshot,
+        stale_snapshot,
+    ]
+
+    result = filter_fresh_market_quote_symbols(
+        session,
+        currency="USD",
+        freshness_seconds=300,
+        now=datetime(2026, 7, 2, 0, 5, tzinfo=timezone.utc),
+        symbols=["aapl", "nvda", " "],
+    )
+
+    assert result == ["nvda"]

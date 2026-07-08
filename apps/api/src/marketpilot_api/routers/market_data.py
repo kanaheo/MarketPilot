@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from marketpilot_api.db.session import get_db_session
 from marketpilot_api.repositories.fx_rates import get_fx_rate
 from marketpilot_api.repositories.market_quote_snapshots import (
+    filter_fresh_market_quote_symbols,
     list_latest_market_quote_snapshots,
     list_market_quote_snapshots as list_recorded_market_quote_snapshots,
     record_market_quote_snapshots,
@@ -72,15 +73,29 @@ def collect_market_quote_snapshots(
     session: Annotated[Session, Depends(get_db_session)],
     currency: SupportedCurrency | None = None,
     symbols: Annotated[list[str] | None, Query()] = None,
+    skip_fresh_seconds: Annotated[int | None, Query(ge=1, le=86400)] = None,
 ) -> MarketQuoteSnapshotCollectionResponse:
-    quotes = list_provider_market_quotes(
+    collectable_symbols = _filter_collectable_symbols(
+        session=session,
         currency=currency,
         symbols=symbols,
+        skip_fresh_seconds=skip_fresh_seconds,
+    )
+    quotes = list_provider_market_quotes(
+        currency=currency,
+        symbols=collectable_symbols,
     )
     collection = record_market_quote_snapshots(session, quotes=quotes)
+    requested_count = len(symbols) if symbols is not None else len(quotes)
+    fresh_skipped_count = (
+        0
+        if symbols is None
+        else len(symbols) - len(collectable_symbols or [])
+    )
 
     return MarketQuoteSnapshotCollectionResponse(
-        requested_count=len(symbols) if symbols is not None else len(quotes),
+        requested_count=requested_count,
+        fresh_skipped_count=fresh_skipped_count,
         stored_count=len(collection.snapshots),
         skipped_count=collection.skipped_count,
         quotes=[
@@ -188,6 +203,25 @@ def retrieve_fx_rate(
 
 def _normalize_symbol_list(symbols: list[str]) -> list[str]:
     return sorted({symbol.strip().upper() for symbol in symbols if symbol.strip()})
+
+
+def _filter_collectable_symbols(
+    *,
+    session: Session,
+    currency: str | None,
+    symbols: list[str] | None,
+    skip_fresh_seconds: int | None,
+) -> list[str] | None:
+    if symbols is None or skip_fresh_seconds is None:
+        return symbols
+
+    return filter_fresh_market_quote_symbols(
+        session,
+        currency=currency,
+        freshness_seconds=skip_fresh_seconds,
+        now=datetime.now(timezone.utc),
+        symbols=symbols,
+    )
 
 
 def _build_snapshot_freshness_response(

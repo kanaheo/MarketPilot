@@ -1,5 +1,6 @@
 from collections.abc import Iterable
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 
 from sqlalchemy import Select, select
 from sqlalchemy.orm import Session
@@ -96,6 +97,40 @@ def list_latest_market_quote_snapshots(
         snapshot_map.values(),
         key=lambda snapshot: (snapshot.currency, snapshot.symbol),
     )
+
+
+def filter_fresh_market_quote_symbols(
+    session: Session,
+    *,
+    currency: str | None = None,
+    freshness_seconds: int,
+    now: datetime,
+    symbols: Iterable[str],
+) -> list[str]:
+    normalized_symbols = [
+        symbol
+        for symbol in symbols
+        if len(symbol.strip()) > 0
+    ]
+    if len(normalized_symbols) == 0:
+        return []
+
+    freshness_cutoff = now - timedelta(seconds=freshness_seconds)
+    fresh_symbols = {
+        snapshot.symbol
+        for snapshot in list_latest_market_quote_snapshots(
+            session,
+            currency=currency,
+            symbols=normalized_symbols,
+        )
+        if snapshot.collected_at >= freshness_cutoff
+    }
+
+    return [
+        symbol
+        for symbol in normalized_symbols
+        if symbol.strip().upper() not in fresh_symbols
+    ]
 
 
 def _build_market_quote_snapshot_query(

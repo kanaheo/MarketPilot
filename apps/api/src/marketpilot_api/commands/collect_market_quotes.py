@@ -2,14 +2,14 @@ import argparse
 from collections.abc import Sequence
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from time import sleep as default_sleep
 
 from sqlalchemy.orm import Session
 
 from marketpilot_api.db.session import SessionLocal
 from marketpilot_api.repositories.market_quote_snapshots import (
-    list_latest_market_quote_snapshots,
+    filter_fresh_market_quote_symbols,
     record_market_quote_snapshots,
 )
 from marketpilot_api.repositories.positions import list_open_position_symbols
@@ -195,22 +195,13 @@ def _filter_fresh_symbols(
     if args.skip_fresh_seconds is None or len(symbols) == 0:
         return symbols
 
-    freshness_cutoff = now - timedelta(seconds=args.skip_fresh_seconds)
-    fresh_symbols = {
-        snapshot.symbol
-        for snapshot in list_latest_market_quote_snapshots(
-            session,
-            currency=args.currency,
-            symbols=symbols,
-        )
-        if snapshot.collected_at >= freshness_cutoff
-    }
-
-    return [
-        symbol
-        for symbol in symbols
-        if symbol.strip().upper() not in fresh_symbols
-    ]
+    return filter_fresh_market_quote_symbols(
+        session,
+        currency=args.currency,
+        freshness_seconds=args.skip_fresh_seconds,
+        now=now,
+        symbols=symbols,
+    )
 
 
 def _positive_int(value: str) -> int:

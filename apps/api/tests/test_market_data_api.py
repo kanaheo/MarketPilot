@@ -532,6 +532,7 @@ def test_collect_market_quote_snapshots_records_provider_quotes(
     assert response.status_code == 200
     assert response.json() == {
         "requested_count": 1,
+        "fresh_skipped_count": 0,
         "stored_count": 1,
         "skipped_count": 0,
         "quotes": [
@@ -547,6 +548,52 @@ def test_collect_market_quote_snapshots_records_provider_quotes(
     assert provider.call_count == 1
     record_mock.assert_called_once()
     assert record_mock.call_args.args[0] is session
+
+
+def test_collect_market_quote_snapshots_skips_fresh_symbols(
+    monkeypatch,
+) -> None:
+    session = object()
+    provider = CountingMarketQuoteProvider()
+    configure_market_quote_provider(provider)
+    filter_mock = MagicMock(return_value=["NVDA"])
+    record_mock = MagicMock(
+        return_value=MarketQuoteSnapshotCollection(
+            snapshots=[object()],
+            skipped_count=0,
+        )
+    )
+    monkeypatch.setattr(
+        "marketpilot_api.routers.market_data.filter_fresh_market_quote_symbols",
+        filter_mock,
+    )
+    monkeypatch.setattr(
+        "marketpilot_api.routers.market_data.record_market_quote_snapshots",
+        record_mock,
+    )
+    app.dependency_overrides[get_db_session] = override_session(session)
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/market-data/quote-snapshots/collect",
+            params=[
+                ("symbols", "MSFT"),
+                ("symbols", "NVDA"),
+                ("currency", "USD"),
+                ("skip_fresh_seconds", "300"),
+            ],
+        )
+
+    assert response.status_code == 200
+    assert response.json()["requested_count"] == 2
+    assert response.json()["fresh_skipped_count"] == 1
+    filter_mock.assert_called_once()
+    assert filter_mock.call_args.args[0] is session
+    assert filter_mock.call_args.kwargs["currency"] == "USD"
+    assert filter_mock.call_args.kwargs["freshness_seconds"] == 300
+    assert filter_mock.call_args.kwargs["symbols"] == ["MSFT", "NVDA"]
+    assert provider.call_count == 1
+    record_mock.assert_called_once()
 
 
 def test_list_market_quote_snapshots_returns_recorded_quotes(

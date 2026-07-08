@@ -25,6 +25,7 @@ class MarketQuoteProviderStatusResponse(BaseModel):
 
 class MarketQuoteSnapshotCollectionResponse(BaseModel):
     requested_count: int
+    fresh_skipped_count: int
     stored_count: int
     skipped_count: int
     quotes: list[MarketQuoteResponse]

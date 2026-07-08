@@ -108,8 +108,10 @@ whether a Finnhub key is configured without returning the key itself.
 `POST /market-data/quote-snapshots/collect` requests quotes through the same
 provider boundary and stores collected symbol, currency, price, source, and
 collection time in `market_quote_snapshots` for later audit, backtest, and data
-pipeline work. `GET /market-data/quote-snapshots` returns stored snapshots in
-latest-first order with optional symbol, currency, and limit filters.
+pipeline work. It also accepts `skip_fresh_seconds` so manual API collection
+can reuse the same duplicate-collection guard as the local command.
+`GET /market-data/quote-snapshots` returns stored snapshots in latest-first
+order with optional symbol, currency, and limit filters.
 `GET /market-data/quote-snapshots/freshness` returns one freshness row per
 requested symbol with `has_snapshot`, `is_fresh`, `age_seconds`, and the latest
 snapshot metadata. This gives future scheduler and UI work a single backend
@@ -228,7 +230,9 @@ fallback 현재가는 `<source>:snapshot` source label을 사용해서 화면과
 cache TTL, Finnhub key 설정 여부만 반환하고 key 값 자체는 반환하지 않습니다.
 `POST /market-data/quote-snapshots/collect`는 같은 provider 경계를 통해 현재가를 요청한 뒤
 symbol, currency, price, source, collection time을 `market_quote_snapshots`에 저장합니다.
-이 이력은 이후 감사, 백테스트, 데이터 파이프라인 작업에 사용합니다.
+이 이력은 이후 감사, 백테스트, 데이터 파이프라인 작업에 사용합니다. 또한
+`skip_fresh_seconds`를 지원해 수동 API 수집도 로컬 command와 같은 중복 수집 방지
+정책을 사용할 수 있습니다.
 `GET /market-data/quote-snapshots`는 저장된 snapshot을 최신순으로 반환하고 symbol,
 currency, limit 필터를 지원합니다.
 `GET /market-data/quote-snapshots/freshness`는 요청한 symbol마다 `has_snapshot`,
@@ -347,7 +351,9 @@ provider応答と保存履歴を区別できます。
 provider、cache TTL、Finnhub key設定有無だけを返し、key値自体は返しません。
 `POST /market-data/quote-snapshots/collect`は同じprovider境界で価格を取得し、symbol、
 currency、price、source、collection timeを`market_quote_snapshots`へ保存します。
-この履歴は後続の監査、バックテスト、データパイプライン作業に使用します。
+この履歴は後続の監査、バックテスト、データパイプライン作業に使用します。また、
+`skip_fresh_seconds`に対応し、手動API収集でもローカルcommandと同じ重複収集防止
+ポリシーを使用できます。
 `GET /market-data/quote-snapshots`は保存済みsnapshotを新しい順で返し、symbol、
 currency、limitフィルターをサポートします。
 `GET /market-data/quote-snapshots/freshness`は、リクエストされたsymbolごとに

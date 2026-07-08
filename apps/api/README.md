@@ -29,6 +29,7 @@ python -m marketpilot_api.commands.collect_market_quotes --symbols AAPL NVDA --c
 python -m marketpilot_api.commands.collect_market_quotes --from-holdings --currency USD
 python -m marketpilot_api.commands.collect_market_quotes --from-holdings --currency USD --skip-fresh-seconds 300
 python -m marketpilot_api.commands.collect_market_quotes --from-holdings --currency USD --skip-fresh-seconds 300 --dry-run
+curl -X POST "http://127.0.0.1:8000/market-data/quote-snapshots/collect?symbols=AAPL&skip_fresh_seconds=300"
 curl "http://127.0.0.1:8000/market-data/quote-snapshots/freshness?symbols=AAPL&freshness_seconds=300"
 ```
 
@@ -64,6 +65,7 @@ python -m marketpilot_api.commands.collect_market_quotes --symbols AAPL NVDA --c
 python -m marketpilot_api.commands.collect_market_quotes --from-holdings --currency USD
 python -m marketpilot_api.commands.collect_market_quotes --from-holdings --currency USD --skip-fresh-seconds 300
 python -m marketpilot_api.commands.collect_market_quotes --from-holdings --currency USD --skip-fresh-seconds 300 --dry-run
+curl -X POST "http://127.0.0.1:8000/market-data/quote-snapshots/collect?symbols=AAPL&skip_fresh_seconds=300"
 curl "http://127.0.0.1:8000/market-data/quote-snapshots/freshness?symbols=AAPL&freshness_seconds=300"
 ```
 
@@ -100,6 +102,7 @@ python -m marketpilot_api.commands.collect_market_quotes --symbols AAPL NVDA --c
 python -m marketpilot_api.commands.collect_market_quotes --from-holdings --currency USD
 python -m marketpilot_api.commands.collect_market_quotes --from-holdings --currency USD --skip-fresh-seconds 300
 python -m marketpilot_api.commands.collect_market_quotes --from-holdings --currency USD --skip-fresh-seconds 300 --dry-run
+curl -X POST "http://127.0.0.1:8000/market-data/quote-snapshots/collect?symbols=AAPL&skip_fresh_seconds=300"
 curl "http://127.0.0.1:8000/market-data/quote-snapshots/freshness?symbols=AAPL&freshness_seconds=300"
 ```
 

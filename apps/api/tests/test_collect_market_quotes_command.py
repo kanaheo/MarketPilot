@@ -193,7 +193,7 @@ def test_collect_market_quotes_command_skips_fresh_snapshots(
         source="finnhub",
         collected_at=collected_at,
     )
-    list_snapshots_mock = MagicMock(return_value=[fresh_snapshot])
+    filter_mock = MagicMock(return_value=["nvda"])
     list_quotes_mock = MagicMock(return_value=[quote])
     record_mock = MagicMock(
         return_value=MarketQuoteSnapshotCollection(
@@ -204,8 +204,8 @@ def test_collect_market_quotes_command_skips_fresh_snapshots(
     session = FakeSession()
     monkeypatch.setattr(
         collect_market_quotes,
-        "list_latest_market_quote_snapshots",
-        list_snapshots_mock,
+        "filter_fresh_market_quote_symbols",
+        filter_mock,
     )
     monkeypatch.setattr(
         collect_market_quotes,
@@ -244,9 +244,11 @@ def test_collect_market_quotes_command_skips_fresh_snapshots(
     assert exit_code == 0
     assert "requested_count=2" in output
     assert "fresh_skipped_count=1" in output
-    list_snapshots_mock.assert_called_once_with(
+    filter_mock.assert_called_once_with(
         session,
         currency="USD",
+        freshness_seconds=600,
+        now=datetime(2026, 7, 2, 0, 5, tzinfo=timezone.utc),
         symbols=["aapl", "nvda"],
     )
     list_quotes_mock.assert_called_once_with(
