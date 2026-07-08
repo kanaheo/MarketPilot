@@ -119,6 +119,6 @@ export type MarketQuoteApiItem = Readonly<{
   symbol: string;
   currency: SupportedCurrency;
   current_price: string;
-  source: "fixture";
-  collected_at: string;
+  source: string;
+  collected_at: string | null;
 }>;

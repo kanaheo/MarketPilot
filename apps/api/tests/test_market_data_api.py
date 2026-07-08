@@ -532,6 +532,7 @@ def test_collect_market_quote_snapshots_records_provider_quotes(
     assert response.status_code == 200
     assert response.json() == {
         "requested_count": 1,
+        "fresh_skipped_count": 0,
         "stored_count": 1,
         "skipped_count": 0,
         "quotes": [
@@ -547,6 +548,52 @@ def test_collect_market_quote_snapshots_records_provider_quotes(
     assert provider.call_count == 1
     record_mock.assert_called_once()
     assert record_mock.call_args.args[0] is session
+
+
+def test_collect_market_quote_snapshots_skips_fresh_symbols(
+    monkeypatch,
+) -> None:
+    session = object()
+    provider = CountingMarketQuoteProvider()
+    configure_market_quote_provider(provider)
+    filter_mock = MagicMock(return_value=["NVDA"])
+    record_mock = MagicMock(
+        return_value=MarketQuoteSnapshotCollection(
+            snapshots=[object()],
+            skipped_count=0,
+        )
+    )
+    monkeypatch.setattr(
+        "marketpilot_api.routers.market_data.filter_fresh_market_quote_symbols",
+        filter_mock,
+    )
+    monkeypatch.setattr(
+        "marketpilot_api.routers.market_data.record_market_quote_snapshots",
+        record_mock,
+    )
+    app.dependency_overrides[get_db_session] = override_session(session)
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/market-data/quote-snapshots/collect",
+            params=[
+                ("symbols", "MSFT"),
+                ("symbols", "NVDA"),
+                ("currency", "USD"),
+                ("skip_fresh_seconds", "300"),
+            ],
+        )
+
+    assert response.status_code == 200
+    assert response.json()["requested_count"] == 2
+    assert response.json()["fresh_skipped_count"] == 1
+    filter_mock.assert_called_once()
+    assert filter_mock.call_args.args[0] is session
+    assert filter_mock.call_args.kwargs["currency"] == "USD"
+    assert filter_mock.call_args.kwargs["freshness_seconds"] == 300
+    assert filter_mock.call_args.kwargs["symbols"] == ["MSFT", "NVDA"]
+    assert provider.call_count == 1
+    record_mock.assert_called_once()
 
 
 def test_list_market_quote_snapshots_returns_recorded_quotes(
@@ -603,6 +650,131 @@ def test_list_market_quote_snapshots_rejects_invalid_limit() -> None:
         response = client.get(
             "/market-data/quote-snapshots",
             params={"limit": "0"},
+        )
+
+    assert response.status_code == 422
+
+
+def test_list_market_quote_snapshot_freshness_returns_latest_status(
+    monkeypatch,
+) -> None:
+    session = object()
+    snapshot_id = uuid.uuid4()
+    created_at = datetime(2026, 7, 3, 9, 0, tzinfo=timezone.utc)
+    collected_at = datetime(2026, 7, 3, 8, 56, tzinfo=timezone.utc)
+    snapshot = MarketQuoteSnapshot(
+        id=snapshot_id,
+        symbol="NVDA",
+        currency="USD",
+        current_price=Decimal("125.0000"),
+        source="finnhub",
+        collected_at=collected_at,
+        created_at=created_at,
+    )
+    list_mock = MagicMock(return_value=[snapshot])
+    monkeypatch.setattr(
+        "marketpilot_api.routers.market_data.list_latest_market_quote_snapshots",
+        list_mock,
+    )
+    monkeypatch.setattr(
+        "marketpilot_api.routers.market_data.datetime",
+        MagicMock(
+            now=MagicMock(
+                return_value=datetime(2026, 7, 3, 9, 0, tzinfo=timezone.utc)
+            ),
+        ),
+    )
+    app.dependency_overrides[get_db_session] = override_session(session)
+
+    with TestClient(app) as client:
+        response = client.get(
+            "/market-data/quote-snapshots/freshness",
+            params=[
+                ("symbols", "aapl"),
+                ("symbols", "nvda"),
+                ("currency", "USD"),
+                ("freshness_seconds", "300"),
+            ],
+        )
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "symbol": "AAPL",
+            "currency": None,
+            "has_snapshot": False,
+            "is_fresh": False,
+            "age_seconds": None,
+            "current_price": None,
+            "source": None,
+            "collected_at": None,
+            "created_at": None,
+        },
+        {
+            "symbol": "NVDA",
+            "currency": "USD",
+            "has_snapshot": True,
+            "is_fresh": True,
+            "age_seconds": 240,
+            "current_price": "125.0000",
+            "source": "finnhub",
+            "collected_at": "2026-07-03T08:56:00Z",
+            "created_at": "2026-07-03T09:00:00Z",
+        },
+    ]
+    list_mock.assert_called_once_with(
+        session,
+        currency="USD",
+        symbols=["aapl", "nvda"],
+    )
+
+
+def test_list_market_quote_snapshot_freshness_marks_stale_snapshot(
+    monkeypatch,
+) -> None:
+    session = object()
+    snapshot = MarketQuoteSnapshot(
+        id=uuid.uuid4(),
+        symbol="AAPL",
+        currency="USD",
+        current_price=Decimal("294.3800"),
+        source="finnhub",
+        collected_at=datetime(2026, 7, 3, 8, 0, tzinfo=timezone.utc),
+        created_at=datetime(2026, 7, 3, 8, 0, tzinfo=timezone.utc),
+    )
+    monkeypatch.setattr(
+        "marketpilot_api.routers.market_data.list_latest_market_quote_snapshots",
+        MagicMock(return_value=[snapshot]),
+    )
+    monkeypatch.setattr(
+        "marketpilot_api.routers.market_data.datetime",
+        MagicMock(
+            now=MagicMock(
+                return_value=datetime(2026, 7, 3, 9, 0, tzinfo=timezone.utc)
+            ),
+        ),
+    )
+    app.dependency_overrides[get_db_session] = override_session(session)
+
+    with TestClient(app) as client:
+        response = client.get(
+            "/market-data/quote-snapshots/freshness",
+            params={"symbols": "AAPL", "freshness_seconds": "300"},
+        )
+
+    assert response.status_code == 200
+    freshness = response.json()[0]
+    assert freshness["symbol"] == "AAPL"
+    assert freshness["has_snapshot"] is True
+    assert freshness["is_fresh"] is False
+    assert freshness["age_seconds"] == 3600
+
+
+def test_list_market_quote_snapshot_freshness_rejects_invalid_threshold() -> None:
+    with TestClient(app) as client:
+        response = client.get(
+            "/market-data/quote-snapshots/freshness",
+            params={"freshness_seconds": "0"},
         )
 
     assert response.status_code == 422

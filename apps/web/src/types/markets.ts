@@ -30,6 +30,7 @@ export type MarketInstrument = Readonly<{
   color: string;
   sparkline: readonly number[];
   quoteSource?: string;
+  quoteCollectedAt?: string | null;
 }>;
 
 export type MarketFilterState = Readonly<{

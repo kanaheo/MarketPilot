@@ -25,6 +25,7 @@ class MarketQuoteProviderStatusResponse(BaseModel):
 
 class MarketQuoteSnapshotCollectionResponse(BaseModel):
     requested_count: int
+    fresh_skipped_count: int
     stored_count: int
     skipped_count: int
     quotes: list[MarketQuoteResponse]
@@ -38,6 +39,18 @@ class MarketQuoteSnapshotResponse(BaseModel):
     source: str
     collected_at: datetime
     created_at: datetime
+
+
+class MarketQuoteSnapshotFreshnessResponse(BaseModel):
+    symbol: str
+    currency: SupportedCurrency | None
+    has_snapshot: bool
+    is_fresh: bool
+    age_seconds: int | None
+    current_price: Decimal | None
+    source: str | None
+    collected_at: datetime | None
+    created_at: datetime | None
 
 
 class FxRateResponse(BaseModel):

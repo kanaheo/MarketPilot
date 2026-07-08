@@ -68,83 +68,83 @@ export function MarketTable({
           </div>
 
           {instruments.map((instrument) => (
-            <div
-              className="market-table-row"
-              key={instrument.symbol}
-              role="row"
-            >
-              <div className="asset-cell" role="cell">
-                <AssetMark color={instrument.color} symbol={instrument.symbol} />
-                <span>
-                  <strong>{instrument.symbol}</strong>
-                  <small>{instrument.name}</small>
+              <div
+                className="market-table-row"
+                key={instrument.symbol}
+                role="row"
+              >
+                <div className="asset-cell" role="cell">
+                  <AssetMark
+                    color={instrument.color}
+                    symbol={instrument.symbol}
+                  />
+                  <span>
+                    <strong>{instrument.symbol}</strong>
+                    <small>{instrument.name}</small>
+                  </span>
+                </div>
+                <div className="market-identity" role="cell">
+                  <strong>{messages.countries[instrument.country]}</strong>
+                  <small>
+                    {instrument.exchange} ·{" "}
+                    {messages.sessions[instrument.session]}
+                  </small>
+                </div>
+                <div className="numeric-cell market-price" role="cell">
+                  <strong>
+                    {formatMarketPrice(
+                      instrument.price,
+                      instrument.currency,
+                      locale,
+                    )}
+                  </strong>
+                </div>
+                <span role="cell">
+                  <TrendValue value={instrument.changeRate}>
+                    {formatPercent(instrument.changeRate, locale)}
+                  </TrendValue>
+                </span>
+                <span className="numeric-cell market-volume" role="cell">
+                  {formatCompactNumber(instrument.volume, locale)}
+                </span>
+                <span className="market-trend" role="cell">
+                  <Sparkline
+                    points={instrument.sparkline}
+                    positive={instrument.changeRate >= 0}
+                  />
+                </span>
+                <span className="ai-score-cell" role="cell">
+                  {instrument.aiScore === null ? (
+                    <span className="ai-score-empty">{messages.noSignal}</span>
+                  ) : (
+                    <strong>{Math.round(instrument.aiScore * 100)}</strong>
+                  )}
+                </span>
+                <span role="cell">
+                  <button
+                    aria-label={
+                      watchlist.has(instrument.symbol)
+                        ? `${instrument.name} ${messages.removeWatchlist}`
+                        : `${instrument.name} ${messages.addWatchlist}`
+                    }
+                    aria-pressed={watchlist.has(instrument.symbol)}
+                    className="watchlist-toggle"
+                    data-active={watchlist.has(instrument.symbol)}
+                    onClick={() => onToggleWatchlist(instrument.symbol)}
+                    type="button"
+                  >
+                    <Star
+                      fill={
+                        watchlist.has(instrument.symbol)
+                          ? "currentColor"
+                          : "none"
+                      }
+                      size={17}
+                      aria-hidden="true"
+                    />
+                  </button>
                 </span>
               </div>
-              <div className="market-identity" role="cell">
-                <strong>{messages.countries[instrument.country]}</strong>
-                <small>
-                  {instrument.exchange} ·{" "}
-                  {messages.sessions[instrument.session]}
-                </small>
-              </div>
-              <div className="numeric-cell market-price" role="cell">
-                <strong>
-                  {formatMarketPrice(
-                    instrument.price,
-                    instrument.currency,
-                    locale,
-                  )}
-                </strong>
-                {instrument.quoteSource === undefined ? null : (
-                  <small>{instrument.quoteSource}</small>
-                )}
-              </div>
-              <span role="cell">
-                <TrendValue value={instrument.changeRate}>
-                  {formatPercent(instrument.changeRate, locale)}
-                </TrendValue>
-              </span>
-              <span className="numeric-cell market-volume" role="cell">
-                {formatCompactNumber(instrument.volume, locale)}
-              </span>
-              <span className="market-trend" role="cell">
-                <Sparkline
-                  points={instrument.sparkline}
-                  positive={instrument.changeRate >= 0}
-                />
-              </span>
-              <span className="ai-score-cell" role="cell">
-                {instrument.aiScore === null ? (
-                  <span className="ai-score-empty">{messages.noSignal}</span>
-                ) : (
-                  <strong>{Math.round(instrument.aiScore * 100)}</strong>
-                )}
-              </span>
-              <span role="cell">
-                <button
-                  aria-label={
-                    watchlist.has(instrument.symbol)
-                      ? `${instrument.name} ${messages.removeWatchlist}`
-                      : `${instrument.name} ${messages.addWatchlist}`
-                  }
-                  aria-pressed={watchlist.has(instrument.symbol)}
-                  className="watchlist-toggle"
-                  data-active={watchlist.has(instrument.symbol)}
-                  onClick={() => onToggleWatchlist(instrument.symbol)}
-                  type="button"
-                >
-                  <Star
-                    fill={
-                      watchlist.has(instrument.symbol)
-                        ? "currentColor"
-                        : "none"
-                    }
-                    size={17}
-                    aria-hidden="true"
-                  />
-                </button>
-              </span>
-            </div>
           ))}
         </div>
       ) : (
