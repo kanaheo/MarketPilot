@@ -608,6 +608,131 @@ def test_list_market_quote_snapshots_rejects_invalid_limit() -> None:
     assert response.status_code == 422
 
 
+def test_list_market_quote_snapshot_freshness_returns_latest_status(
+    monkeypatch,
+) -> None:
+    session = object()
+    snapshot_id = uuid.uuid4()
+    created_at = datetime(2026, 7, 3, 9, 0, tzinfo=timezone.utc)
+    collected_at = datetime(2026, 7, 3, 8, 56, tzinfo=timezone.utc)
+    snapshot = MarketQuoteSnapshot(
+        id=snapshot_id,
+        symbol="NVDA",
+        currency="USD",
+        current_price=Decimal("125.0000"),
+        source="finnhub",
+        collected_at=collected_at,
+        created_at=created_at,
+    )
+    list_mock = MagicMock(return_value=[snapshot])
+    monkeypatch.setattr(
+        "marketpilot_api.routers.market_data.list_latest_market_quote_snapshots",
+        list_mock,
+    )
+    monkeypatch.setattr(
+        "marketpilot_api.routers.market_data.datetime",
+        MagicMock(
+            now=MagicMock(
+                return_value=datetime(2026, 7, 3, 9, 0, tzinfo=timezone.utc)
+            ),
+        ),
+    )
+    app.dependency_overrides[get_db_session] = override_session(session)
+
+    with TestClient(app) as client:
+        response = client.get(
+            "/market-data/quote-snapshots/freshness",
+            params=[
+                ("symbols", "aapl"),
+                ("symbols", "nvda"),
+                ("currency", "USD"),
+                ("freshness_seconds", "300"),
+            ],
+        )
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "symbol": "AAPL",
+            "currency": None,
+            "has_snapshot": False,
+            "is_fresh": False,
+            "age_seconds": None,
+            "current_price": None,
+            "source": None,
+            "collected_at": None,
+            "created_at": None,
+        },
+        {
+            "symbol": "NVDA",
+            "currency": "USD",
+            "has_snapshot": True,
+            "is_fresh": True,
+            "age_seconds": 240,
+            "current_price": "125.0000",
+            "source": "finnhub",
+            "collected_at": "2026-07-03T08:56:00Z",
+            "created_at": "2026-07-03T09:00:00Z",
+        },
+    ]
+    list_mock.assert_called_once_with(
+        session,
+        currency="USD",
+        symbols=["aapl", "nvda"],
+    )
+
+
+def test_list_market_quote_snapshot_freshness_marks_stale_snapshot(
+    monkeypatch,
+) -> None:
+    session = object()
+    snapshot = MarketQuoteSnapshot(
+        id=uuid.uuid4(),
+        symbol="AAPL",
+        currency="USD",
+        current_price=Decimal("294.3800"),
+        source="finnhub",
+        collected_at=datetime(2026, 7, 3, 8, 0, tzinfo=timezone.utc),
+        created_at=datetime(2026, 7, 3, 8, 0, tzinfo=timezone.utc),
+    )
+    monkeypatch.setattr(
+        "marketpilot_api.routers.market_data.list_latest_market_quote_snapshots",
+        MagicMock(return_value=[snapshot]),
+    )
+    monkeypatch.setattr(
+        "marketpilot_api.routers.market_data.datetime",
+        MagicMock(
+            now=MagicMock(
+                return_value=datetime(2026, 7, 3, 9, 0, tzinfo=timezone.utc)
+            ),
+        ),
+    )
+    app.dependency_overrides[get_db_session] = override_session(session)
+
+    with TestClient(app) as client:
+        response = client.get(
+            "/market-data/quote-snapshots/freshness",
+            params={"symbols": "AAPL", "freshness_seconds": "300"},
+        )
+
+    assert response.status_code == 200
+    freshness = response.json()[0]
+    assert freshness["symbol"] == "AAPL"
+    assert freshness["has_snapshot"] is True
+    assert freshness["is_fresh"] is False
+    assert freshness["age_seconds"] == 3600
+
+
+def test_list_market_quote_snapshot_freshness_rejects_invalid_threshold() -> None:
+    with TestClient(app) as client:
+        response = client.get(
+            "/market-data/quote-snapshots/freshness",
+            params={"freshness_seconds": "0"},
+        )
+
+    assert response.status_code == 422
+
+
 def test_retrieve_fx_rate_uses_cached_external_provider_result() -> None:
     provider = CountingFxRateProvider()
     configure_fx_rate_provider(provider)

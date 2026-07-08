@@ -46,6 +46,7 @@ incrementally while preserving reproducibility and auditability.
 - `GET /market-data/quotes` endpoint
 - `POST /market-data/quote-snapshots/collect` endpoint
 - `GET /market-data/quote-snapshots` endpoint
+- `GET /market-data/quote-snapshots/freshness` endpoint
 - `marketpilot_api.commands.collect_market_quotes` local collection command
 - `GET /market-data/quote-provider-status` diagnostic endpoint without secrets
 - cached FX rate provider boundary with fixture fallback
@@ -109,6 +110,10 @@ provider boundary and stores collected symbol, currency, price, source, and
 collection time in `market_quote_snapshots` for later audit, backtest, and data
 pipeline work. `GET /market-data/quote-snapshots` returns stored snapshots in
 latest-first order with optional symbol, currency, and limit filters.
+`GET /market-data/quote-snapshots/freshness` returns one freshness row per
+requested symbol with `has_snapshot`, `is_fresh`, `age_seconds`, and the latest
+snapshot metadata. This gives future scheduler and UI work a single backend
+contract for stale-price decisions.
 The same collection path can run without the API server through
 `python -m marketpilot_api.commands.collect_market_quotes --symbols AAPL NVDA --currency USD`,
 which is the first local-friendly step toward a scheduled market-data job. For
@@ -171,6 +176,7 @@ MarketPilot은 모듈형 FastAPI 백엔드를 사용합니다. PostgreSQL 기반
 - `GET /market-data/quotes` endpoint
 - `POST /market-data/quote-snapshots/collect` endpoint
 - `GET /market-data/quote-snapshots` endpoint
+- `GET /market-data/quote-snapshots/freshness` endpoint
 - `marketpilot_api.commands.collect_market_quotes` 로컬 수집 command
 - 비밀값을 노출하지 않는 `GET /market-data/quote-provider-status` 진단 endpoint
 - fixture fallback이 있는 cached 환율 provider 경계
@@ -225,6 +231,9 @@ symbol, currency, price, source, collection time을 `market_quote_snapshots`에 
 이 이력은 이후 감사, 백테스트, 데이터 파이프라인 작업에 사용합니다.
 `GET /market-data/quote-snapshots`는 저장된 snapshot을 최신순으로 반환하고 symbol,
 currency, limit 필터를 지원합니다.
+`GET /market-data/quote-snapshots/freshness`는 요청한 symbol마다 `has_snapshot`,
+`is_fresh`, `age_seconds`와 최신 snapshot metadata를 반환합니다. 이후 scheduler와
+UI가 가격이 오래됐는지 판단할 때 같은 backend contract를 사용할 수 있습니다.
 같은 수집 흐름은 API 서버 없이도
 `python -m marketpilot_api.commands.collect_market_quotes --symbols AAPL NVDA --currency USD`로
 실행할 수 있으며, 이는 이후 예약 market-data job으로 가기 위한 로컬 친화적인 첫 단계입니다.
@@ -285,6 +294,7 @@ PostgreSQLベースのポートフォリオ、市場データ、バックテス�
 - `GET /market-data/quotes` endpoint
 - `POST /market-data/quote-snapshots/collect` endpoint
 - `GET /market-data/quote-snapshots` endpoint
+- `GET /market-data/quote-snapshots/freshness` endpoint
 - `marketpilot_api.commands.collect_market_quotes`ローカル収集command
 - secretを返さない`GET /market-data/quote-provider-status`診断endpoint
 - fixture fallback付きcached FXレートprovider境界
@@ -340,6 +350,9 @@ currency、price、source、collection timeを`market_quote_snapshots`へ保存�
 この履歴は後続の監査、バックテスト、データパイプライン作業に使用します。
 `GET /market-data/quote-snapshots`は保存済みsnapshotを新しい順で返し、symbol、
 currency、limitフィルターをサポートします。
+`GET /market-data/quote-snapshots/freshness`は、リクエストされたsymbolごとに
+`has_snapshot`、`is_fresh`、`age_seconds`、最新snapshot metadataを返します。
+これにより、後続のschedulerとUIが古い価格を判断するためのbackend contractを共有できます。
 同じ収集フローはAPIサーバーなしでも
 `python -m marketpilot_api.commands.collect_market_quotes --symbols AAPL NVDA --currency USD`で
 実行でき、将来のscheduled market-data jobに向けたローカル向けの第一歩です。

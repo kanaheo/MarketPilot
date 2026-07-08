@@ -40,6 +40,18 @@ class MarketQuoteSnapshotResponse(BaseModel):
     created_at: datetime
 
 
+class MarketQuoteSnapshotFreshnessResponse(BaseModel):
+    symbol: str
+    currency: SupportedCurrency | None
+    has_snapshot: bool
+    is_fresh: bool
+    age_seconds: int | None
+    current_price: Decimal | None
+    source: str | None
+    collected_at: datetime | None
+    created_at: datetime | None
+
+
 class FxRateResponse(BaseModel):
     base_currency: SupportedCurrency
     quote_currency: SupportedCurrency
