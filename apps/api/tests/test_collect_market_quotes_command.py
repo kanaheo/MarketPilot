@@ -2,6 +2,8 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from unittest.mock import MagicMock
 
+import pytest
+
 from marketpilot_api.commands import collect_market_quotes
 from marketpilot_api.repositories.market_quote_snapshots import (
     MarketQuoteSnapshotCollection,
@@ -61,3 +63,66 @@ def test_collect_market_quotes_command_records_quotes(
         symbols=["aapl", "nvda"],
     )
     record_mock.assert_called_once_with(session, quotes=[quote])
+
+
+def test_collect_market_quotes_command_repeats_with_interval(
+    capsys,
+    monkeypatch,
+) -> None:
+    collected_at = datetime(2026, 7, 2, tzinfo=timezone.utc)
+    quote = MarketQuote(
+        symbol="NVDA",
+        currency="USD",
+        current_price=Decimal("125.0000"),
+        source="fixture",
+        collected_at=collected_at,
+    )
+    list_mock = MagicMock(return_value=[quote])
+    record_mock = MagicMock(
+        return_value=MarketQuoteSnapshotCollection(
+            snapshots=[object()],
+            skipped_count=0,
+        )
+    )
+    sleep_mock = MagicMock()
+    session = FakeSession()
+    monkeypatch.setattr(collect_market_quotes, "list_market_quotes", list_mock)
+    monkeypatch.setattr(
+        collect_market_quotes,
+        "record_market_quote_snapshots",
+        record_mock,
+    )
+    monkeypatch.setattr(collect_market_quotes, "SessionLocal", lambda: session)
+
+    exit_code = collect_market_quotes.main(
+        [
+            "--symbols",
+            "nvda",
+            "--currency",
+            "USD",
+            "--interval-seconds",
+            "300",
+            "--max-runs",
+            "2",
+        ],
+        sleep=sleep_mock,
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert output.count("run=") == 2
+    assert "run=1" in output
+    assert "run=2" in output
+    assert list_mock.call_count == 2
+    assert record_mock.call_count == 2
+    sleep_mock.assert_called_once_with(300)
+
+
+def test_collect_market_quotes_command_requires_interval_for_max_runs(
+    capsys,
+) -> None:
+    with pytest.raises(SystemExit) as exc_info:
+        collect_market_quotes.main(["--symbols", "aapl", "--max-runs", "2"])
+
+    assert exc_info.value.code == 2
+    assert "--max-runs requires --interval-seconds" in capsys.readouterr().err

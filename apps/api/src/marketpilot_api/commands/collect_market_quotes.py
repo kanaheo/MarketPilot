@@ -1,5 +1,8 @@
 import argparse
 from collections.abc import Sequence
+from collections.abc import Callable
+from dataclasses import dataclass
+from time import sleep as default_sleep
 
 from marketpilot_api.db.session import SessionLocal
 from marketpilot_api.repositories.market_quote_snapshots import (
@@ -7,8 +10,40 @@ from marketpilot_api.repositories.market_quote_snapshots import (
 )
 from marketpilot_api.repositories.price_quotes import list_market_quotes
 
+Sleep = Callable[[int], None]
 
-def main(argv: Sequence[str] | None = None) -> int:
+
+@dataclass(frozen=True)
+class CollectionCommandArgs:
+    symbols: list[str]
+    currency: str | None
+    interval_seconds: int | None
+    max_runs: int | None
+
+
+def main(
+    argv: Sequence[str] | None = None,
+    *,
+    sleep: Sleep = default_sleep,
+) -> int:
+    args = _parse_args(argv)
+    run_count = 0
+
+    while True:
+        run_count += 1
+        _collect_once(args=args, run_number=run_count)
+
+        if args.max_runs is not None and run_count >= args.max_runs:
+            break
+        if args.interval_seconds is None:
+            break
+
+        sleep(args.interval_seconds)
+
+    return 0
+
+
+def _parse_args(argv: Sequence[str] | None) -> CollectionCommandArgs:
     parser = argparse.ArgumentParser(
         prog="collect-market-quotes",
         description="Collect market quote snapshots through the backend provider boundary.",
@@ -24,8 +59,41 @@ def main(argv: Sequence[str] | None = None) -> int:
         default=None,
         help="Optional quote currency filter, for example: USD",
     )
+    parser.add_argument(
+        "--interval-seconds",
+        type=_positive_int,
+        default=None,
+        help=(
+            "Optional delay between collection runs. "
+            "Omit it for a single collection."
+        ),
+    )
+    parser.add_argument(
+        "--max-runs",
+        type=_positive_int,
+        default=None,
+        help=(
+            "Optional number of collection runs before stopping. "
+            "Use with --interval-seconds for bounded local polling."
+        ),
+    )
     args = parser.parse_args(argv)
+    if args.max_runs is not None and args.interval_seconds is None:
+        parser.error("--max-runs requires --interval-seconds")
 
+    return CollectionCommandArgs(
+        symbols=args.symbols,
+        currency=args.currency,
+        interval_seconds=args.interval_seconds,
+        max_runs=args.max_runs,
+    )
+
+
+def _collect_once(
+    *,
+    args: CollectionCommandArgs,
+    run_number: int,
+) -> None:
     quotes = list_market_quotes(
         currency=args.currency,
         symbols=args.symbols,
@@ -33,6 +101,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     with SessionLocal() as session:
         collection = record_market_quote_snapshots(session, quotes=quotes)
 
+    print(f"run={run_number}")
     print(f"requested_count={len(args.symbols)}")
     print(f"returned_count={len(quotes)}")
     print(f"stored_count={len(collection.snapshots)}")
@@ -47,7 +116,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             f"{quote.collected_at.isoformat() if quote.collected_at else None}"
         )
 
-    return 0
+
+def _positive_int(value: str) -> int:
+    parsed_value = int(value)
+    if parsed_value < 1:
+        raise argparse.ArgumentTypeError("must be greater than or equal to 1")
+
+    return parsed_value
 
 
 if __name__ == "__main__":
