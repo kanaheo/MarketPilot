@@ -39,24 +39,35 @@ export function formatCompactDollar(value: number, locale: Locale) {
 }
 
 export function formatShortDate(value: string, locale: Locale) {
-  return new Intl.DateTimeFormat(localeCodes[locale], {
-    day: "numeric",
-    month: "short",
-    timeZone: "UTC",
-    year: "numeric",
-  }).format(new Date(value));
+  const dateParts = getUtcDateParts(value);
+  if (dateParts === null) {
+    return value;
+  }
+
+  if (locale === "en") {
+    return `${dateParts.monthNameEn} ${dateParts.day}, ${dateParts.year}`;
+  }
+
+  return locale === "ko"
+    ? `${dateParts.year}년 ${dateParts.month}월 ${dateParts.day}일`
+    : `${dateParts.year}年${dateParts.month}月${dateParts.day}日`;
 }
 
 export function formatDateTime(value: string, locale: Locale) {
-  return new Intl.DateTimeFormat(localeCodes[locale], {
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    month: "short",
-    timeZone: "UTC",
-    timeZoneName: "short",
-    year: "numeric",
-  }).format(new Date(value));
+  const dateParts = getUtcDateParts(value);
+  if (dateParts === null) {
+    return value;
+  }
+
+  const time = `${dateParts.hour}:${dateParts.minute} UTC`;
+
+  if (locale === "en") {
+    return `${dateParts.monthNameEn} ${dateParts.day}, ${dateParts.year}, ${time}`;
+  }
+
+  return locale === "ko"
+    ? `${dateParts.year}년 ${dateParts.month}월 ${dateParts.day}일 ${time}`
+    : `${dateParts.year}年${dateParts.month}月${dateParts.day}日 ${time}`;
 }
 
 export function formatMarketPrice(
@@ -105,4 +116,35 @@ export function formatPercent(
     style: "percent",
     ...options,
   }).format(value);
+}
+
+function getUtcDateParts(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  const month = date.getUTCMonth() + 1;
+
+  return {
+    day: date.getUTCDate(),
+    hour: date.getUTCHours().toString().padStart(2, "0"),
+    minute: date.getUTCMinutes().toString().padStart(2, "0"),
+    month,
+    monthNameEn: [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ][month - 1],
+    year: date.getUTCFullYear(),
+  };
 }

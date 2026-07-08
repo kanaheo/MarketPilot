@@ -58,6 +58,7 @@ function applyMarketQuotes(
     return {
       ...instrument,
       price: Number(quote.current_price),
+      quoteCollectedAt: quote.collected_at,
       quoteSource: quote.source,
     };
   });
