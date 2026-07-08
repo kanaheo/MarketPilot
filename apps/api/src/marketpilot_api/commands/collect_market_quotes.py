@@ -2,12 +2,14 @@ import argparse
 from collections.abc import Sequence
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 from time import sleep as default_sleep
 
 from sqlalchemy.orm import Session
 
 from marketpilot_api.db.session import SessionLocal
 from marketpilot_api.repositories.market_quote_snapshots import (
+    list_latest_market_quote_snapshots,
     record_market_quote_snapshots,
 )
 from marketpilot_api.repositories.positions import list_open_position_symbols
@@ -23,6 +25,7 @@ class CollectionCommandArgs:
     currency: str | None
     interval_seconds: int | None
     max_runs: int | None
+    skip_fresh_seconds: int | None
 
 
 def main(
@@ -86,6 +89,15 @@ def _parse_args(argv: Sequence[str] | None) -> CollectionCommandArgs:
             "Use with --interval-seconds for bounded local polling."
         ),
     )
+    parser.add_argument(
+        "--skip-fresh-seconds",
+        type=_positive_int,
+        default=None,
+        help=(
+            "Skip symbols that already have a latest quote snapshot collected "
+            "within this many seconds."
+        ),
+    )
     args = parser.parse_args(argv)
     if args.max_runs is not None and args.interval_seconds is None:
         parser.error("--max-runs requires --interval-seconds")
@@ -96,6 +108,7 @@ def _parse_args(argv: Sequence[str] | None) -> CollectionCommandArgs:
         currency=args.currency,
         interval_seconds=args.interval_seconds,
         max_runs=args.max_runs,
+        skip_fresh_seconds=args.skip_fresh_seconds,
     )
 
 
@@ -106,9 +119,15 @@ def _collect_once(
 ) -> None:
     with SessionLocal() as session:
         symbols = _resolve_collection_symbols(session=session, args=args)
+        collectable_symbols = _filter_fresh_symbols(
+            session=session,
+            symbols=symbols,
+            args=args,
+            now=datetime.now(timezone.utc),
+        )
         quotes = list_market_quotes(
             currency=args.currency,
-            symbols=symbols,
+            symbols=collectable_symbols,
         )
         collection = record_market_quote_snapshots(session, quotes=quotes)
 
@@ -118,6 +137,7 @@ def _collect_once(
         f"{'holdings' if args.from_holdings else 'arguments'}"
     )
     print(f"requested_count={len(symbols)}")
+    print(f"fresh_skipped_count={len(symbols) - len(collectable_symbols)}")
     print(f"returned_count={len(quotes)}")
     print(f"stored_count={len(collection.snapshots)}")
     print(f"skipped_count={collection.skipped_count}")
@@ -144,6 +164,34 @@ def _resolve_collection_symbols(
         session,
         currency=args.currency,
     )
+
+
+def _filter_fresh_symbols(
+    *,
+    session: Session,
+    symbols: list[str],
+    args: CollectionCommandArgs,
+    now: datetime,
+) -> list[str]:
+    if args.skip_fresh_seconds is None or len(symbols) == 0:
+        return symbols
+
+    freshness_cutoff = now - timedelta(seconds=args.skip_fresh_seconds)
+    fresh_symbols = {
+        snapshot.symbol
+        for snapshot in list_latest_market_quote_snapshots(
+            session,
+            currency=args.currency,
+            symbols=symbols,
+        )
+        if snapshot.collected_at >= freshness_cutoff
+    }
+
+    return [
+        symbol
+        for symbol in symbols
+        if symbol.strip().upper() not in fresh_symbols
+    ]
 
 
 def _positive_int(value: str) -> int:

@@ -114,7 +114,9 @@ The same collection path can run without the API server through
 which is the first local-friendly step toward a scheduled market-data job. For
 bounded local polling, pass `--interval-seconds 300 --max-runs 12` to collect
 every five minutes for one hour. Use `--from-holdings` instead of `--symbols`
-to collect quotes for currently open portfolio positions.
+to collect quotes for currently open portfolio positions. Add
+`--skip-fresh-seconds 300` to avoid collecting a symbol again when a fresh
+snapshot already exists.
 
 FX rates are also fixture-backed behind the same cached provider pattern. The
 first API surface returns a single pair rate for supported currencies and
@@ -227,7 +229,8 @@ currency, limit 필터를 지원합니다.
 실행할 수 있으며, 이는 이후 예약 market-data job으로 가기 위한 로컬 친화적인 첫 단계입니다.
 로컬에서 제한된 반복 수집을 할 때는 `--interval-seconds 300 --max-runs 12`를 붙이면
 5분마다 1시간 동안 수집합니다. `--symbols` 대신 `--from-holdings`를 사용하면 현재
-보유 중인 포트폴리오 종목의 현재가를 수집합니다.
+보유 중인 포트폴리오 종목의 현재가를 수집합니다. `--skip-fresh-seconds 300`을
+붙이면 이미 최근 snapshot이 있는 종목은 다시 수집하지 않습니다.
 
 환율도 같은 cached provider pattern 뒤에 fixture로 준비했습니다. 첫 API는 지원 통화
 사이의 단일 환율을 반환하며 `source`와 `collected_at`을 포함합니다. 주문 체결 기록에는
@@ -340,7 +343,8 @@ currency、limitフィルターをサポートします。
 実行でき、将来のscheduled market-data jobに向けたローカル向けの第一歩です。
 ローカルで回数を制限して繰り返し収集する場合は、`--interval-seconds 300 --max-runs 12`を
 付けると5分ごとに1時間収集します。`--symbols`の代わりに`--from-holdings`を使うと、
-現在保有中のポートフォリオ銘柄の価格を収集します。
+現在保有中のポートフォリオ銘柄の価格を収集します。`--skip-fresh-seconds 300`を
+付けると、新しいsnapshotがすでにある銘柄は再収集しません。
 
 FXレートも同じcached provider patternの背後にfixtureとして用意しています。最初のAPIは
 対応通貨間の単一レートを返し、`source`と`collected_at`を含めます。注文約定記録には
