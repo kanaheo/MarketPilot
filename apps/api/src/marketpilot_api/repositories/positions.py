@@ -145,6 +145,50 @@ def build_holding_accumulators(
     return holdings_by_symbol
 
 
+def list_open_position_symbols(
+    session: Session,
+    *,
+    currency: str | None = None,
+) -> list[str]:
+    statement = select(OrderExecution)
+    normalized_currency = currency.upper() if currency is not None else None
+    if normalized_currency is not None:
+        statement = statement.where(OrderExecution.currency == normalized_currency)
+
+    executions = list(
+        session.scalars(
+            statement.order_by(
+                OrderExecution.symbol.asc(),
+                OrderExecution.currency.asc(),
+                OrderExecution.executed_at.asc(),
+                OrderExecution.id.asc(),
+            )
+        ).all()
+    )
+    holdings_by_symbol_and_currency: dict[
+        tuple[str, str],
+        HoldingAccumulator,
+    ] = {}
+
+    for execution in executions:
+        accumulator = holdings_by_symbol_and_currency.setdefault(
+            (execution.symbol, execution.currency),
+            HoldingAccumulator(
+                symbol=execution.symbol,
+                currency=execution.currency,
+            ),
+        )
+        accumulator.apply_execution(execution)
+
+    return sorted(
+        {
+            accumulator.symbol
+            for accumulator in holdings_by_symbol_and_currency.values()
+            if accumulator.quantity > 0
+        }
+    )
+
+
 def _get_current_quote(
     *,
     average_price: Decimal,

@@ -4,10 +4,13 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from time import sleep as default_sleep
 
+from sqlalchemy.orm import Session
+
 from marketpilot_api.db.session import SessionLocal
 from marketpilot_api.repositories.market_quote_snapshots import (
     record_market_quote_snapshots,
 )
+from marketpilot_api.repositories.positions import list_open_position_symbols
 from marketpilot_api.repositories.price_quotes import list_market_quotes
 
 Sleep = Callable[[int], None]
@@ -15,7 +18,8 @@ Sleep = Callable[[int], None]
 
 @dataclass(frozen=True)
 class CollectionCommandArgs:
-    symbols: list[str]
+    symbols: list[str] | None
+    from_holdings: bool
     currency: str | None
     interval_seconds: int | None
     max_runs: int | None
@@ -48,11 +52,16 @@ def _parse_args(argv: Sequence[str] | None) -> CollectionCommandArgs:
         prog="collect-market-quotes",
         description="Collect market quote snapshots through the backend provider boundary.",
     )
-    parser.add_argument(
+    symbol_source_group = parser.add_mutually_exclusive_group(required=True)
+    symbol_source_group.add_argument(
         "--symbols",
         nargs="+",
-        required=True,
         help="One or more ticker symbols to collect, for example: AAPL NVDA",
+    )
+    symbol_source_group.add_argument(
+        "--from-holdings",
+        action="store_true",
+        help="Collect symbols from currently open portfolio holdings.",
     )
     parser.add_argument(
         "--currency",
@@ -83,6 +92,7 @@ def _parse_args(argv: Sequence[str] | None) -> CollectionCommandArgs:
 
     return CollectionCommandArgs(
         symbols=args.symbols,
+        from_holdings=args.from_holdings,
         currency=args.currency,
         interval_seconds=args.interval_seconds,
         max_runs=args.max_runs,
@@ -94,15 +104,20 @@ def _collect_once(
     args: CollectionCommandArgs,
     run_number: int,
 ) -> None:
-    quotes = list_market_quotes(
-        currency=args.currency,
-        symbols=args.symbols,
-    )
     with SessionLocal() as session:
+        symbols = _resolve_collection_symbols(session=session, args=args)
+        quotes = list_market_quotes(
+            currency=args.currency,
+            symbols=symbols,
+        )
         collection = record_market_quote_snapshots(session, quotes=quotes)
 
     print(f"run={run_number}")
-    print(f"requested_count={len(args.symbols)}")
+    print(
+        "symbols_source="
+        f"{'holdings' if args.from_holdings else 'arguments'}"
+    )
+    print(f"requested_count={len(symbols)}")
     print(f"returned_count={len(quotes)}")
     print(f"stored_count={len(collection.snapshots)}")
     print(f"skipped_count={collection.skipped_count}")
@@ -115,6 +130,20 @@ def _collect_once(
             f"{quote.source},"
             f"{quote.collected_at.isoformat() if quote.collected_at else None}"
         )
+
+
+def _resolve_collection_symbols(
+    *,
+    session: Session,
+    args: CollectionCommandArgs,
+) -> list[str]:
+    if args.symbols is not None:
+        return args.symbols
+
+    return list_open_position_symbols(
+        session,
+        currency=args.currency,
+    )
 
 
 def _positive_int(value: str) -> int:

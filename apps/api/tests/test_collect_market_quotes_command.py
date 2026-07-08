@@ -118,6 +118,60 @@ def test_collect_market_quotes_command_repeats_with_interval(
     sleep_mock.assert_called_once_with(300)
 
 
+def test_collect_market_quotes_command_collects_from_holdings(
+    capsys,
+    monkeypatch,
+) -> None:
+    collected_at = datetime(2026, 7, 2, tzinfo=timezone.utc)
+    quote = MarketQuote(
+        symbol="AAPL",
+        currency="USD",
+        current_price=Decimal("294.3800"),
+        source="finnhub",
+        collected_at=collected_at,
+    )
+    list_symbols_mock = MagicMock(return_value=["AAPL", "NVDA"])
+    list_quotes_mock = MagicMock(return_value=[quote])
+    record_mock = MagicMock(
+        return_value=MarketQuoteSnapshotCollection(
+            snapshots=[object()],
+            skipped_count=0,
+        )
+    )
+    session = FakeSession()
+    monkeypatch.setattr(
+        collect_market_quotes,
+        "list_open_position_symbols",
+        list_symbols_mock,
+    )
+    monkeypatch.setattr(
+        collect_market_quotes,
+        "list_market_quotes",
+        list_quotes_mock,
+    )
+    monkeypatch.setattr(
+        collect_market_quotes,
+        "record_market_quote_snapshots",
+        record_mock,
+    )
+    monkeypatch.setattr(collect_market_quotes, "SessionLocal", lambda: session)
+
+    exit_code = collect_market_quotes.main(
+        ["--from-holdings", "--currency", "USD"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "symbols_source=holdings" in output
+    assert "requested_count=2" in output
+    list_symbols_mock.assert_called_once_with(session, currency="USD")
+    list_quotes_mock.assert_called_once_with(
+        currency="USD",
+        symbols=["AAPL", "NVDA"],
+    )
+    record_mock.assert_called_once_with(session, quotes=[quote])
+
+
 def test_collect_market_quotes_command_requires_interval_for_max_runs(
     capsys,
 ) -> None:
