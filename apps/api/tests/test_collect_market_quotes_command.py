@@ -111,7 +111,8 @@ def test_collect_market_quotes_command_repeats_with_interval(
 
     output = capsys.readouterr().out
     assert exit_code == 0
-    assert output.count("run=") == 2
+    assert output.count("run=1") == 1
+    assert output.count("run=2") == 1
     assert "run=1" in output
     assert "run=2" in output
     assert list_mock.call_count == 2
@@ -253,6 +254,80 @@ def test_collect_market_quotes_command_skips_fresh_snapshots(
         symbols=["nvda"],
     )
     record_mock.assert_called_once_with(session, quotes=[quote])
+
+
+def test_collect_market_quotes_command_dry_run_does_not_collect_or_store(
+    capsys,
+    monkeypatch,
+) -> None:
+    list_quotes_mock = MagicMock()
+    record_mock = MagicMock()
+    session = FakeSession()
+    monkeypatch.setattr(
+        collect_market_quotes,
+        "list_market_quotes",
+        list_quotes_mock,
+    )
+    monkeypatch.setattr(
+        collect_market_quotes,
+        "record_market_quote_snapshots",
+        record_mock,
+    )
+    monkeypatch.setattr(collect_market_quotes, "SessionLocal", lambda: session)
+
+    exit_code = collect_market_quotes.main(
+        ["--symbols", "aapl", "nvda", "--currency", "USD", "--dry-run"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "dry_run=True" in output
+    assert "requested_count=2" in output
+    assert "collectable_count=2" in output
+    assert "returned_count=0" in output
+    assert "stored_count=0" in output
+    list_quotes_mock.assert_not_called()
+    record_mock.assert_not_called()
+
+
+def test_collect_market_quotes_command_skips_provider_when_no_symbols(
+    capsys,
+    monkeypatch,
+) -> None:
+    list_symbols_mock = MagicMock(return_value=[])
+    list_quotes_mock = MagicMock()
+    record_mock = MagicMock()
+    session = FakeSession()
+    monkeypatch.setattr(
+        collect_market_quotes,
+        "list_open_position_symbols",
+        list_symbols_mock,
+    )
+    monkeypatch.setattr(
+        collect_market_quotes,
+        "list_market_quotes",
+        list_quotes_mock,
+    )
+    monkeypatch.setattr(
+        collect_market_quotes,
+        "record_market_quote_snapshots",
+        record_mock,
+    )
+    monkeypatch.setattr(collect_market_quotes, "SessionLocal", lambda: session)
+
+    exit_code = collect_market_quotes.main(
+        ["--from-holdings", "--currency", "USD"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "requested_count=0" in output
+    assert "collectable_count=0" in output
+    assert "returned_count=0" in output
+    assert "stored_count=0" in output
+    list_symbols_mock.assert_called_once_with(session, currency="USD")
+    list_quotes_mock.assert_not_called()
+    record_mock.assert_not_called()
 
 
 def test_collect_market_quotes_command_requires_interval_for_max_runs(

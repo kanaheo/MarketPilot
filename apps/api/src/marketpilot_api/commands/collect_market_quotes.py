@@ -26,6 +26,7 @@ class CollectionCommandArgs:
     interval_seconds: int | None
     max_runs: int | None
     skip_fresh_seconds: int | None
+    dry_run: bool
 
 
 def main(
@@ -98,6 +99,14 @@ def _parse_args(argv: Sequence[str] | None) -> CollectionCommandArgs:
             "within this many seconds."
         ),
     )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help=(
+            "Resolve and filter symbols, then print what would be collected "
+            "without calling the quote provider or writing snapshots."
+        ),
+    )
     args = parser.parse_args(argv)
     if args.max_runs is not None and args.interval_seconds is None:
         parser.error("--max-runs requires --interval-seconds")
@@ -109,6 +118,7 @@ def _parse_args(argv: Sequence[str] | None) -> CollectionCommandArgs:
         interval_seconds=args.interval_seconds,
         max_runs=args.max_runs,
         skip_fresh_seconds=args.skip_fresh_seconds,
+        dry_run=args.dry_run,
     )
 
 
@@ -125,22 +135,31 @@ def _collect_once(
             args=args,
             now=datetime.now(timezone.utc),
         )
-        quotes = list_market_quotes(
-            currency=args.currency,
-            symbols=collectable_symbols,
-        )
-        collection = record_market_quote_snapshots(session, quotes=quotes)
+        if args.dry_run or len(collectable_symbols) == 0:
+            quotes = []
+            stored_count = 0
+            skipped_count = 0
+        else:
+            quotes = list_market_quotes(
+                currency=args.currency,
+                symbols=collectable_symbols,
+            )
+            collection = record_market_quote_snapshots(session, quotes=quotes)
+            stored_count = len(collection.snapshots)
+            skipped_count = collection.skipped_count
 
     print(f"run={run_number}")
+    print(f"dry_run={args.dry_run}")
     print(
         "symbols_source="
         f"{'holdings' if args.from_holdings else 'arguments'}"
     )
     print(f"requested_count={len(symbols)}")
+    print(f"collectable_count={len(collectable_symbols)}")
     print(f"fresh_skipped_count={len(symbols) - len(collectable_symbols)}")
     print(f"returned_count={len(quotes)}")
-    print(f"stored_count={len(collection.snapshots)}")
-    print(f"skipped_count={collection.skipped_count}")
+    print(f"stored_count={stored_count}")
+    print(f"skipped_count={skipped_count}")
     for quote in quotes:
         print(
             "quote="
