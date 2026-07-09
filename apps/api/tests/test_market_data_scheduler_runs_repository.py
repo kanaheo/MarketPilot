@@ -3,8 +3,10 @@ from decimal import Decimal
 from unittest.mock import MagicMock
 
 from marketpilot_api.commands.collect_market_quotes import CollectionRunResult
+from marketpilot_api.models import MarketDataSchedulerRun
 from marketpilot_api.repositories.market_data_scheduler_runs import (
     SchedulerRunStart,
+    list_market_data_scheduler_runs,
     mark_market_data_scheduler_run_failed,
     mark_market_data_scheduler_run_succeeded,
     start_market_data_scheduler_run,
@@ -42,6 +44,32 @@ def test_start_market_data_scheduler_run_records_running_state() -> None:
     assert scheduler_run.started_at == started_at
     session.add.assert_called_once_with(scheduler_run)
     session.commit.assert_called_once()
+
+
+def test_list_market_data_scheduler_runs_filters_and_limits_results() -> None:
+    scheduler_run = MarketDataSchedulerRun(
+        job_name="market-quote-scheduler",
+        status="succeeded",
+        symbols_source="holdings",
+        currency="USD",
+        started_at=datetime(2026, 7, 8, 9, tzinfo=timezone.utc),
+    )
+    session = MagicMock()
+    session.scalars.return_value.all.return_value = [scheduler_run]
+
+    result = list_market_data_scheduler_runs(
+        session,
+        job_name=" market-quote-scheduler ",
+        status="SUCCEEDED",
+        limit=20,
+    )
+
+    assert result == [scheduler_run]
+    statement = session.scalars.call_args.args[0]
+    compiled_params = statement.compile().params
+    assert "market-quote-scheduler" in compiled_params.values()
+    assert "succeeded" in compiled_params.values()
+    assert 20 in compiled_params.values()
 
 
 def test_mark_market_data_scheduler_run_succeeded_stores_counts() -> None:

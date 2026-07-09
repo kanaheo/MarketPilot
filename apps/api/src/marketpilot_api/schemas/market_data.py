@@ -53,6 +53,24 @@ class MarketQuoteSnapshotFreshnessResponse(BaseModel):
     created_at: datetime | None
 
 
+class MarketDataSchedulerRunResponse(BaseModel):
+    id: UUID
+    job_name: str
+    status: str
+    symbols_source: str
+    currency: SupportedCurrency | None
+    started_at: datetime
+    completed_at: datetime | None
+    requested_count: int
+    collectable_count: int
+    fresh_skipped_count: int
+    returned_count: int
+    stored_count: int
+    skipped_count: int
+    error_message: str | None
+    created_at: datetime
+
+
 class FxRateResponse(BaseModel):
     base_currency: SupportedCurrency
     quote_currency: SupportedCurrency

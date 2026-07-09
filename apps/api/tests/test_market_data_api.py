@@ -12,6 +12,7 @@ from marketpilot_api.core.config import get_settings
 from marketpilot_api.db.session import get_db_session
 from marketpilot_api.main import app
 from marketpilot_api.models import MarketQuoteSnapshot
+from marketpilot_api.models import MarketDataSchedulerRun
 from marketpilot_api.repositories.market_quote_snapshots import (
     MarketQuoteSnapshotCollection,
 )
@@ -775,6 +776,87 @@ def test_list_market_quote_snapshot_freshness_rejects_invalid_threshold() -> Non
         response = client.get(
             "/market-data/quote-snapshots/freshness",
             params={"freshness_seconds": "0"},
+        )
+
+    assert response.status_code == 422
+
+
+def test_list_market_data_scheduler_runs_returns_recorded_runs(
+    monkeypatch,
+) -> None:
+    session = object()
+    scheduler_run_id = uuid.uuid4()
+    started_at = datetime(2026, 7, 8, 9, 0, tzinfo=timezone.utc)
+    completed_at = datetime(2026, 7, 8, 9, 1, tzinfo=timezone.utc)
+    created_at = datetime(2026, 7, 8, 9, 2, tzinfo=timezone.utc)
+    scheduler_run = MarketDataSchedulerRun(
+        id=scheduler_run_id,
+        job_name="market-quote-scheduler",
+        status="succeeded",
+        symbols_source="holdings",
+        currency="USD",
+        started_at=started_at,
+        completed_at=completed_at,
+        requested_count=2,
+        collectable_count=1,
+        fresh_skipped_count=1,
+        returned_count=1,
+        stored_count=1,
+        skipped_count=0,
+        error_message=None,
+        created_at=created_at,
+    )
+    list_mock = MagicMock(return_value=[scheduler_run])
+    monkeypatch.setattr(
+        "marketpilot_api.routers.market_data."
+        "list_recorded_market_data_scheduler_runs",
+        list_mock,
+    )
+    app.dependency_overrides[get_db_session] = override_session(session)
+
+    with TestClient(app) as client:
+        response = client.get(
+            "/market-data/scheduler-runs",
+            params={
+                "job_name": "market-quote-scheduler",
+                "status": "succeeded",
+                "limit": "20",
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "id": str(scheduler_run_id),
+            "job_name": "market-quote-scheduler",
+            "status": "succeeded",
+            "symbols_source": "holdings",
+            "currency": "USD",
+            "started_at": "2026-07-08T09:00:00Z",
+            "completed_at": "2026-07-08T09:01:00Z",
+            "requested_count": 2,
+            "collectable_count": 1,
+            "fresh_skipped_count": 1,
+            "returned_count": 1,
+            "stored_count": 1,
+            "skipped_count": 0,
+            "error_message": None,
+            "created_at": "2026-07-08T09:02:00Z",
+        }
+    ]
+    list_mock.assert_called_once_with(
+        session,
+        job_name="market-quote-scheduler",
+        status="succeeded",
+        limit=20,
+    )
+
+
+def test_list_market_data_scheduler_runs_rejects_invalid_status() -> None:
+    with TestClient(app) as client:
+        response = client.get(
+            "/market-data/scheduler-runs",
+            params={"status": "unknown"},
         )
 
     assert response.status_code == 422

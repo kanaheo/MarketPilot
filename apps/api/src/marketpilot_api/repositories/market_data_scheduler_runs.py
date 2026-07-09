@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 
+from sqlalchemy import Select, select
 from sqlalchemy.orm import Session
 
 from marketpilot_api.commands.collect_market_quotes import CollectionRunResult
@@ -13,6 +14,22 @@ class SchedulerRunStart:
     symbols_source: str
     currency: str | None
     started_at: datetime
+
+
+def list_market_data_scheduler_runs(
+    session: Session,
+    *,
+    job_name: str | None = None,
+    status: str | None = None,
+    limit: int = 50,
+) -> list[MarketDataSchedulerRun]:
+    statement = _build_market_data_scheduler_runs_query(
+        job_name=job_name,
+        status=status,
+        limit=limit,
+    )
+
+    return list(session.scalars(statement).all())
 
 
 def start_market_data_scheduler_run(
@@ -35,6 +52,31 @@ def start_market_data_scheduler_run(
     session.commit()
 
     return scheduler_run
+
+
+def _build_market_data_scheduler_runs_query(
+    *,
+    job_name: str | None = None,
+    status: str | None = None,
+    limit: int = 50,
+) -> Select[tuple[MarketDataSchedulerRun]]:
+    statement = select(MarketDataSchedulerRun)
+    normalized_status = status.strip().lower() if status is not None else None
+    normalized_job_name = job_name.strip() if job_name is not None else None
+
+    if normalized_job_name:
+        statement = statement.where(
+            MarketDataSchedulerRun.job_name == normalized_job_name
+        )
+    if normalized_status:
+        statement = statement.where(
+            MarketDataSchedulerRun.status == normalized_status
+        )
+
+    return statement.order_by(
+        MarketDataSchedulerRun.started_at.desc(),
+        MarketDataSchedulerRun.created_at.desc(),
+    ).limit(limit)
 
 
 def mark_market_data_scheduler_run_succeeded(

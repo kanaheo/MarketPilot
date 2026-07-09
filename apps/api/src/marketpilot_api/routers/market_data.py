@@ -12,12 +12,16 @@ from marketpilot_api.repositories.market_quote_snapshots import (
     list_market_quote_snapshots as list_recorded_market_quote_snapshots,
     record_market_quote_snapshots,
 )
+from marketpilot_api.repositories.market_data_scheduler_runs import (
+    list_market_data_scheduler_runs as list_recorded_market_data_scheduler_runs,
+)
 from marketpilot_api.repositories.price_quotes import (
     get_market_quote_provider_status,
     list_market_quotes as list_provider_market_quotes,
 )
 from marketpilot_api.schemas.market_data import (
     FxRateResponse,
+    MarketDataSchedulerRunResponse,
     MarketQuoteSnapshotFreshnessResponse,
     MarketQuoteSnapshotCollectionResponse,
     MarketQuoteSnapshotResponse,
@@ -173,6 +177,45 @@ def list_market_quote_snapshot_freshness(
             now=now,
         )
         for symbol in response_symbols
+    ]
+
+
+@router.get(
+    "/scheduler-runs",
+    response_model=list[MarketDataSchedulerRunResponse],
+)
+def list_market_data_scheduler_runs(
+    session: Annotated[Session, Depends(get_db_session)],
+    job_name: Annotated[str | None, Query(min_length=1, max_length=64)] = None,
+    status: Annotated[str | None, Query(pattern="^(running|succeeded|failed)$")] = None,
+    limit: Annotated[int, Query(ge=1, le=200)] = 50,
+) -> list[MarketDataSchedulerRunResponse]:
+    scheduler_runs = list_recorded_market_data_scheduler_runs(
+        session,
+        job_name=job_name,
+        status=status,
+        limit=limit,
+    )
+
+    return [
+        MarketDataSchedulerRunResponse(
+            id=scheduler_run.id,
+            job_name=scheduler_run.job_name,
+            status=scheduler_run.status,
+            symbols_source=scheduler_run.symbols_source,
+            currency=scheduler_run.currency,
+            started_at=scheduler_run.started_at,
+            completed_at=scheduler_run.completed_at,
+            requested_count=scheduler_run.requested_count,
+            collectable_count=scheduler_run.collectable_count,
+            fresh_skipped_count=scheduler_run.fresh_skipped_count,
+            returned_count=scheduler_run.returned_count,
+            stored_count=scheduler_run.stored_count,
+            skipped_count=scheduler_run.skipped_count,
+            error_message=scheduler_run.error_message,
+            created_at=scheduler_run.created_at,
+        )
+        for scheduler_run in scheduler_runs
     ]
 
 
