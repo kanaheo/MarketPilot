@@ -48,6 +48,9 @@ incrementally while preserving reproducibility and auditability.
 - `GET /market-data/quote-snapshots` endpoint
 - `GET /market-data/quote-snapshots/freshness` endpoint
 - `marketpilot_api.commands.collect_market_quotes` local collection command
+- `market_data_scheduler_runs` table for local scheduler run logs
+- `marketpilot_api.commands.run_market_data_scheduler` local scheduler command
+- `GET /market-data/scheduler-runs` and `/scheduler-runs/status` endpoints
 - `GET /market-data/quote-provider-status` diagnostic endpoint without secrets
 - cached FX rate provider boundary with fixture fallback
 - `GET /market-data/fx-rates` endpoint
@@ -125,6 +128,13 @@ to collect quotes for currently open portfolio positions. Add
 `--skip-fresh-seconds 300` to avoid collecting a symbol again when a fresh
 snapshot already exists. Add `--dry-run` to preview the resolved symbols and
 fresh-skip counts without calling the quote provider or writing snapshots.
+`python -m marketpilot_api.commands.run_market_data_scheduler --from-holdings --currency USD --interval-policy market-hours --max-runs 12`
+wraps the same collection path in a local scheduler runner and records each
+run in `market_data_scheduler_runs`. The simple `market-hours` policy uses US
+weekday market times to choose an open-market or closed-market interval and
+freshness window; it is not holiday aware yet. `GET /market-data/scheduler-runs`
+returns recent run logs, while `GET /market-data/scheduler-runs/status` returns
+the latest run plus recent succeeded, failed, and running counts.
 
 FX rates are also fixture-backed behind the same cached provider pattern. The
 first API surface returns a single pair rate for supported currencies and
@@ -180,6 +190,9 @@ MarketPilot은 모듈형 FastAPI 백엔드를 사용합니다. PostgreSQL 기반
 - `GET /market-data/quote-snapshots` endpoint
 - `GET /market-data/quote-snapshots/freshness` endpoint
 - `marketpilot_api.commands.collect_market_quotes` 로컬 수집 command
+- 로컬 scheduler 실행 이력을 위한 `market_data_scheduler_runs` 테이블
+- `marketpilot_api.commands.run_market_data_scheduler` 로컬 scheduler command
+- `GET /market-data/scheduler-runs` 및 `/scheduler-runs/status` endpoint
 - 비밀값을 노출하지 않는 `GET /market-data/quote-provider-status` 진단 endpoint
 - fixture fallback이 있는 cached 환율 provider 경계
 - `GET /market-data/fx-rates` endpoint
@@ -246,6 +259,13 @@ UI가 가격이 오래됐는지 판단할 때 같은 backend contract를 사용�
 보유 중인 포트폴리오 종목의 현재가를 수집합니다. `--skip-fresh-seconds 300`을
 붙이면 이미 최근 snapshot이 있는 종목은 다시 수집하지 않습니다. `--dry-run`을 붙이면
 provider 호출이나 snapshot 저장 없이 대상 종목과 skip 개수만 미리 확인합니다.
+`python -m marketpilot_api.commands.run_market_data_scheduler --from-holdings --currency USD --interval-policy market-hours --max-runs 12`는
+같은 수집 흐름을 로컬 scheduler 실행기로 감싸고, 실행마다
+`market_data_scheduler_runs`에 기록합니다. 간단한 `market-hours` 정책은 미국장
+요일과 시간을 기준으로 장중/장마감 간격과 freshness 기준을 선택하며, 아직 휴장일은
+반영하지 않습니다. `GET /market-data/scheduler-runs`는 최근 실행 로그를 반환하고,
+`GET /market-data/scheduler-runs/status`는 최신 실행과 최근 성공, 실패, 실행 중 개수를
+요약합니다.
 
 환율도 같은 cached provider pattern 뒤에 fixture로 준비했습니다. 첫 API는 지원 통화
 사이의 단일 환율을 반환하며 `source`와 `collected_at`을 포함합니다. 주문 체결 기록에는
@@ -300,6 +320,9 @@ PostgreSQLベースのポートフォリオ、市場データ、バックテス�
 - `GET /market-data/quote-snapshots` endpoint
 - `GET /market-data/quote-snapshots/freshness` endpoint
 - `marketpilot_api.commands.collect_market_quotes`ローカル収集command
+- ローカルscheduler実行履歴用`market_data_scheduler_runs`テーブル
+- `marketpilot_api.commands.run_market_data_scheduler`ローカルscheduler command
+- `GET /market-data/scheduler-runs`および`/scheduler-runs/status` endpoint
 - secretを返さない`GET /market-data/quote-provider-status`診断endpoint
 - fixture fallback付きcached FXレートprovider境界
 - `GET /market-data/fx-rates` endpoint
@@ -367,6 +390,13 @@ currency、limitフィルターをサポートします。
 現在保有中のポートフォリオ銘柄の価格を収集します。`--skip-fresh-seconds 300`を
 付けると、新しいsnapshotがすでにある銘柄は再収集しません。`--dry-run`を付けると、
 provider呼び出しやsnapshot保存をせず、対象銘柄とskip件数だけを確認できます。
+`python -m marketpilot_api.commands.run_market_data_scheduler --from-holdings --currency USD --interval-policy market-hours --max-runs 12`は
+同じ収集フローをローカルscheduler runnerで包み、各実行を
+`market_data_scheduler_runs`に記録します。シンプルな`market-hours`ポリシーは米国市場の
+曜日と時間を基準に、取引時間中または時間外のintervalとfreshness windowを選びます。
+ただし、休日はまだ考慮していません。`GET /market-data/scheduler-runs`は最近の実行ログを
+返し、`GET /market-data/scheduler-runs/status`は最新実行と最近の成功、失敗、実行中件数を
+要約します。
 
 FXレートも同じcached provider patternの背後にfixtureとして用意しています。最初のAPIは
 対応通貨間の単一レートを返し、`source`と`collected_at`を含めます。注文約定記録には

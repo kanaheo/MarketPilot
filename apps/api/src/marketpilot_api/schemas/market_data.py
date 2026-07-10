@@ -75,6 +75,14 @@ class MarketDataSchedulerRunResponse(BaseModel):
     created_at: datetime
 
 
+class MarketDataSchedulerRunStatusResponse(BaseModel):
+    latest_run: MarketDataSchedulerRunResponse | None
+    recent_run_count: int
+    running_count: int
+    succeeded_count: int
+    failed_count: int
+
+
 class FxRateResponse(BaseModel):
     base_currency: SupportedCurrency
     quote_currency: SupportedCurrency

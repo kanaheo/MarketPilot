@@ -6,6 +6,7 @@ from marketpilot_api.commands.collect_market_quotes import CollectionRunResult
 from marketpilot_api.models import MarketDataSchedulerRun
 from marketpilot_api.repositories.market_data_scheduler_runs import (
     SchedulerRunStart,
+    get_market_data_scheduler_run_status,
     list_market_data_scheduler_runs,
     mark_market_data_scheduler_run_failed,
     mark_market_data_scheduler_run_succeeded,
@@ -82,6 +83,68 @@ def test_list_market_data_scheduler_runs_filters_and_limits_results() -> None:
     assert "market-quote-scheduler" in compiled_params.values()
     assert "succeeded" in compiled_params.values()
     assert 20 in compiled_params.values()
+
+
+def test_get_market_data_scheduler_run_status_counts_recent_runs(
+    monkeypatch,
+) -> None:
+    latest_run = MarketDataSchedulerRun(
+        job_name="market-quote-scheduler",
+        status="succeeded",
+        symbols_source="holdings",
+        currency="USD",
+        interval_policy="market-hours",
+        market_phase="open",
+        next_interval_seconds=300,
+        freshness_seconds=300,
+        started_at=datetime(2026, 7, 8, 9, tzinfo=timezone.utc),
+    )
+    failed_run = MarketDataSchedulerRun(
+        job_name="market-quote-scheduler",
+        status="failed",
+        symbols_source="holdings",
+        currency="USD",
+        interval_policy="market-hours",
+        market_phase="open",
+        next_interval_seconds=300,
+        freshness_seconds=300,
+        started_at=datetime(2026, 7, 8, 8, tzinfo=timezone.utc),
+    )
+    running_run = MarketDataSchedulerRun(
+        job_name="market-quote-scheduler",
+        status="running",
+        symbols_source="holdings",
+        currency="USD",
+        interval_policy="market-hours",
+        market_phase="open",
+        next_interval_seconds=300,
+        freshness_seconds=300,
+        started_at=datetime(2026, 7, 8, 7, tzinfo=timezone.utc),
+    )
+    list_mock = MagicMock(return_value=[latest_run, failed_run, running_run])
+    monkeypatch.setattr(
+        "marketpilot_api.repositories.market_data_scheduler_runs."
+        "list_market_data_scheduler_runs",
+        list_mock,
+    )
+    session = object()
+
+    result = get_market_data_scheduler_run_status(
+        session,
+        job_name="market-quote-scheduler",
+        limit=20,
+    )
+
+    assert result.latest_run is latest_run
+    assert result.recent_run_count == 3
+    assert result.succeeded_count == 1
+    assert result.failed_count == 1
+    assert result.running_count == 1
+    list_mock.assert_called_once_with(
+        session,
+        job_name="market-quote-scheduler",
+        limit=20,
+    )
 
 
 def test_mark_market_data_scheduler_run_succeeded_stores_counts() -> None:

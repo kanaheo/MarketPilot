@@ -20,6 +20,44 @@ class SchedulerRunStart:
     started_at: datetime
 
 
+@dataclass(frozen=True)
+class MarketDataSchedulerRunStatus:
+    latest_run: MarketDataSchedulerRun | None
+    recent_run_count: int
+    running_count: int
+    succeeded_count: int
+    failed_count: int
+
+
+def get_market_data_scheduler_run_status(
+    session: Session,
+    *,
+    job_name: str | None = None,
+    limit: int = 20,
+) -> MarketDataSchedulerRunStatus:
+    scheduler_runs = list_market_data_scheduler_runs(
+        session,
+        job_name=job_name,
+        limit=limit,
+    )
+
+    return MarketDataSchedulerRunStatus(
+        latest_run=scheduler_runs[0] if len(scheduler_runs) > 0 else None,
+        recent_run_count=len(scheduler_runs),
+        running_count=sum(
+            1 for scheduler_run in scheduler_runs if scheduler_run.status == "running"
+        ),
+        succeeded_count=sum(
+            1
+            for scheduler_run in scheduler_runs
+            if scheduler_run.status == "succeeded"
+        ),
+        failed_count=sum(
+            1 for scheduler_run in scheduler_runs if scheduler_run.status == "failed"
+        ),
+    )
+
+
 def list_market_data_scheduler_runs(
     session: Session,
     *,
