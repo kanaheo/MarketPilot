@@ -8,7 +8,12 @@ from marketpilot_api.commands.collect_market_quotes import (
     CollectionCommandArgs,
     collect_once,
 )
+from marketpilot_api.core.config import get_settings
 from marketpilot_api.db.session import SessionLocal
+from marketpilot_api.market_data_scheduler_policy import (
+    MarketDataSchedulerDecision,
+    decide_market_data_scheduler_policy,
+)
 from marketpilot_api.repositories.market_data_scheduler_runs import (
     SchedulerRunStart,
     mark_market_data_scheduler_run_failed,
@@ -28,6 +33,7 @@ class SchedulerCommandArgs:
     symbols: list[str] | None
     from_holdings: bool
     currency: str | None
+    interval_policy: str
     interval_seconds: int | None
     max_runs: int
     skip_fresh_seconds: int | None
@@ -44,16 +50,23 @@ def main(
     exit_code = 0
 
     for run_number in range(1, args.max_runs + 1):
+        run_started_at = now()
+        decision = _resolve_scheduler_decision(
+            args=args,
+            run_started_at=run_started_at,
+        )
         succeeded = _run_scheduler_once(
             args=args,
             run_number=run_number,
+            run_started_at=run_started_at,
+            decision=decision,
             now=now,
         )
         if not succeeded:
             exit_code = 1
 
-        if run_number < args.max_runs and args.interval_seconds is not None:
-            sleep(args.interval_seconds)
+        if run_number < args.max_runs:
+            sleep(decision.interval_seconds)
 
     return exit_code
 
@@ -85,10 +98,19 @@ def _parse_args(argv: Sequence[str] | None) -> SchedulerCommandArgs:
         help="Optional quote currency filter, for example: USD",
     )
     parser.add_argument(
+        "--interval-policy",
+        choices=["fixed", "market-hours"],
+        default="fixed",
+        help=(
+            "Use fixed interval options or simple US market-hours defaults. "
+            "The market-hours policy is weekday/time based and not holiday aware."
+        ),
+    )
+    parser.add_argument(
         "--interval-seconds",
         type=_positive_int,
         default=None,
-        help="Optional delay between scheduler runs.",
+        help="Optional delay between scheduler runs for the fixed interval policy.",
     )
     parser.add_argument(
         "--max-runs",
@@ -108,7 +130,11 @@ def _parse_args(argv: Sequence[str] | None) -> SchedulerCommandArgs:
         help="Record scheduler logs without calling the quote provider or writing snapshots.",
     )
     args = parser.parse_args(argv)
-    if args.interval_seconds is None and args.max_runs > 1:
+    if (
+        args.interval_policy == "fixed"
+        and args.interval_seconds is None
+        and args.max_runs > 1
+    ):
         parser.error("--max-runs greater than 1 requires --interval-seconds")
 
     return SchedulerCommandArgs(
@@ -116,6 +142,7 @@ def _parse_args(argv: Sequence[str] | None) -> SchedulerCommandArgs:
         symbols=args.symbols,
         from_holdings=args.from_holdings,
         currency=args.currency,
+        interval_policy=args.interval_policy,
         interval_seconds=args.interval_seconds,
         max_runs=args.max_runs,
         skip_fresh_seconds=args.skip_fresh_seconds,
@@ -127,6 +154,8 @@ def _run_scheduler_once(
     *,
     args: SchedulerCommandArgs,
     run_number: int,
+    run_started_at: datetime,
+    decision: MarketDataSchedulerDecision,
     now: Now,
 ) -> bool:
     symbols_source = "holdings" if args.from_holdings else "arguments"
@@ -137,7 +166,7 @@ def _run_scheduler_once(
                 job_name=args.job_name,
                 symbols_source=symbols_source,
                 currency=args.currency,
-                started_at=now(),
+                started_at=run_started_at,
             ),
         )
 
@@ -149,7 +178,7 @@ def _run_scheduler_once(
                 currency=args.currency,
                 interval_seconds=None,
                 max_runs=None,
-                skip_fresh_seconds=args.skip_fresh_seconds,
+                skip_fresh_seconds=decision.freshness_seconds,
                 dry_run=args.dry_run,
             ),
             run_number=run_number,
@@ -178,11 +207,41 @@ def _run_scheduler_once(
 
     print(f"run={run_number}")
     print("status=succeeded")
+    print(f"interval_policy={args.interval_policy}")
+    print(f"market_phase={decision.phase}")
+    print(f"next_interval_seconds={decision.interval_seconds}")
+    print(f"freshness_seconds={decision.freshness_seconds}")
     print(f"requested_count={result.requested_count}")
     print(f"fresh_skipped_count={result.fresh_skipped_count}")
     print(f"stored_count={result.stored_count}")
 
     return True
+
+
+def _resolve_scheduler_decision(
+    *,
+    args: SchedulerCommandArgs,
+    run_started_at: datetime,
+) -> MarketDataSchedulerDecision:
+    if args.interval_policy == "market-hours":
+        decision = decide_market_data_scheduler_policy(
+            now=run_started_at,
+            settings=get_settings(),
+        )
+        if args.skip_fresh_seconds is not None:
+            return MarketDataSchedulerDecision(
+                phase=decision.phase,
+                interval_seconds=decision.interval_seconds,
+                freshness_seconds=args.skip_fresh_seconds,
+            )
+
+        return decision
+
+    return MarketDataSchedulerDecision(
+        phase="fixed",
+        interval_seconds=args.interval_seconds or 0,
+        freshness_seconds=args.skip_fresh_seconds,
+    )
 
 
 def _positive_int(value: str) -> int:

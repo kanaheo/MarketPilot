@@ -29,8 +29,10 @@ python -m marketpilot_api.commands.collect_market_quotes --symbols AAPL NVDA --c
 python -m marketpilot_api.commands.collect_market_quotes --from-holdings --currency USD
 python -m marketpilot_api.commands.collect_market_quotes --from-holdings --currency USD --skip-fresh-seconds 300
 python -m marketpilot_api.commands.collect_market_quotes --from-holdings --currency USD --skip-fresh-seconds 300 --dry-run
+python -m marketpilot_api.commands.run_market_data_scheduler --from-holdings --currency USD --interval-policy market-hours --max-runs 12
 curl -X POST "http://127.0.0.1:8000/market-data/quote-snapshots/collect?symbols=AAPL&skip_fresh_seconds=300"
 curl "http://127.0.0.1:8000/market-data/quote-snapshots/freshness?symbols=AAPL&freshness_seconds=300"
+curl "http://127.0.0.1:8000/market-data/scheduler-runs?limit=20"
 ```
 
 Create `.env` only for server-only overrides such as the internal user-sync
@@ -65,8 +67,10 @@ python -m marketpilot_api.commands.collect_market_quotes --symbols AAPL NVDA --c
 python -m marketpilot_api.commands.collect_market_quotes --from-holdings --currency USD
 python -m marketpilot_api.commands.collect_market_quotes --from-holdings --currency USD --skip-fresh-seconds 300
 python -m marketpilot_api.commands.collect_market_quotes --from-holdings --currency USD --skip-fresh-seconds 300 --dry-run
+python -m marketpilot_api.commands.run_market_data_scheduler --from-holdings --currency USD --interval-policy market-hours --max-runs 12
 curl -X POST "http://127.0.0.1:8000/market-data/quote-snapshots/collect?symbols=AAPL&skip_fresh_seconds=300"
 curl "http://127.0.0.1:8000/market-data/quote-snapshots/freshness?symbols=AAPL&freshness_seconds=300"
+curl "http://127.0.0.1:8000/market-data/scheduler-runs?limit=20"
 ```
 
 내부 사용자 동기화 비밀키처럼 서버 전용 값을 변경할 때만 `.env`를 만들며 커밋하지
@@ -102,8 +106,10 @@ python -m marketpilot_api.commands.collect_market_quotes --symbols AAPL NVDA --c
 python -m marketpilot_api.commands.collect_market_quotes --from-holdings --currency USD
 python -m marketpilot_api.commands.collect_market_quotes --from-holdings --currency USD --skip-fresh-seconds 300
 python -m marketpilot_api.commands.collect_market_quotes --from-holdings --currency USD --skip-fresh-seconds 300 --dry-run
+python -m marketpilot_api.commands.run_market_data_scheduler --from-holdings --currency USD --interval-policy market-hours --max-runs 12
 curl -X POST "http://127.0.0.1:8000/market-data/quote-snapshots/collect?symbols=AAPL&skip_fresh_seconds=300"
 curl "http://127.0.0.1:8000/market-data/quote-snapshots/freshness?symbols=AAPL&freshness_seconds=300"
+curl "http://127.0.0.1:8000/market-data/scheduler-runs?limit=20"
 ```
 
 内部ユーザー同期トークンなどサーバー専用値を上書きする場合のみ`.env`を作成し、

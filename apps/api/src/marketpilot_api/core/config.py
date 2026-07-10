@@ -16,6 +16,11 @@ class Settings(BaseSettings):
     finnhub_api_key: SecretStr | None = None
     market_data_quote_provider: Literal["fixture", "finnhub"] = "fixture"
     market_data_cache_ttl_seconds: int = Field(default=300, ge=0)
+    market_data_scheduler_open_interval_seconds: int = Field(default=300, ge=1)
+    market_data_scheduler_closed_interval_seconds: int = Field(default=3600, ge=1)
+    market_data_scheduler_open_freshness_seconds: int = Field(default=300, ge=1)
+    market_data_scheduler_closed_freshness_seconds: int = Field(default=3600, ge=1)
+    market_data_scheduler_market_timezone: str = "America/New_York"
     database_url: str = (
         "postgresql+psycopg://marketpilot:marketpilot@127.0.0.1:5432/"
         "marketpilot"
