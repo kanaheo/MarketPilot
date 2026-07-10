@@ -19,6 +19,14 @@ class MarketDataSchedulerRun(CreatedAtMixin, Base):
     status: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
     symbols_source: Mapped[str] = mapped_column(String(32), nullable=False)
     currency: Mapped[str | None] = mapped_column(String(3), nullable=True)
+    interval_policy: Mapped[str] = mapped_column(String(32), nullable=False)
+    market_phase: Mapped[str] = mapped_column(String(32), nullable=False)
+    next_interval_seconds: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+    )
+    freshness_seconds: Mapped[int | None] = mapped_column(Integer, nullable=True)
     started_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

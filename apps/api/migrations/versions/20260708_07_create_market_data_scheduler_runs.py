@@ -24,6 +24,15 @@ def upgrade() -> None:
         sa.Column("status", sa.String(length=16), nullable=False),
         sa.Column("symbols_source", sa.String(length=32), nullable=False),
         sa.Column("currency", sa.String(length=3), nullable=True),
+        sa.Column("interval_policy", sa.String(length=32), nullable=False),
+        sa.Column("market_phase", sa.String(length=32), nullable=False),
+        sa.Column(
+            "next_interval_seconds",
+            sa.Integer(),
+            nullable=False,
+            server_default="0",
+        ),
+        sa.Column("freshness_seconds", sa.Integer(), nullable=True),
         sa.Column(
             "started_at",
             sa.DateTime(timezone=True),
@@ -86,6 +95,12 @@ def upgrade() -> None:
         unique=False,
     )
     op.create_index(
+        "ix_market_data_scheduler_runs_market_phase",
+        "market_data_scheduler_runs",
+        ["market_phase"],
+        unique=False,
+    )
+    op.create_index(
         "ix_market_data_scheduler_runs_started_at",
         "market_data_scheduler_runs",
         ["started_at"],
@@ -106,6 +121,10 @@ def downgrade() -> None:
     )
     op.drop_index(
         "ix_market_data_scheduler_runs_started_at",
+        table_name="market_data_scheduler_runs",
+    )
+    op.drop_index(
+        "ix_market_data_scheduler_runs_market_phase",
         table_name="market_data_scheduler_runs",
     )
     op.drop_index(

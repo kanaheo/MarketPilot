@@ -166,6 +166,10 @@ def _run_scheduler_once(
                 job_name=args.job_name,
                 symbols_source=symbols_source,
                 currency=args.currency,
+                interval_policy=args.interval_policy,
+                market_phase=decision.phase,
+                next_interval_seconds=decision.interval_seconds,
+                freshness_seconds=decision.freshness_seconds,
                 started_at=run_started_at,
             ),
         )

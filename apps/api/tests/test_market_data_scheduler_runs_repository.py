@@ -33,6 +33,10 @@ def test_start_market_data_scheduler_run_records_running_state() -> None:
             job_name="market-quote-scheduler",
             symbols_source="holdings",
             currency="usd",
+            interval_policy="market-hours",
+            market_phase="open",
+            next_interval_seconds=300,
+            freshness_seconds=300,
             started_at=started_at,
         ),
     )
@@ -41,6 +45,10 @@ def test_start_market_data_scheduler_run_records_running_state() -> None:
     assert scheduler_run.status == "running"
     assert scheduler_run.symbols_source == "holdings"
     assert scheduler_run.currency == "USD"
+    assert scheduler_run.interval_policy == "market-hours"
+    assert scheduler_run.market_phase == "open"
+    assert scheduler_run.next_interval_seconds == 300
+    assert scheduler_run.freshness_seconds == 300
     assert scheduler_run.started_at == started_at
     session.add.assert_called_once_with(scheduler_run)
     session.commit.assert_called_once()
@@ -52,6 +60,10 @@ def test_list_market_data_scheduler_runs_filters_and_limits_results() -> None:
         status="succeeded",
         symbols_source="holdings",
         currency="USD",
+        interval_policy="market-hours",
+        market_phase="open",
+        next_interval_seconds=300,
+        freshness_seconds=300,
         started_at=datetime(2026, 7, 8, 9, tzinfo=timezone.utc),
     )
     session = MagicMock()
@@ -82,6 +94,10 @@ def test_mark_market_data_scheduler_run_succeeded_stores_counts() -> None:
             job_name="market-quote-scheduler",
             symbols_source="arguments",
             currency="USD",
+            interval_policy="fixed",
+            market_phase="fixed",
+            next_interval_seconds=300,
+            freshness_seconds=300,
             started_at=started_at,
         ),
     )
@@ -132,6 +148,10 @@ def test_mark_market_data_scheduler_run_failed_stores_error_message() -> None:
             job_name="market-quote-scheduler",
             symbols_source="holdings",
             currency=None,
+            interval_policy="market-hours",
+            market_phase="closed",
+            next_interval_seconds=3600,
+            freshness_seconds=3600,
             started_at=datetime(2026, 7, 8, 9, tzinfo=timezone.utc),
         ),
     )

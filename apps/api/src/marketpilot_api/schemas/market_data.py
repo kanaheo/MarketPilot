@@ -59,6 +59,10 @@ class MarketDataSchedulerRunResponse(BaseModel):
     status: str
     symbols_source: str
     currency: SupportedCurrency | None
+    interval_policy: str
+    market_phase: str
+    next_interval_seconds: int
+    freshness_seconds: int | None
     started_at: datetime
     completed_at: datetime | None
     requested_count: int

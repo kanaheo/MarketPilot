@@ -78,6 +78,11 @@ def test_run_market_data_scheduler_records_success(
     assert "status=succeeded" in output
     assert "requested_count=2" in output
     start_mock.assert_called_once()
+    run_start = start_mock.call_args.kwargs["run_start"]
+    assert run_start.interval_policy == "fixed"
+    assert run_start.market_phase == "fixed"
+    assert run_start.next_interval_seconds == 0
+    assert run_start.freshness_seconds == 300
     collect_args = collect_mock.call_args.kwargs["args"]
     assert collect_args.symbols == ["aapl", "nvda"]
     assert collect_args.currency == "USD"
@@ -198,6 +203,11 @@ def test_run_market_data_scheduler_uses_market_hours_policy(
     assert "next_interval_seconds=300" in output
     assert "freshness_seconds=300" in output
     assert collect_mock.call_count == 2
+    first_run_start = start_mock.call_args_list[0].kwargs["run_start"]
+    assert first_run_start.interval_policy == "market-hours"
+    assert first_run_start.market_phase == "open"
+    assert first_run_start.next_interval_seconds == 300
+    assert first_run_start.freshness_seconds == 300
     first_collect_args = collect_mock.call_args_list[0].kwargs["args"]
     assert first_collect_args.skip_fresh_seconds == 300
     sleep_mock.assert_called_once_with(300)

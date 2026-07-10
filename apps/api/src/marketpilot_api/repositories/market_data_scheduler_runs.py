@@ -13,6 +13,10 @@ class SchedulerRunStart:
     job_name: str
     symbols_source: str
     currency: str | None
+    interval_policy: str
+    market_phase: str
+    next_interval_seconds: int
+    freshness_seconds: int | None
     started_at: datetime
 
 
@@ -46,6 +50,10 @@ def start_market_data_scheduler_run(
             if run_start.currency is not None
             else None
         ),
+        interval_policy=run_start.interval_policy,
+        market_phase=run_start.market_phase,
+        next_interval_seconds=run_start.next_interval_seconds,
+        freshness_seconds=run_start.freshness_seconds,
         started_at=run_start.started_at,
     )
     session.add(scheduler_run)
