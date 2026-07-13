@@ -9,6 +9,7 @@ import type {
   CashTransactionApiItem,
   MarketDataSchedulerRunStatusApiItem,
   MarketQuoteApiItem,
+  MarketQuoteProviderStatusApiItem,
   MarketQuoteSnapshotFreshnessApiItem,
   OrderApiItem,
   OrderCreateApiRequest,
@@ -23,6 +24,12 @@ export async function getMarketQuotes(): Promise<
   readonly MarketQuoteApiItem[]
 > {
   return marketPilotApiRequest<MarketQuoteApiItem[]>("/market-data/quotes");
+}
+
+export async function getMarketQuoteProviderStatus(): Promise<MarketQuoteProviderStatusApiItem> {
+  return marketPilotApiRequest<MarketQuoteProviderStatusApiItem>(
+    "/market-data/quote-provider-status",
+  );
 }
 
 export async function getMarketQuoteSnapshotFreshness(): Promise<

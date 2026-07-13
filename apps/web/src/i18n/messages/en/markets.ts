@@ -21,6 +21,7 @@ export const markets = {
       warningPrefix: "Some market data API responses could not be loaded:",
       sources: {
         quotes: "quotes",
+        provider: "provider",
         freshness: "freshness",
         scheduler: "scheduler",
       },
@@ -67,6 +68,16 @@ export const markets = {
       stored: "Stored",
       freshSkipped: "Fresh skip",
       skipped: "Skipped",
+    },
+    provider: {
+      title: "Quote provider status",
+      active: "Active provider",
+      configured: "Configured provider",
+      fallback: "Fallback",
+      cacheTtl: "Cache TTL",
+      apiKey: "Finnhub key",
+      apiKeyReady: "Configured",
+      apiKeyMissing: "Missing",
     },
     time: {
       seconds: "s",

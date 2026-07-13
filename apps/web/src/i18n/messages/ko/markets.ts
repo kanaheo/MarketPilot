@@ -21,6 +21,7 @@ export const markets = {
       warningPrefix: "일부 market data API 응답을 가져오지 못했습니다:",
       sources: {
         quotes: "시세",
+        provider: "provider",
         freshness: "freshness",
         scheduler: "scheduler",
       },
@@ -67,6 +68,16 @@ export const markets = {
       stored: "저장",
       freshSkipped: "최신 스킵",
       skipped: "스킵",
+    },
+    provider: {
+      title: "시세 Provider 상태",
+      active: "활성 provider",
+      configured: "설정 provider",
+      fallback: "fallback",
+      cacheTtl: "cache TTL",
+      apiKey: "Finnhub key",
+      apiKeyReady: "설정됨",
+      apiKeyMissing: "미설정",
     },
     time: {
       seconds: "초",

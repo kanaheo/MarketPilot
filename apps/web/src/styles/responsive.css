@@ -49,6 +49,7 @@
   .market-data-status-grid,
   .market-data-scheduler-strip,
   .market-data-details-grid,
+  .market-data-provider-status dl,
   .market-data-scheduler-strip dl {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -200,7 +201,8 @@
 
   .market-data-status-heading,
   .market-data-freshness-list > header,
-  .market-data-latest-run > header {
+  .market-data-latest-run > header,
+  .market-data-provider-status > header {
     align-items: flex-start;
     flex-direction: column;
   }

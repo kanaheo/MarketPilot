@@ -5,6 +5,7 @@ import { assertLocale } from "@/i18n/config";
 import { getMessages } from "@/i18n/messages";
 import {
   getMarketDataSchedulerRunStatus,
+  getMarketQuoteProviderStatus,
   getMarketQuoteSnapshotFreshness,
   getMarketQuotes,
 } from "@/lib/server/portfolio-api";
@@ -16,9 +17,14 @@ export default async function MarketsPage({ params }: MarketsPageProps) {
   assertLocale(locale);
 
   const messages = getMessages(locale);
-  const [marketQuotesResult, freshnessResult, schedulerStatusResult] =
-    await Promise.all([
+  const [
+    marketQuotesResult,
+    providerStatusResult,
+    freshnessResult,
+    schedulerStatusResult,
+  ] = await Promise.all([
       getMarketQuotes().then(toSuccess, toFailure),
+      getMarketQuoteProviderStatus().then(toSuccess, toFailure),
       getMarketQuoteSnapshotFreshness().then(toSuccess, toFailure),
       getMarketDataSchedulerRunStatus().then(toSuccess, toFailure),
     ]);
@@ -29,12 +35,14 @@ export default async function MarketsPage({ params }: MarketsPageProps) {
       <MarketDataStatus
         availability={{
           freshness: freshnessResult.ok,
+          provider: providerStatusResult.ok,
           quotes: marketQuotesResult.ok,
           scheduler: schedulerStatusResult.ok,
         }}
         freshness={freshnessResult.ok ? freshnessResult.data : []}
         locale={locale}
         messages={messages.markets.dataStatus}
+        providerStatus={providerStatusResult.ok ? providerStatusResult.data : null}
         schedulerStatus={
           schedulerStatusResult.ok ? schedulerStatusResult.data : null
         }

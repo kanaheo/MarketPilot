@@ -2,6 +2,7 @@ import type { Locale, Messages } from "@/types/i18n";
 import type {
   MarketDataSchedulerRunStatusApiItem,
   MarketQuoteApiItem,
+  MarketQuoteProviderStatusApiItem,
   MarketQuoteSnapshotFreshnessApiItem,
 } from "@/types/marketpilot-api";
 
@@ -84,12 +85,14 @@ export type MarketExplorerProps = Readonly<{
 export type MarketDataStatusProps = Readonly<{
   availability: Readonly<{
     freshness: boolean;
+    provider: boolean;
     quotes: boolean;
     scheduler: boolean;
   }>;
   freshness: readonly MarketQuoteSnapshotFreshnessApiItem[];
   locale: Locale;
   messages: MarketsMessages["dataStatus"];
+  providerStatus: MarketQuoteProviderStatusApiItem | null;
   schedulerStatus: MarketDataSchedulerRunStatusApiItem | null;
 }>;
 

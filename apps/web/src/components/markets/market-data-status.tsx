@@ -10,6 +10,7 @@ export function MarketDataStatus({
   freshness,
   locale,
   messages,
+  providerStatus,
   schedulerStatus,
 }: MarketDataStatusProps) {
   const unavailableSources = getUnavailableSources(availability, messages);
@@ -210,6 +211,51 @@ export function MarketDataStatus({
           ) : null}
         </section>
       </div>
+
+      <section className="market-data-provider-status">
+        <header>
+          <h3>{messages.provider.title}</h3>
+          <span>
+            {providerStatus === null
+              ? messages.emptyValue
+              : providerStatus.finnhub_api_key_configured
+                ? messages.provider.apiKeyReady
+                : messages.provider.apiKeyMissing}
+          </span>
+        </header>
+        <dl>
+          <div>
+            <dt>{messages.provider.active}</dt>
+            <dd>{providerStatus?.active_provider ?? messages.emptyValue}</dd>
+          </div>
+          <div>
+            <dt>{messages.provider.configured}</dt>
+            <dd>{providerStatus?.configured_provider ?? messages.emptyValue}</dd>
+          </div>
+          <div>
+            <dt>{messages.provider.fallback}</dt>
+            <dd>{providerStatus?.fallback_provider ?? messages.emptyValue}</dd>
+          </div>
+          <div>
+            <dt>{messages.provider.cacheTtl}</dt>
+            <dd>
+              {providerStatus === null
+                ? messages.emptyValue
+                : formatSeconds(providerStatus.cache_ttl_seconds, messages)}
+            </dd>
+          </div>
+          <div>
+            <dt>{messages.provider.apiKey}</dt>
+            <dd>
+              {providerStatus === null
+                ? messages.emptyValue
+                : providerStatus.finnhub_api_key_configured
+                  ? messages.provider.apiKeyReady
+                  : messages.provider.apiKeyMissing}
+            </dd>
+          </div>
+        </dl>
+      </section>
     </Panel>
   );
 }
@@ -317,6 +363,10 @@ function getUnavailableSources(
 
   if (!availability.quotes) {
     sources.push(messages.availability.sources.quotes);
+  }
+
+  if (!availability.provider) {
+    sources.push(messages.availability.sources.provider);
   }
 
   if (!availability.freshness) {

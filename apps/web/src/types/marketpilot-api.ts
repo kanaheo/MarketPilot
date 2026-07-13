@@ -123,6 +123,14 @@ export type MarketQuoteApiItem = Readonly<{
   collected_at: string | null;
 }>;
 
+export type MarketQuoteProviderStatusApiItem = Readonly<{
+  configured_provider: string;
+  active_provider: string;
+  fallback_provider: string;
+  finnhub_api_key_configured: boolean;
+  cache_ttl_seconds: number;
+}>;
+
 export type MarketQuoteSnapshotFreshnessApiItem = Readonly<{
   symbol: string;
   currency: SupportedCurrency | null;

@@ -21,6 +21,7 @@ export const markets = {
       warningPrefix: "一部のmarket data API応答を取得できませんでした:",
       sources: {
         quotes: "価格",
+        provider: "provider",
         freshness: "鮮度",
         scheduler: "scheduler",
       },
@@ -67,6 +68,16 @@ export const markets = {
       stored: "保存",
       freshSkipped: "最新skip",
       skipped: "skip",
+    },
+    provider: {
+      title: "価格Provider状態",
+      active: "有効provider",
+      configured: "設定provider",
+      fallback: "fallback",
+      cacheTtl: "cache TTL",
+      apiKey: "Finnhub key",
+      apiKeyReady: "設定済み",
+      apiKeyMissing: "未設定",
     },
     time: {
       seconds: "秒",

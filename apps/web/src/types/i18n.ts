@@ -265,6 +265,7 @@ export type Messages = Readonly<{
         warningPrefix: string;
         sources: {
           quotes: string;
+          provider: string;
           freshness: string;
           scheduler: string;
         };
@@ -311,6 +312,16 @@ export type Messages = Readonly<{
         stored: string;
         freshSkipped: string;
         skipped: string;
+      };
+      provider: {
+        title: string;
+        active: string;
+        configured: string;
+        fallback: string;
+        cacheTtl: string;
+        apiKey: string;
+        apiKeyReady: string;
+        apiKeyMissing: string;
       };
       time: {
         seconds: string;
