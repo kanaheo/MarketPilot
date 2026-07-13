@@ -7,6 +7,40 @@ export const markets = {
     description: "米国、韓国、日本市場から新しい機会を探します。",
     dataBadge: "Fixture銘柄群 · 3市場",
   },
+  dataStatus: {
+    eyebrow: "データ状態",
+    title: "市場データ収集状況",
+    description: "価格スナップショットの鮮度とscheduler実行状態を確認します。",
+    emptyValue: "なし",
+    health: {
+      healthy: "正常",
+      warning: "確認必要",
+      critical: "注意",
+    },
+    metrics: {
+      tracked: "追跡銘柄",
+      fresh: "最新価格",
+      stale: "遅延/欠落",
+      lastCollected: "最終収集",
+    },
+    scheduler: {
+      title: "Scheduler",
+      noRuns: "実行記録なし",
+      recentRuns: "最近の実行",
+      running: "実行中",
+      failed: "失敗",
+      nextInterval: "次の間隔",
+      statuses: {
+        running: "実行中",
+        succeeded: "最終実行成功",
+        failed: "最終実行失敗",
+      },
+    },
+    time: {
+      seconds: "秒",
+      minutes: "分",
+    },
+  },
   filters: {
     ariaLabel: "市場検索とフィルター",
     searchLabel: "ティッカーまたは会社を検索",

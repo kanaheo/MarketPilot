@@ -7,6 +7,40 @@ export const markets = {
     description: "Discover opportunities across the US, Korea, and Japan.",
     dataBadge: "Fixture universe · 3 markets",
   },
+  dataStatus: {
+    eyebrow: "Data status",
+    title: "Market data collection",
+    description: "Review quote snapshot freshness and scheduler run health.",
+    emptyValue: "None",
+    health: {
+      healthy: "Healthy",
+      warning: "Needs review",
+      critical: "Attention",
+    },
+    metrics: {
+      tracked: "Tracked symbols",
+      fresh: "Fresh quotes",
+      stale: "Stale/missing",
+      lastCollected: "Last collected",
+    },
+    scheduler: {
+      title: "Scheduler",
+      noRuns: "No runs recorded",
+      recentRuns: "Recent runs",
+      running: "Running",
+      failed: "Failed",
+      nextInterval: "Next interval",
+      statuses: {
+        running: "Running now",
+        succeeded: "Last run succeeded",
+        failed: "Last run failed",
+      },
+    },
+    time: {
+      seconds: "s",
+      minutes: "m",
+    },
+  },
   filters: {
     ariaLabel: "Market search and filters",
     searchLabel: "Search symbols and companies",

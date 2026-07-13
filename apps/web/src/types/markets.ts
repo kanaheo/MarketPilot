@@ -1,5 +1,9 @@
 import type { Locale, Messages } from "@/types/i18n";
-import type { MarketQuoteApiItem } from "@/types/marketpilot-api";
+import type {
+  MarketDataSchedulerRunStatusApiItem,
+  MarketQuoteApiItem,
+  MarketQuoteSnapshotFreshnessApiItem,
+} from "@/types/marketpilot-api";
 
 export type MarketCountry = "all" | "us" | "kr" | "jp";
 export type MarketAssetClass = "all" | "stocks" | "etfs";
@@ -75,6 +79,13 @@ export type MarketExplorerProps = Readonly<{
   locale: Locale;
   marketQuotes: readonly MarketQuoteApiItem[];
   messages: MarketsMessages;
+}>;
+
+export type MarketDataStatusProps = Readonly<{
+  freshness: readonly MarketQuoteSnapshotFreshnessApiItem[];
+  locale: Locale;
+  messages: MarketsMessages["dataStatus"];
+  schedulerStatus: MarketDataSchedulerRunStatusApiItem | null;
 }>;
 
 export type AiDiscoveryProps = Readonly<{

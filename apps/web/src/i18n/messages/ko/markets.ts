@@ -7,6 +7,40 @@ export const markets = {
     description: "미국, 한국, 일본 시장에서 새로운 기회를 탐색하세요.",
     dataBadge: "Fixture 종목군 · 3개 시장",
   },
+  dataStatus: {
+    eyebrow: "데이터 상태",
+    title: "시장 데이터 수집 현황",
+    description: "시세 스냅샷 freshness와 scheduler 실행 상태를 확인합니다.",
+    emptyValue: "없음",
+    health: {
+      healthy: "정상",
+      warning: "확인 필요",
+      critical: "주의",
+    },
+    metrics: {
+      tracked: "추적 종목",
+      fresh: "최신 시세",
+      stale: "지연/누락",
+      lastCollected: "마지막 수집",
+    },
+    scheduler: {
+      title: "Scheduler",
+      noRuns: "실행 기록 없음",
+      recentRuns: "최근 실행",
+      running: "실행 중",
+      failed: "실패",
+      nextInterval: "다음 간격",
+      statuses: {
+        running: "실행 중",
+        succeeded: "마지막 실행 성공",
+        failed: "마지막 실행 실패",
+      },
+    },
+    time: {
+      seconds: "초",
+      minutes: "분",
+    },
+  },
   filters: {
     ariaLabel: "시장 검색 및 필터",
     searchLabel: "티커 또는 회사 검색",

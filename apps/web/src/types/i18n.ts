@@ -251,6 +251,40 @@ export type Messages = Readonly<{
       description: string;
       dataBadge: string;
     };
+    dataStatus: {
+      eyebrow: string;
+      title: string;
+      description: string;
+      emptyValue: string;
+      health: {
+        healthy: string;
+        warning: string;
+        critical: string;
+      };
+      metrics: {
+        tracked: string;
+        fresh: string;
+        stale: string;
+        lastCollected: string;
+      };
+      scheduler: {
+        title: string;
+        noRuns: string;
+        recentRuns: string;
+        running: string;
+        failed: string;
+        nextInterval: string;
+        statuses: {
+          running: string;
+          succeeded: string;
+          failed: string;
+        };
+      };
+      time: {
+        seconds: string;
+        minutes: string;
+      };
+    };
     filters: {
       ariaLabel: string;
       searchLabel: string;

@@ -46,6 +46,12 @@
     grid-template-columns: 1fr;
   }
 
+  .market-data-status-grid,
+  .market-data-scheduler-strip,
+  .market-data-scheduler-strip dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .backtest-configuration-grid {
     grid-template-columns: 1fr;
   }
