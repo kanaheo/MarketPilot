@@ -36,9 +36,34 @@ export const markets = {
         failed: "Last run failed",
       },
     },
+    freshness: {
+      title: "Quote freshness details",
+      limitLabel: "Issues first",
+      empty: "No quote snapshots are available yet.",
+      columns: {
+        symbol: "Symbol",
+        status: "Status",
+        price: "Price",
+        age: "Age",
+        source: "Source",
+      },
+      statuses: {
+        fresh: "Fresh",
+        stale: "Stale",
+        missing: "Missing",
+      },
+    },
+    latestRun: {
+      title: "Latest collection result",
+      requested: "Requested",
+      stored: "Stored",
+      freshSkipped: "Fresh skip",
+      skipped: "Skipped",
+    },
     time: {
       seconds: "s",
       minutes: "m",
+      hours: "h",
     },
   },
   filters: {

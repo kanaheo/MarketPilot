@@ -36,9 +36,34 @@ export const markets = {
         failed: "마지막 실행 실패",
       },
     },
+    freshness: {
+      title: "시세 freshness 상세",
+      limitLabel: "문제 종목 우선",
+      empty: "아직 확인할 시세 스냅샷이 없습니다.",
+      columns: {
+        symbol: "종목",
+        status: "상태",
+        price: "가격",
+        age: "나이",
+        source: "출처",
+      },
+      statuses: {
+        fresh: "최신",
+        stale: "지연",
+        missing: "누락",
+      },
+    },
+    latestRun: {
+      title: "마지막 실행 수집 결과",
+      requested: "요청",
+      stored: "저장",
+      freshSkipped: "최신 스킵",
+      skipped: "스킵",
+    },
     time: {
       seconds: "초",
       minutes: "분",
+      hours: "시간",
     },
   },
   filters: {

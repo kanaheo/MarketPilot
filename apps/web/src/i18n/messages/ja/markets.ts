@@ -36,9 +36,34 @@ export const markets = {
         failed: "最終実行失敗",
       },
     },
+    freshness: {
+      title: "価格鮮度の詳細",
+      limitLabel: "問題銘柄を優先",
+      empty: "確認できる価格スナップショットがまだありません。",
+      columns: {
+        symbol: "銘柄",
+        status: "状態",
+        price: "価格",
+        age: "経過",
+        source: "出典",
+      },
+      statuses: {
+        fresh: "最新",
+        stale: "遅延",
+        missing: "欠落",
+      },
+    },
+    latestRun: {
+      title: "最終収集結果",
+      requested: "要求",
+      stored: "保存",
+      freshSkipped: "最新skip",
+      skipped: "skip",
+    },
     time: {
       seconds: "秒",
       minutes: "分",
+      hours: "時間",
     },
   },
   filters: {

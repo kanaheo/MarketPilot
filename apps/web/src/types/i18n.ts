@@ -280,9 +280,34 @@ export type Messages = Readonly<{
           failed: string;
         };
       };
+      freshness: {
+        title: string;
+        limitLabel: string;
+        empty: string;
+        columns: {
+          symbol: string;
+          status: string;
+          price: string;
+          age: string;
+          source: string;
+        };
+        statuses: {
+          fresh: string;
+          stale: string;
+          missing: string;
+        };
+      };
+      latestRun: {
+        title: string;
+        requested: string;
+        stored: string;
+        freshSkipped: string;
+        skipped: string;
+      };
       time: {
         seconds: string;
         minutes: string;
+        hours: string;
       };
     };
     filters: {
