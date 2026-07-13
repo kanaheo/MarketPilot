@@ -1,4 +1,5 @@
 from marketpilot_api.models.cash_transaction import CashTransaction
+from marketpilot_api.models.market_data_scheduler_run import MarketDataSchedulerRun
 from marketpilot_api.models.market_quote_snapshot import MarketQuoteSnapshot
 from marketpilot_api.models.order import Order
 from marketpilot_api.models.order_execution import OrderExecution
@@ -7,6 +8,7 @@ from marketpilot_api.models.user import User
 
 __all__ = [
     "CashTransaction",
+    "MarketDataSchedulerRun",
     "MarketQuoteSnapshot",
     "Order",
     "OrderExecution",

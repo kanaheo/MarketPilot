@@ -13,7 +13,7 @@ from marketpilot_api.repositories.market_quote_snapshots import (
     record_market_quote_snapshots,
 )
 from marketpilot_api.repositories.positions import list_open_position_symbols
-from marketpilot_api.repositories.price_quotes import list_market_quotes
+from marketpilot_api.repositories.price_quotes import MarketQuote, list_market_quotes
 
 Sleep = Callable[[int], None]
 
@@ -29,6 +29,20 @@ class CollectionCommandArgs:
     dry_run: bool
 
 
+@dataclass(frozen=True)
+class CollectionRunResult:
+    run_number: int
+    dry_run: bool
+    symbols_source: str
+    requested_count: int
+    collectable_count: int
+    fresh_skipped_count: int
+    returned_count: int
+    stored_count: int
+    skipped_count: int
+    quotes: list[MarketQuote]
+
+
 def main(
     argv: Sequence[str] | None = None,
     *,
@@ -39,7 +53,8 @@ def main(
 
     while True:
         run_count += 1
-        _collect_once(args=args, run_number=run_count)
+        result = collect_once(args=args, run_number=run_count)
+        print_collection_run_result(result)
 
         if args.max_runs is not None and run_count >= args.max_runs:
             break
@@ -122,11 +137,11 @@ def _parse_args(argv: Sequence[str] | None) -> CollectionCommandArgs:
     )
 
 
-def _collect_once(
+def collect_once(
     *,
     args: CollectionCommandArgs,
     run_number: int,
-) -> None:
+) -> CollectionRunResult:
     with SessionLocal() as session:
         symbols = _resolve_collection_symbols(session=session, args=args)
         collectable_symbols = _filter_fresh_symbols(
@@ -148,19 +163,31 @@ def _collect_once(
             stored_count = len(collection.snapshots)
             skipped_count = collection.skipped_count
 
-    print(f"run={run_number}")
-    print(f"dry_run={args.dry_run}")
-    print(
-        "symbols_source="
-        f"{'holdings' if args.from_holdings else 'arguments'}"
+    return CollectionRunResult(
+        run_number=run_number,
+        dry_run=args.dry_run,
+        symbols_source="holdings" if args.from_holdings else "arguments",
+        requested_count=len(symbols),
+        collectable_count=len(collectable_symbols),
+        fresh_skipped_count=len(symbols) - len(collectable_symbols),
+        returned_count=len(quotes),
+        stored_count=stored_count,
+        skipped_count=skipped_count,
+        quotes=quotes,
     )
-    print(f"requested_count={len(symbols)}")
-    print(f"collectable_count={len(collectable_symbols)}")
-    print(f"fresh_skipped_count={len(symbols) - len(collectable_symbols)}")
-    print(f"returned_count={len(quotes)}")
-    print(f"stored_count={stored_count}")
-    print(f"skipped_count={skipped_count}")
-    for quote in quotes:
+
+
+def print_collection_run_result(result: CollectionRunResult) -> None:
+    print(f"run={result.run_number}")
+    print(f"dry_run={result.dry_run}")
+    print(f"symbols_source={result.symbols_source}")
+    print(f"requested_count={result.requested_count}")
+    print(f"collectable_count={result.collectable_count}")
+    print(f"fresh_skipped_count={result.fresh_skipped_count}")
+    print(f"returned_count={result.returned_count}")
+    print(f"stored_count={result.stored_count}")
+    print(f"skipped_count={result.skipped_count}")
+    for quote in result.quotes:
         print(
             "quote="
             f"{quote.symbol},"
