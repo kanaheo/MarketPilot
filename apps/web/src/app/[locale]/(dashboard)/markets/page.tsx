@@ -58,7 +58,7 @@ export default async function MarketsPage({ params }: MarketsPageProps) {
   );
 }
 
-type LoadResult<Data> =
+type MarketDataLoadResult<Data> =
   | Readonly<{
       data: Data;
       ok: true;
@@ -67,14 +67,14 @@ type LoadResult<Data> =
       ok: false;
     }>;
 
-function toSuccess<Data>(data: Data): LoadResult<Data> {
+function toSuccess<Data>(data: Data): MarketDataLoadResult<Data> {
   return {
     data,
     ok: true,
   };
 }
 
-function toFailure(): LoadResult<never> {
+function toFailure(): MarketDataLoadResult<never> {
   return {
     ok: false,
   };

@@ -22,6 +22,16 @@ export function MarketDataStatus({
   const missingCount = freshness.filter((item) => !item.has_snapshot).length;
   const latestCollectedAt = findLatestCollectedAt(freshness);
   const prioritizedFreshness = prioritizeFreshness(freshness).slice(0, 6);
+  const latestRunCompletedAt =
+    latestRun?.completed_at === undefined || latestRun.completed_at === null
+      ? messages.emptyValue
+      : formatDateTime(latestRun.completed_at, locale);
+  const providerApiKeyStatus =
+    providerStatus === null
+      ? messages.emptyValue
+      : providerStatus.finnhub_api_key_configured
+        ? messages.provider.apiKeyReady
+        : messages.provider.apiKeyMissing;
   const health = resolveHealth({
     failedCount: schedulerStatus?.failed_count ?? 0,
     freshCount,
@@ -180,13 +190,7 @@ export function MarketDataStatus({
         <section className="market-data-latest-run">
           <header>
             <h3>{messages.latestRun.title}</h3>
-            <span>
-              {latestRun?.completed_at === null
-                ? messages.emptyValue
-                : latestRun?.completed_at === undefined
-                  ? messages.emptyValue
-                  : formatDateTime(latestRun.completed_at, locale)}
-            </span>
+            <span>{latestRunCompletedAt}</span>
           </header>
           <dl>
             <div>
@@ -215,13 +219,7 @@ export function MarketDataStatus({
       <section className="market-data-provider-status">
         <header>
           <h3>{messages.provider.title}</h3>
-          <span>
-            {providerStatus === null
-              ? messages.emptyValue
-              : providerStatus.finnhub_api_key_configured
-                ? messages.provider.apiKeyReady
-                : messages.provider.apiKeyMissing}
-          </span>
+          <span>{providerApiKeyStatus}</span>
         </header>
         <dl>
           <div>
@@ -246,13 +244,7 @@ export function MarketDataStatus({
           </div>
           <div>
             <dt>{messages.provider.apiKey}</dt>
-            <dd>
-              {providerStatus === null
-                ? messages.emptyValue
-                : providerStatus.finnhub_api_key_configured
-                  ? messages.provider.apiKeyReady
-                  : messages.provider.apiKeyMissing}
-            </dd>
+            <dd>{providerApiKeyStatus}</dd>
           </div>
         </dl>
       </section>
