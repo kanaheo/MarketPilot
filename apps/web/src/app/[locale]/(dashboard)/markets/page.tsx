@@ -16,26 +16,56 @@ export default async function MarketsPage({ params }: MarketsPageProps) {
   assertLocale(locale);
 
   const messages = getMessages(locale);
-  const [marketQuotes, freshness, schedulerStatus] = await Promise.all([
-    getMarketQuotes().catch(() => []),
-    getMarketQuoteSnapshotFreshness().catch(() => []),
-    getMarketDataSchedulerRunStatus().catch(() => null),
-  ]);
+  const [marketQuotesResult, freshnessResult, schedulerStatusResult] =
+    await Promise.all([
+      getMarketQuotes().then(toSuccess, toFailure),
+      getMarketQuoteSnapshotFreshness().then(toSuccess, toFailure),
+      getMarketDataSchedulerRunStatus().then(toSuccess, toFailure),
+    ]);
 
   return (
     <div className="markets-page">
       <MarketsHeader messages={messages.markets.header} />
       <MarketDataStatus
-        freshness={freshness}
+        availability={{
+          freshness: freshnessResult.ok,
+          quotes: marketQuotesResult.ok,
+          scheduler: schedulerStatusResult.ok,
+        }}
+        freshness={freshnessResult.ok ? freshnessResult.data : []}
         locale={locale}
         messages={messages.markets.dataStatus}
-        schedulerStatus={schedulerStatus}
+        schedulerStatus={
+          schedulerStatusResult.ok ? schedulerStatusResult.data : null
+        }
       />
       <MarketExplorer
         locale={locale}
-        marketQuotes={marketQuotes}
+        marketQuotes={marketQuotesResult.ok ? marketQuotesResult.data : []}
         messages={messages.markets}
       />
     </div>
   );
+}
+
+type LoadResult<Data> =
+  | Readonly<{
+      data: Data;
+      ok: true;
+    }>
+  | Readonly<{
+      ok: false;
+    }>;
+
+function toSuccess<Data>(data: Data): LoadResult<Data> {
+  return {
+    data,
+    ok: true,
+  };
+}
+
+function toFailure(): LoadResult<never> {
+  return {
+    ok: false,
+  };
 }

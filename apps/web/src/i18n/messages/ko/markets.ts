@@ -17,6 +17,14 @@ export const markets = {
       warning: "확인 필요",
       critical: "주의",
     },
+    availability: {
+      warningPrefix: "일부 market data API 응답을 가져오지 못했습니다:",
+      sources: {
+        quotes: "시세",
+        freshness: "freshness",
+        scheduler: "scheduler",
+      },
+    },
     metrics: {
       tracked: "추적 종목",
       fresh: "최신 시세",

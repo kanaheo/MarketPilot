@@ -107,6 +107,28 @@
   color: #a43f2c;
 }
 
+.market-data-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  border: 1px solid #ffd7cf;
+  border-radius: 8px;
+  background: #fff7f5;
+  padding: 10px 12px;
+  color: #a43f2c;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.market-data-alert svg {
+  flex: none;
+}
+
+.market-data-alert strong {
+  font-weight: 780;
+}
+
 .market-data-status-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

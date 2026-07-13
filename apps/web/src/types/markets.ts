@@ -82,6 +82,11 @@ export type MarketExplorerProps = Readonly<{
 }>;
 
 export type MarketDataStatusProps = Readonly<{
+  availability: Readonly<{
+    freshness: boolean;
+    quotes: boolean;
+    scheduler: boolean;
+  }>;
   freshness: readonly MarketQuoteSnapshotFreshnessApiItem[];
   locale: Locale;
   messages: MarketsMessages["dataStatus"];

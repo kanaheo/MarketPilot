@@ -17,6 +17,14 @@ export const markets = {
       warning: "確認必要",
       critical: "注意",
     },
+    availability: {
+      warningPrefix: "一部のmarket data API応答を取得できませんでした:",
+      sources: {
+        quotes: "価格",
+        freshness: "鮮度",
+        scheduler: "scheduler",
+      },
+    },
     metrics: {
       tracked: "追跡銘柄",
       fresh: "最新価格",

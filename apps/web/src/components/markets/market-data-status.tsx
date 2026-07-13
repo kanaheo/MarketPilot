@@ -6,11 +6,13 @@ import { formatDateTime, formatMarketPrice } from "@/lib/formatters";
 import type { MarketDataStatusProps } from "@/types/markets";
 
 export function MarketDataStatus({
+  availability,
   freshness,
   locale,
   messages,
   schedulerStatus,
 }: MarketDataStatusProps) {
+  const unavailableSources = getUnavailableSources(availability, messages);
   const latestRun = schedulerStatus?.latest_run ?? null;
   const freshCount = freshness.filter((item) => item.is_fresh).length;
   const staleCount = freshness.filter(
@@ -25,6 +27,7 @@ export function MarketDataStatus({
     missingCount,
     staleCount,
     totalCount: freshness.length,
+    unavailableCount: unavailableSources.length,
   });
 
   return (
@@ -46,6 +49,16 @@ export function MarketDataStatus({
           {messages.health[health]}
         </span>
       </header>
+
+      {unavailableSources.length > 0 ? (
+        <div className="market-data-alert" role="status">
+          <XCircle size={16} aria-hidden="true" />
+          <span>
+            {messages.availability.warningPrefix}{" "}
+            <strong>{unavailableSources.join(", ")}</strong>
+          </span>
+        </div>
+      ) : null}
 
       <div className="market-data-status-grid">
         <StatusMetric
@@ -276,14 +289,16 @@ function resolveHealth({
   missingCount,
   staleCount,
   totalCount,
+  unavailableCount,
 }: Readonly<{
   failedCount: number;
   freshCount: number;
   missingCount: number;
   staleCount: number;
   totalCount: number;
+  unavailableCount: number;
 }>): "healthy" | "warning" | "critical" {
-  if (failedCount > 0 || missingCount > 0) {
+  if (failedCount > 0 || missingCount > 0 || unavailableCount > 0) {
     return "critical";
   }
 
@@ -292,6 +307,27 @@ function resolveHealth({
   }
 
   return "healthy";
+}
+
+function getUnavailableSources(
+  availability: MarketDataStatusProps["availability"],
+  messages: MarketDataStatusProps["messages"],
+): string[] {
+  const sources: string[] = [];
+
+  if (!availability.quotes) {
+    sources.push(messages.availability.sources.quotes);
+  }
+
+  if (!availability.freshness) {
+    sources.push(messages.availability.sources.freshness);
+  }
+
+  if (!availability.scheduler) {
+    sources.push(messages.availability.sources.scheduler);
+  }
+
+  return sources;
 }
 
 function formatSeconds(

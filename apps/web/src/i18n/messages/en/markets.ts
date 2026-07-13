@@ -17,6 +17,14 @@ export const markets = {
       warning: "Needs review",
       critical: "Attention",
     },
+    availability: {
+      warningPrefix: "Some market data API responses could not be loaded:",
+      sources: {
+        quotes: "quotes",
+        freshness: "freshness",
+        scheduler: "scheduler",
+      },
+    },
     metrics: {
       tracked: "Tracked symbols",
       fresh: "Fresh quotes",

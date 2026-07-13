@@ -261,6 +261,14 @@ export type Messages = Readonly<{
         warning: string;
         critical: string;
       };
+      availability: {
+        warningPrefix: string;
+        sources: {
+          quotes: string;
+          freshness: string;
+          scheduler: string;
+        };
+      };
       metrics: {
         tracked: string;
         fresh: string;
