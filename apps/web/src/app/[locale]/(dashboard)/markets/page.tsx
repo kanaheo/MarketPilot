@@ -23,11 +23,11 @@ export default async function MarketsPage({ params }: MarketsPageProps) {
     freshnessResult,
     schedulerStatusResult,
   ] = await Promise.all([
-      getMarketQuotes().then(toSuccess, toFailure),
-      getMarketQuoteProviderStatus().then(toSuccess, toFailure),
-      getMarketQuoteSnapshotFreshness().then(toSuccess, toFailure),
-      getMarketDataSchedulerRunStatus().then(toSuccess, toFailure),
-    ]);
+    getMarketQuotes().then(toSuccess, toFailure),
+    getMarketQuoteProviderStatus().then(toSuccess, toFailure),
+    getMarketQuoteSnapshotFreshness().then(toSuccess, toFailure),
+    getMarketDataSchedulerRunStatus().then(toSuccess, toFailure),
+  ]);
 
   return (
     <div className="markets-page">
@@ -42,7 +42,9 @@ export default async function MarketsPage({ params }: MarketsPageProps) {
         freshness={freshnessResult.ok ? freshnessResult.data : []}
         locale={locale}
         messages={messages.markets.dataStatus}
-        providerStatus={providerStatusResult.ok ? providerStatusResult.data : null}
+        providerStatus={
+          providerStatusResult.ok ? providerStatusResult.data : null
+        }
         schedulerStatus={
           schedulerStatusResult.ok ? schedulerStatusResult.data : null
         }
