@@ -24,6 +24,7 @@ incrementally while preserving reproducibility and auditability.
 - database-aware `GET /readiness` endpoint
 - SQLAlchemy declarative model foundation
 - provider-neutral `users` table
+- planned password credential table separate from `users`
 - user-owned `portfolios` table
 - immutable `cash_transactions` ledger table
 - internal Auth.js user synchronization endpoint
@@ -145,6 +146,18 @@ includes `source` and `collected_at`. Order executions store the execution-time
 FX rate snapshot, and cross-currency portfolio valuation uses the current FX
 provider rate.
 
+Password authentication is planned as a backend-owned credential feature rather
+than extra nullable fields on `users`. The future backend shape should keep
+`users` as the canonical project user table and add a separate password
+credential table for normalized email, email verification state, password hash,
+hash metadata, failure counters, lockout timestamps, and password-change audit
+timestamps. FastAPI should own signup, password verification, email
+verification, password reset tokens, rate limiting, and generic authentication
+errors. The web app should use Auth.js Credentials provider only as the
+server-side bridge into that backend verification flow, then continue using the
+existing encrypted HTTP-only session and short-lived signed user API token
+boundary.
+
 ---
 
 <a id="한국어"></a>
@@ -169,6 +182,7 @@ MarketPilot은 모듈형 FastAPI 백엔드를 사용합니다. PostgreSQL 기반
 - DB 상태를 확인하는 `GET /readiness` endpoint
 - SQLAlchemy 선언형 모델 기반
 - 인증 제공자에 종속되지 않는 `users` 테이블
+- `users`와 분리할 예정인 password credential 테이블
 - 사용자별 `portfolios` 테이블
 - 변경하지 않고 계속 쌓는 `cash_transactions` 원장 테이블
 - Auth.js 로그인 사용자를 저장하는 내부 동기화 endpoint
@@ -277,6 +291,16 @@ provider 호출이나 snapshot 저장 없이 대상 종목과 skip 개수만 미
 체결 시점 환율 snapshot을 저장하고, 서로 다른 통화의 포트폴리오 평가는 현재 FX
 provider rate를 사용합니다.
 
+비밀번호 인증은 `users`에 nullable field를 계속 추가하는 방식이 아니라, 백엔드가
+소유하는 별도 credential 기능으로 설계합니다. 향후 백엔드는 `users`를 프로젝트
+사용자의 기준 테이블로 유지하고, 정규화된 email, 이메일 인증 상태, password hash,
+hash metadata, 실패 횟수, 잠금 시각, 비밀번호 변경 감사 시각을 담는 password
+credential 테이블을 추가합니다. FastAPI는 회원가입, 비밀번호 검증, 이메일 인증,
+비밀번호 reset token, rate limit, 일반화된 인증 에러를 담당합니다. web app은
+Auth.js Credentials provider를 이 백엔드 검증 흐름으로 들어가는 서버 측 연결부로만
+사용하고, 이후에는 기존 암호화 HTTP-only 세션과 짧은 수명 서명 user API token 경계를
+계속 사용합니다.
+
 ---
 
 <a id="日本語"></a>
@@ -301,6 +325,7 @@ PostgreSQLベースのポートフォリオ、市場データ、バックテス�
 - DB状態を確認する`GET /readiness` endpoint
 - SQLAlchemy宣言型モデル基盤
 - 認証プロバイダーに依存しない`users`テーブル
+- `users`と分離する予定のpassword credentialテーブル
 - ユーザー別の`portfolios`テーブル
 - 変更せず積み上げる`cash_transactions`元帳テーブル
 - Auth.jsログインユーザーを保存する内部同期endpoint
@@ -409,3 +434,12 @@ FXレートも同じcached provider patternの背後にfixtureとして用意し
 対応通貨間の単一レートを返し、`source`と`collected_at`を含めます。注文約定記録には
 約定時点のFXレートsnapshotを保存し、通貨が異なるポートフォリオ評価は現在のFX
 provider rateを使用します。
+
+パスワード認証は、`users`へnullable fieldを増やす形ではなく、バックエンドが所有する
+別credential機能として設計します。将来のバックエンドは`users`をproject userの基準
+tableとして維持し、正規化email、メール確認状態、password hash、hash metadata、
+失敗回数、lockout timestamp、password change audit timestampを保存するpassword
+credential tableを追加します。FastAPIはsignup、password verification、email
+verification、password reset token、rate limit、generic authentication errorを担当します。
+web appはAuth.js Credentials providerをバックエンド検証フローへのserver-side bridgeとして
+使い、その後は既存の暗号化HTTP-only sessionと短命signed user API token境界を維持します。

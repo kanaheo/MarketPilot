@@ -34,6 +34,98 @@ audience, lifetime, and database user before a protected router handles the
 request. The browser never receives either server secret. The user-sync token
 is intentionally not reused for this flow.
 
+### Email and password design
+
+MarketPilot will add email and password authentication after the current Google
+OAuth foundation. The recommended direction is a hybrid model:
+
+- keep Auth.js as the web session layer
+- keep the encrypted HTTP-only Auth.js JWT cookie
+- use a Credentials provider only as the web bridge for email/password login
+- let FastAPI own password registration, password verification, reset tokens,
+  email verification, throttling, and audit fields
+- keep Google OAuth and email/password as separate credentials for the same
+  project user until an explicit account-linking flow is designed
+
+The backend should store password credentials outside the `users` table, for
+example in a `user_password_credentials` table. `users` remains the canonical
+project user record, while the credential row stores the normalized email,
+email verification state, password hash, hash algorithm metadata, failed login
+state, lockout time, and password change timestamps. This avoids forcing OAuth
+users to have password-only fields and makes future account linking safer.
+
+Password policy uses a MarketPilot-specific composition rule while keeping the
+OWASP/NIST-aligned safeguards for storage, throttling, breached-password
+blocking, and generic responses:
+
+- minimum length: 12 characters
+- maximum accepted length: at least 64 characters
+- allow spaces, symbols, and Unicode
+- require at least one lowercase English letter
+- require at least one uppercase English letter
+- require at least one number
+- require at least one special character
+- do not force periodic password rotation
+- block common or known-compromised passwords before accepting a new password
+- never store plaintext passwords
+- hash passwords with a password-specific KDF such as Argon2id when available,
+  otherwise bcrypt with a documented migration plan
+- compare password verification results with safe library functions
+- rate-limit signup, login, verification, and reset attempts
+- use generic error messages so attackers cannot easily enumerate accounts
+- require the current password or a recent reauthentication for password and
+  email changes
+
+Signup flow:
+
+1. User submits email and password from `/{locale}/signup`.
+2. Next.js server action validates input shape and calls FastAPI.
+3. FastAPI normalizes the email, checks rate limits and password policy, hashes
+   the password, creates the user and credential records in one transaction,
+   and creates a short-lived email verification token.
+4. FastAPI sends or queues the verification email in production. Local
+   development may log a safe preview token only when explicitly configured.
+5. The first version may allow dashboard access before verification only if
+   high-risk actions stay blocked. The safer default is to require verification
+   before authenticated dashboard access.
+
+Login flow:
+
+1. User submits email and password from `/{locale}/login`.
+2. Auth.js Credentials provider calls a server-only FastAPI verification
+   endpoint.
+3. FastAPI applies throttling, verifies the password hash, checks account
+   status, records success or failure, and returns the project user identity.
+4. Auth.js stores the project user ID in the existing encrypted HTTP-only JWT
+   session.
+5. Existing MarketPilot user API calls continue to use the 60-second
+   HMAC-signed bearer token generated only on the Next.js server.
+
+Password reset flow:
+
+1. User requests reset with an email address.
+2. Response is always generic, whether the account exists or not.
+3. FastAPI stores only a hashed reset token with an expiry and one-time-use
+   status.
+4. Reset completion validates the token, applies password policy, updates the
+   password hash, marks the token used, and invalidates active sessions where
+   possible.
+
+Implementation should be split into small backend-first steps:
+
+1. Add password credential and token models with Alembic migrations.
+2. Add password hashing and token helpers with unit tests.
+3. Add signup, login verification, email verification, and reset endpoints.
+4. Add Auth.js Credentials provider and server actions.
+5. Replace the current email-only placeholder UI with email/password fields.
+6. Add abuse-defense tests for duplicate email, weak password, wrong password,
+   lockout, reset token expiry, and generic responses.
+
+References:
+
+- [OWASP Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html)
+- [NIST SP 800-63B](https://pages.nist.gov/800-63-4/sp800-63b.html)
+
 ### Local environment
 
 Store local credentials only in `apps/web/.env.local`.
@@ -164,6 +256,88 @@ token을 생성합니다. FastAPI는 보호된 router를 실행하기 전에 서
 유효시간과 DB 사용자 존재 여부를 검증합니다. 브라우저에는 서버 비밀값이 전달되지
 않으며, 사용자 동기화 토큰도 이 흐름에 재사용하지 않습니다.
 
+### 이메일/비밀번호 설계
+
+MarketPilot은 현재 Google OAuth 기반 위에 이메일/비밀번호 인증을 추가합니다.
+추천 방향은 하이브리드 구조입니다.
+
+- web 세션 관리는 계속 Auth.js가 담당
+- HTTP-only 쿠키에 저장되는 암호화 Auth.js JWT 세션 유지
+- 이메일/비밀번호 로그인은 Auth.js Credentials provider를 web 연결부로 사용
+- 비밀번호 회원가입, 비밀번호 검증, reset token, 이메일 인증, 로그인 제한,
+  감사 필드는 FastAPI가 담당
+- Google OAuth와 이메일/비밀번호는 명시적인 계정 연결 흐름을 만들기 전까지
+  같은 프로젝트 사용자에 붙을 수 있는 별도 로그인 수단으로 관리
+
+백엔드는 비밀번호 정보를 `users` 테이블에 직접 섞지 않고
+`user_password_credentials` 같은 별도 테이블에 저장하는 방향이 좋습니다.
+`users`는 프로젝트의 실제 사용자 기준 record로 유지하고, credential row에는 정규화된
+email, 이메일 인증 상태, password hash, hash 알고리즘 metadata, 로그인 실패 상태,
+잠금 해제 시각, 비밀번호 변경 시각을 저장합니다. 이렇게 하면 OAuth 사용자에게
+비밀번호 전용 필드를 억지로 붙이지 않아도 되고, 나중에 계정 연결도 안전해집니다.
+
+비밀번호 정책은 MarketPilot 전용 조합 규칙을 사용하되, 저장 방식, 로그인 제한,
+유출 비밀번호 차단, 일반화된 응답은 OWASP/NIST에 맞춰 안전하게 유지합니다.
+
+- 최소 12자
+- 최소 64자까지 허용
+- 공백, 기호, Unicode 허용
+- 영문 소문자 1개 이상 필수
+- 영문 대문자 1개 이상 필수
+- 숫자 1개 이상 필수
+- 특수문자 1개 이상 필수
+- 주기적인 비밀번호 변경 강제 금지
+- 흔한 비밀번호나 유출된 비밀번호 차단
+- 평문 비밀번호 저장 금지
+- 가능하면 Argon2id 같은 비밀번호 전용 KDF 사용, 어렵다면 bcrypt로 시작하되
+  나중에 Argon2id로 옮길 계획 문서화
+- 검증 비교는 라이브러리의 안전한 함수 사용
+- 가입, 로그인, 이메일 인증, 비밀번호 재설정 요청에 rate limit 적용
+- 계정 존재 여부를 쉽게 알 수 없도록 에러 문구는 일반화
+- 비밀번호나 이메일 변경은 현재 비밀번호 확인 또는 최근 재인증 요구
+
+회원가입 흐름:
+
+1. 사용자가 `/{locale}/signup`에서 email과 password 입력
+2. Next.js server action이 입력 형태를 검증하고 FastAPI 호출
+3. FastAPI가 email 정규화, rate limit, 비밀번호 정책 검사를 수행
+4. FastAPI가 password를 hash하고 user와 credential을 하나의 transaction으로 생성
+5. FastAPI가 짧은 수명의 이메일 인증 token 생성
+6. 운영 환경에서는 인증 메일을 발송하거나 queue에 넣음
+7. 첫 버전은 이메일 인증 전 dashboard 접근을 막는 쪽이 더 안전함
+
+로그인 흐름:
+
+1. 사용자가 `/{locale}/login`에서 email과 password 입력
+2. Auth.js Credentials provider가 서버 전용 FastAPI 검증 endpoint 호출
+3. FastAPI가 throttling, password hash 검증, 계정 상태 확인, 성공/실패 기록 수행
+4. Auth.js가 기존처럼 프로젝트 사용자 ID를 암호화된 HTTP-only JWT 세션에 저장
+5. 기존 MarketPilot 사용자 API 호출은 그대로 Next.js 서버가 60초 HMAC bearer token을
+   만들어 사용
+
+비밀번호 재설정 흐름:
+
+1. 사용자가 email로 reset 요청
+2. 계정 존재 여부와 상관없이 같은 응답 반환
+3. FastAPI는 reset token 원문이 아니라 hash만 저장하고 만료 시각과 1회 사용 여부 기록
+4. reset 완료 시 token 검증, 비밀번호 정책 검사, password hash 업데이트,
+   token 사용 처리, 가능한 범위의 기존 세션 무효화 수행
+
+구현은 작은 backend-first 단계로 나눕니다.
+
+1. password credential/token model과 Alembic migration 추가
+2. password hashing/token helper와 unit test 추가
+3. signup, login verify, email verify, password reset endpoint 추가
+4. Auth.js Credentials provider와 server action 연결
+5. 현재 email-only placeholder UI를 email/password 입력으로 교체
+6. 중복 email, 약한 password, 잘못된 password, lockout, reset token 만료,
+   일반화된 응답 테스트 추가
+
+참고:
+
+- [OWASP Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html)
+- [NIST SP 800-63B](https://pages.nist.gov/800-63-4/sp800-63b.html)
+
 ### 로컬 환경변수
 
 로컬 인증정보는 `apps/web/.env.local`에만 저장합니다.
@@ -291,6 +465,58 @@ Google認証に成功すると、FastAPIがユーザーをプロジェクトDB�
 HMAC署名付きbearer tokenを生成します。FastAPIは保護routerを実行する前に、
 署名、issuer、audience、有効期間、DBユーザーの存在を検証します。ブラウザへ
 サーバーシークレットは渡さず、ユーザー同期トークンも再利用しません。
+
+### メール/パスワード設計
+
+MarketPilotは現在のGoogle OAuth基盤の上に、メール/パスワード認証を追加します。
+推奨方針はハイブリッド構成です。
+
+- webセッション層はAuth.jsを維持
+- HTTP-only Cookieに保存される暗号化Auth.js JWTセッションを維持
+- メール/パスワードログインはAuth.js Credentials providerをweb側の橋渡しにする
+- パスワード登録、検証、reset token、メール確認、試行制限、監査項目はFastAPIが担当
+- 明示的なアカウント連携を設計するまでは、Google OAuthとメール/パスワードを
+  同じproject userに紐づく別credentialとして扱う
+
+バックエンドでは、パスワード情報を`users`へ直接混ぜず、
+`user_password_credentials`のような別テーブルに保存します。`users`はproject userの
+基準recordとして維持し、credential rowに正規化email、メール確認状態、password hash、
+hashアルゴリズムmetadata、ログイン失敗状態、ロック解除時刻、パスワード変更時刻を
+保存します。これによりOAuthユーザーへパスワード専用fieldを強制せず、将来の
+アカウント連携も安全にできます。
+
+パスワードポリシーはMarketPilot独自のcomposition ruleを使いながら、保存方式、
+試行制限、漏えい済みパスワード拒否、generic responseはOWASP/NISTに沿って安全に保ちます。
+
+- 最小12文字
+- 少なくとも64文字まで受け付ける
+- 空白、記号、Unicodeを許可
+- 英小文字を1文字以上必須
+- 英大文字を1文字以上必須
+- 数字を1文字以上必須
+- 特殊文字を1文字以上必須
+- 定期的なパスワード変更を強制しない
+- よく使われる、または漏えい済みのパスワードを拒否
+- 平文パスワードを保存しない
+- 可能ならArgon2idなどのpassword KDFを使い、難しい場合はbcryptで始めて移行計画を残す
+- signup、login、email verification、reset requestにrate limitを適用
+- account enumerationを避けるため、エラー文言は一般化
+- パスワードやメール変更には現在パスワード確認または最近の再認証を要求
+
+実装はbackend-firstで小さく進めます。
+
+1. password credential/token modelとAlembic migrationを追加
+2. password hashing/token helperとunit testを追加
+3. signup、login verify、email verify、password reset endpointを追加
+4. Auth.js Credentials providerとserver actionを接続
+5. 現在のemail-only placeholder UIをemail/password入力へ置き換え
+6. duplicate email、weak password、wrong password、lockout、reset token expiry、
+   generic responseのテストを追加
+
+References:
+
+- [OWASP Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html)
+- [NIST SP 800-63B](https://pages.nist.gov/800-63-4/sp800-63b.html)
 
 ### ローカル環境変数
 
