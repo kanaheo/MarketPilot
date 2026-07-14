@@ -160,10 +160,10 @@ signup, password verification, email verification, password reset tokens, rate
 limiting, and generic authentication errors. The web app should use Auth.js
 Credentials provider only as the server-side bridge into that backend
 verification flow, then continue using the existing encrypted HTTP-only session
-and short-lived signed user API token boundary. The first password hashing
-helper uses Python's built-in `hashlib.scrypt` with per-password salts and
-constant-time hash comparison, so no plaintext password is stored or compared
-directly.
+and short-lived signed user API token boundary. Password hashing uses Argon2id
+through `argon2-cffi` with per-password salts and safe library verification, so
+no plaintext password is stored or compared directly. Email request validation
+uses Pydantic `EmailStr` through `email-validator`.
 
 ---
 
@@ -310,9 +310,9 @@ token 원문은 저장하지 않습니다. FastAPI는 회원가입, 비밀번호
 비밀번호 reset token, rate limit, 일반화된 인증 에러를 담당합니다. web app은 Auth.js
 Credentials provider를 이 백엔드 검증 흐름으로 들어가는 서버 측 연결부로만 사용하고,
 이후에는 기존 암호화 HTTP-only 세션과 짧은 수명 서명 user API token 경계를 계속 사용합니다.
-첫 password hashing helper는 Python 기본 `hashlib.scrypt`를 사용하며, 비밀번호마다 salt를
-따로 만들고 constant-time 비교를 사용합니다. 그래서 평문 비밀번호를 저장하거나 직접
-비교하지 않습니다.
+password hashing은 `argon2-cffi`의 Argon2id를 사용하며, 비밀번호마다 salt를 따로 만들고
+라이브러리의 안전한 검증 함수를 사용합니다. 그래서 평문 비밀번호를 저장하거나 직접
+비교하지 않습니다. email 요청 검증은 `email-validator` 기반 Pydantic `EmailStr`을 사용합니다.
 
 ---
 
@@ -460,5 +460,6 @@ raw token値は保存しません。FastAPIはsignup、password verification、e
 password reset token、rate limit、generic authentication errorを担当します。web appは
 Auth.js Credentials providerをバックエンド検証フローへのserver-side bridgeとして使い、
 その後は既存の暗号化HTTP-only sessionと短命signed user API token境界を維持します。
-最初のpassword hashing helperはPython標準の`hashlib.scrypt`を使い、passwordごとのsaltと
-constant-time比較を使用します。そのため平文passwordを保存したり直接比較したりしません。
+password hashingは`argon2-cffi`のArgon2idを使い、passwordごとのsaltと安全なlibrary
+verificationを使用します。そのため平文passwordを保存したり直接比較したりしません。
+email request validationは`email-validator`ベースのPydantic `EmailStr`を使用します。

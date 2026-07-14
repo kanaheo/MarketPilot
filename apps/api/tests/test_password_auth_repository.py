@@ -33,7 +33,7 @@ def test_create_password_user_adds_user_and_credential() -> None:
     assert user.auth_subject == "developer@example.com"
     assert credential.normalized_email == "developer@example.com"
     assert credential.password_hash != "MarketPilot2026!"
-    assert credential.password_hash_algorithm == "scrypt"
+    assert credential.password_hash_algorithm == "argon2id"
     assert credential.email_verified_at is None
     assert session.add.call_count == 2
     session.commit.assert_called_once()
@@ -58,7 +58,7 @@ def test_verify_password_user_requires_verified_email(monkeypatch) -> None:
         user_id=uuid.uuid4(),
         normalized_email="developer@example.com",
         password_hash="stored",
-        password_hash_algorithm="scrypt",
+        password_hash_algorithm="argon2id",
         password_hash_parameters="params",
         email_verified_at=None,
     )
@@ -84,7 +84,7 @@ def test_verify_password_user_returns_user_for_valid_credentials(monkeypatch) ->
         user_id=user_id,
         normalized_email="developer@example.com",
         password_hash="stored",
-        password_hash_algorithm="scrypt",
+        password_hash_algorithm="argon2id",
         password_hash_parameters="params",
         email_verified_at=datetime.now(timezone.utc),
         failed_login_count=2,

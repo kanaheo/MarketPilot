@@ -70,7 +70,7 @@ def test_password_signup_returns_created_user(monkeypatch) -> None:
         "email": "developer@example.com",
         "email_verification_required": True,
     }
-    assert create_mock.call_args.kwargs["email"] == "Developer@Example.com"
+    assert create_mock.call_args.kwargs["email"] == "Developer@example.com"
 
 
 def test_password_signup_rejects_duplicate_email(monkeypatch) -> None:

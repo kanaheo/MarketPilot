@@ -5,11 +5,13 @@ from marketpilot_api.core.password_hashing import (
 )
 
 
-def test_hash_password_returns_verifiable_scrypt_hash() -> None:
+def test_hash_password_returns_verifiable_argon2id_hash() -> None:
     password_hash, algorithm, parameters = hash_password("MarketPilot2026!")
 
     assert algorithm == PASSWORD_HASH_ALGORITHM
-    assert "n=" in parameters
+    assert algorithm == "argon2id"
+    assert password_hash.startswith("$argon2id$")
+    assert "memory_cost=" in parameters
     assert verify_password(
         "MarketPilot2026!",
         password_hash=password_hash,
