@@ -81,7 +81,9 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       return session;
     },
   },
-  providers: googleProvider ? [googleProvider, passwordProvider] : [passwordProvider],
+  providers: googleProvider
+    ? [googleProvider, passwordProvider]
+    : [passwordProvider],
   secret: getOptionalServerEnv("AUTH_SECRET") ?? undefined,
   session: {
     maxAge: 60 * 60 * 24 * 7,

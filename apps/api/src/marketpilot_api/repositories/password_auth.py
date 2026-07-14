@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 import hashlib
 import secrets
@@ -206,19 +207,10 @@ def complete_password_reset(
     session.commit()
 
 
-class _CreatedAuthToken(tuple):
-    __slots__ = ()
-
-    def __new__(cls, raw_token: str, record: UserAuthToken):
-        return super().__new__(cls, (raw_token, record))
-
-    @property
-    def raw_token(self) -> str:
-        return self[0]
-
-    @property
-    def record(self) -> UserAuthToken:
-        return self[1]
+@dataclass(frozen=True)
+class _CreatedAuthToken:
+    raw_token: str
+    record: UserAuthToken
 
 
 def _create_auth_token(

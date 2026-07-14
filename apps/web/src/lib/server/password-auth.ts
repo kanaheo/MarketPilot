@@ -58,7 +58,9 @@ export async function verifyPasswordCredentials(
   }
 
   if (!response.ok) {
-    throw new Error(`MarketPilot password verification failed: ${response.status}`);
+    throw new Error(
+      `MarketPilot password verification failed: ${response.status}`,
+    );
   }
 
   return (await response.json()) as AuthenticatedUser;

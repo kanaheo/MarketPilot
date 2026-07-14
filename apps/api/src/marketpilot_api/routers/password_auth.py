@@ -30,6 +30,16 @@ from marketpilot_api.schemas.auth import (
 router = APIRouter(prefix="/auth/password", tags=["password-auth"])
 
 
+def raise_password_policy_error(errors: tuple[str, ...]) -> None:
+    raise HTTPException(
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+        detail={
+            "code": "password_policy_failed",
+            "errors": list(errors),
+        },
+    )
+
+
 @router.post(
     "/signup",
     response_model=PasswordSignupResponse,
@@ -41,13 +51,7 @@ def signup_with_password(
 ) -> PasswordSignupResponse:
     policy_result = validate_password_policy(data.password)
     if not policy_result.is_valid:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail={
-                "code": "password_policy_failed",
-                "errors": list(policy_result.errors),
-            },
-        )
+        raise_password_policy_error(policy_result.errors)
 
     try:
         user, _credential, _verification_token = create_password_user(
@@ -128,13 +132,7 @@ def complete_password_reset_request(
 ) -> AuthActionResponse:
     policy_result = validate_password_policy(data.new_password)
     if not policy_result.is_valid:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail={
-                "code": "password_policy_failed",
-                "errors": list(policy_result.errors),
-            },
-        )
+        raise_password_policy_error(policy_result.errors)
 
     try:
         complete_password_reset(
