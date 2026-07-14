@@ -2,6 +2,8 @@ import uuid
 
 from pydantic import BaseModel, ConfigDict, Field
 
+EMAIL_PATTERN = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
+
 
 class UserSyncRequest(BaseModel):
     auth_provider: str = Field(min_length=1, max_length=32)
@@ -20,3 +22,20 @@ class AuthenticatedUserResponse(BaseModel):
     email: str | None
     display_name: str | None
     image_url: str | None
+
+
+class PasswordSignupRequest(BaseModel):
+    email: str = Field(min_length=3, max_length=320, pattern=EMAIL_PATTERN)
+    password: str = Field(min_length=1, max_length=128)
+    display_name: str | None = Field(default=None, max_length=120)
+
+
+class PasswordSignupResponse(BaseModel):
+    user_id: uuid.UUID
+    email: str
+    email_verification_required: bool
+
+
+class PasswordVerifyRequest(BaseModel):
+    email: str = Field(min_length=3, max_length=320, pattern=EMAIL_PATTERN)
+    password: str = Field(min_length=1, max_length=128)

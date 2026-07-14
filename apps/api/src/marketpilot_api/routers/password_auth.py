@@ -1,0 +1,86 @@
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from marketpilot_api.core.password_policy import validate_password_policy
+from marketpilot_api.db.session import get_db_session
+from marketpilot_api.repositories.password_auth import (
+    PasswordAuthDuplicateEmailError,
+    PasswordAuthEmailNotVerifiedError,
+    PasswordAuthInvalidCredentialsError,
+    create_password_user,
+    verify_password_user,
+)
+from marketpilot_api.schemas.auth import (
+    AuthenticatedUserResponse,
+    PasswordSignupRequest,
+    PasswordSignupResponse,
+    PasswordVerifyRequest,
+)
+
+router = APIRouter(prefix="/auth/password", tags=["password-auth"])
+
+
+@router.post(
+    "/signup",
+    response_model=PasswordSignupResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def signup_with_password(
+    data: PasswordSignupRequest,
+    session: Annotated[Session, Depends(get_db_session)],
+) -> PasswordSignupResponse:
+    policy_result = validate_password_policy(data.password)
+    if not policy_result.is_valid:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={
+                "code": "password_policy_failed",
+                "errors": list(policy_result.errors),
+            },
+        )
+
+    try:
+        user, _credential = create_password_user(
+            session,
+            email=str(data.email),
+            password=data.password,
+            display_name=data.display_name,
+        )
+    except PasswordAuthDuplicateEmailError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Email is already registered",
+        ) from exc
+
+    return PasswordSignupResponse(
+        user_id=user.id,
+        email=user.email or str(data.email),
+        email_verification_required=True,
+    )
+
+
+@router.post("/verify", response_model=AuthenticatedUserResponse)
+def verify_password_login(
+    data: PasswordVerifyRequest,
+    session: Annotated[Session, Depends(get_db_session)],
+) -> AuthenticatedUserResponse:
+    try:
+        user = verify_password_user(
+            session,
+            email=str(data.email),
+            password=data.password,
+        )
+    except PasswordAuthEmailNotVerifiedError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Email verification is required",
+        ) from exc
+    except PasswordAuthInvalidCredentialsError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password",
+        ) from exc
+
+    return AuthenticatedUserResponse.model_validate(user)

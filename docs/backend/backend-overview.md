@@ -26,6 +26,8 @@ incrementally while preserving reproducibility and auditability.
 - provider-neutral `users` table
 - password credential table separate from `users`
 - one-time auth token table for email verification and password reset
+- `POST /auth/password/signup` endpoint
+- `POST /auth/password/verify` endpoint for Auth.js Credentials bridge
 - user-owned `portfolios` table
 - immutable `cash_transactions` ledger table
 - internal Auth.js user synchronization endpoint
@@ -158,7 +160,10 @@ signup, password verification, email verification, password reset tokens, rate
 limiting, and generic authentication errors. The web app should use Auth.js
 Credentials provider only as the server-side bridge into that backend
 verification flow, then continue using the existing encrypted HTTP-only session
-and short-lived signed user API token boundary.
+and short-lived signed user API token boundary. The first password hashing
+helper uses Python's built-in `hashlib.scrypt` with per-password salts and
+constant-time hash comparison, so no plaintext password is stored or compared
+directly.
 
 ---
 
@@ -186,6 +191,8 @@ MarketPilot은 모듈형 FastAPI 백엔드를 사용합니다. PostgreSQL 기반
 - 인증 제공자에 종속되지 않는 `users` 테이블
 - `users`와 분리된 password credential 테이블
 - 이메일 인증과 비밀번호 재설정을 위한 1회용 auth token 테이블
+- `POST /auth/password/signup` endpoint
+- Auth.js Credentials 연결용 `POST /auth/password/verify` endpoint
 - 사용자별 `portfolios` 테이블
 - 변경하지 않고 계속 쌓는 `cash_transactions` 원장 테이블
 - Auth.js 로그인 사용자를 저장하는 내부 동기화 endpoint
@@ -303,6 +310,9 @@ token 원문은 저장하지 않습니다. FastAPI는 회원가입, 비밀번호
 비밀번호 reset token, rate limit, 일반화된 인증 에러를 담당합니다. web app은 Auth.js
 Credentials provider를 이 백엔드 검증 흐름으로 들어가는 서버 측 연결부로만 사용하고,
 이후에는 기존 암호화 HTTP-only 세션과 짧은 수명 서명 user API token 경계를 계속 사용합니다.
+첫 password hashing helper는 Python 기본 `hashlib.scrypt`를 사용하며, 비밀번호마다 salt를
+따로 만들고 constant-time 비교를 사용합니다. 그래서 평문 비밀번호를 저장하거나 직접
+비교하지 않습니다.
 
 ---
 
@@ -330,6 +340,8 @@ PostgreSQLベースのポートフォリオ、市場データ、バックテス�
 - 認証プロバイダーに依存しない`users`テーブル
 - `users`と分離したpassword credentialテーブル
 - email verificationとpassword reset用のone-time auth tokenテーブル
+- `POST /auth/password/signup` endpoint
+- Auth.js Credentials bridge用`POST /auth/password/verify` endpoint
 - ユーザー別の`portfolios`テーブル
 - 変更せず積み上げる`cash_transactions`元帳テーブル
 - Auth.jsログインユーザーを保存する内部同期endpoint
@@ -448,3 +460,5 @@ raw token値は保存しません。FastAPIはsignup、password verification、e
 password reset token、rate limit、generic authentication errorを担当します。web appは
 Auth.js Credentials providerをバックエンド検証フローへのserver-side bridgeとして使い、
 その後は既存の暗号化HTTP-only sessionと短命signed user API token境界を維持します。
+最初のpassword hashing helperはPython標準の`hashlib.scrypt`を使い、passwordごとのsaltと
+constant-time比較を使用します。そのため平文passwordを保存したり直接比較したりしません。
