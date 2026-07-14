@@ -5,6 +5,8 @@ from marketpilot_api.models.order import Order
 from marketpilot_api.models.order_execution import OrderExecution
 from marketpilot_api.models.portfolio import Portfolio
 from marketpilot_api.models.user import User
+from marketpilot_api.models.user_auth_token import UserAuthToken
+from marketpilot_api.models.user_password_credential import UserPasswordCredential
 
 __all__ = [
     "CashTransaction",
@@ -14,4 +16,6 @@ __all__ = [
     "OrderExecution",
     "Portfolio",
     "User",
+    "UserAuthToken",
+    "UserPasswordCredential",
 ]
