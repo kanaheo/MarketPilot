@@ -2,6 +2,7 @@ from functools import lru_cache
 from typing import Literal
 
 from pydantic import Field
+from pydantic import model_validator
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -32,6 +33,27 @@ class Settings(BaseSettings):
         env_prefix="MARKETPILOT_",
         extra="ignore",
     )
+
+    @model_validator(mode="after")
+    def validate_production_secrets(self) -> "Settings":
+        if self.environment != "production":
+            return self
+
+        missing_secrets = [
+            name
+            for name, value in {
+                "internal_api_token": self.internal_api_token,
+                "user_api_signing_secret": self.user_api_signing_secret,
+            }.items()
+            if value is None
+        ]
+        if missing_secrets:
+            raise ValueError(
+                "Production settings require: "
+                + ", ".join(sorted(missing_secrets))
+            )
+
+        return self
 
 
 @lru_cache

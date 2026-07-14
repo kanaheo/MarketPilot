@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from marketpilot_api.db.session import get_db_session
 from marketpilot_api.models import MarketDataSchedulerRun
+from marketpilot_api.routers.internal_auth import verify_internal_token
 from marketpilot_api.repositories.fx_rates import get_fx_rate
 from marketpilot_api.repositories.market_quote_snapshots import (
     filter_fresh_market_quote_symbols,
@@ -75,6 +76,7 @@ def list_market_quotes(
 @router.post(
     "/quote-snapshots/collect",
     response_model=MarketQuoteSnapshotCollectionResponse,
+    dependencies=[Depends(verify_internal_token)],
 )
 def collect_market_quote_snapshots(
     session: Annotated[Session, Depends(get_db_session)],
