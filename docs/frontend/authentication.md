@@ -222,6 +222,18 @@ Then verify:
 5. Confirm the browser returns to `/en`, `/ko`, or `/ja`.
 6. Confirm `/api/auth/providers` includes the `google` provider.
 
+Password auth can be verified locally before real email delivery is connected:
+
+1. Open `http://localhost:3000/en/signup`.
+2. Submit an email and a password that satisfies the policy.
+3. Open the development verification link shown by the signup screen.
+4. Return to `http://localhost:3000/en/login` and log in with the same email
+   and password.
+5. Open `http://localhost:3000/en/forgot-password`.
+6. Request a reset link for the same email.
+7. Open the development reset link and set a new password.
+8. Confirm the old password no longer works and the new password logs in.
+
 Do not test with a Google account that is absent from the test-user list while
 the OAuth app remains in Testing mode.
 
@@ -448,6 +460,17 @@ npm run dev
 5. 인증 후 `/en`, `/ko` 또는 `/ja`로 돌아오는지 확인합니다.
 6. `/api/auth/providers` 응답에 `google` 제공자가 포함되는지 확인합니다.
 
+실제 이메일 발송을 연결하기 전에도 password auth는 로컬에서 확인할 수 있습니다.
+
+1. `http://localhost:3000/en/signup`에 접속합니다.
+2. 정책을 만족하는 email과 password로 가입합니다.
+3. signup 화면에 표시되는 개발용 인증 링크를 엽니다.
+4. `http://localhost:3000/en/login`으로 돌아가 같은 email/password로 로그인합니다.
+5. `http://localhost:3000/en/forgot-password`에 접속합니다.
+6. 같은 email로 reset link를 요청합니다.
+7. 개발용 reset link를 열고 새 password를 설정합니다.
+8. 기존 password는 실패하고 새 password는 로그인되는지 확인합니다.
+
 OAuth 앱이 테스트 상태인 동안에는 테스트 사용자 목록에 등록된 Google 계정으로만
 검증합니다.
 
@@ -642,6 +665,17 @@ npm run dev
 4. アカウント選択とGoogleのセキュリティ認証はユーザーが直接完了します。
 5. 認証後に`/en`、`/ko`、または`/ja`へ戻ることを確認します。
 6. `/api/auth/providers`の応答に`google`プロバイダーが含まれることを確認します。
+
+実際のメール送信を接続する前でも、password authはローカルで確認できます。
+
+1. `http://localhost:3000/en/signup`を開きます。
+2. policyを満たすemailとpasswordでsignupします。
+3. signup画面に表示されるdevelopment verification linkを開きます。
+4. `http://localhost:3000/en/login`へ戻り、同じemail/passwordでloginします。
+5. `http://localhost:3000/en/forgot-password`を開きます。
+6. 同じemailでreset linkをrequestします。
+7. development reset linkを開き、新しいpasswordを設定します。
+8. 古いpasswordでは失敗し、新しいpasswordでloginできることを確認します。
 
 OAuthアプリがテスト状態の間は、テストユーザーとして登録したGoogleアカウントで
 検証します。
