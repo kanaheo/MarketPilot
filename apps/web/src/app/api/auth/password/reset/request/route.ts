@@ -7,9 +7,18 @@ type PasswordResetRequestBody = {
 };
 
 export async function POST(request: Request) {
-  const body = (await request.json()) as PasswordResetRequestBody;
+  let body: PasswordResetRequestBody;
 
-  if (typeof body.email !== "string") {
+  try {
+    body = (await request.json()) as PasswordResetRequestBody;
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid password reset request" },
+      { status: 400 },
+    );
+  }
+
+  if (typeof body.email !== "string" || body.email.trim().length === 0) {
     return NextResponse.json(
       { error: "Invalid password reset request" },
       { status: 400 },
@@ -17,7 +26,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const response = await requestPasswordReset({ email: body.email });
+    const response = await requestPasswordReset({ email: body.email.trim() });
     return NextResponse.json(response);
   } catch {
     return NextResponse.json(

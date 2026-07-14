@@ -8,9 +8,23 @@ type PasswordResetCompleteBody = {
 };
 
 export async function POST(request: Request) {
-  const body = (await request.json()) as PasswordResetCompleteBody;
+  let body: PasswordResetCompleteBody;
 
-  if (typeof body.token !== "string" || typeof body.newPassword !== "string") {
+  try {
+    body = (await request.json()) as PasswordResetCompleteBody;
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid password reset completion" },
+      { status: 400 },
+    );
+  }
+
+  if (
+    typeof body.token !== "string" ||
+    typeof body.newPassword !== "string" ||
+    body.token.trim().length === 0 ||
+    body.newPassword.length === 0
+  ) {
     return NextResponse.json(
       { error: "Invalid password reset completion" },
       { status: 400 },
@@ -20,7 +34,7 @@ export async function POST(request: Request) {
   try {
     const response = await completePasswordReset({
       newPassword: body.newPassword,
-      token: body.token,
+      token: body.token.trim(),
     });
     return NextResponse.json(response);
   } catch {
