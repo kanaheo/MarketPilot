@@ -251,6 +251,84 @@ export type Messages = Readonly<{
       description: string;
       dataBadge: string;
     };
+    dataStatus: {
+      eyebrow: string;
+      title: string;
+      description: string;
+      emptyValue: string;
+      health: {
+        healthy: string;
+        warning: string;
+        critical: string;
+      };
+      availability: {
+        warningPrefix: string;
+        sources: {
+          quotes: string;
+          provider: string;
+          freshness: string;
+          scheduler: string;
+        };
+      };
+      metrics: {
+        tracked: string;
+        fresh: string;
+        stale: string;
+        lastCollected: string;
+      };
+      scheduler: {
+        title: string;
+        noRuns: string;
+        recentRuns: string;
+        running: string;
+        failed: string;
+        nextInterval: string;
+        statuses: {
+          running: string;
+          succeeded: string;
+          failed: string;
+        };
+      };
+      freshness: {
+        title: string;
+        limitLabel: string;
+        empty: string;
+        columns: {
+          symbol: string;
+          status: string;
+          price: string;
+          age: string;
+          source: string;
+        };
+        statuses: {
+          fresh: string;
+          stale: string;
+          missing: string;
+        };
+      };
+      latestRun: {
+        title: string;
+        requested: string;
+        stored: string;
+        freshSkipped: string;
+        skipped: string;
+      };
+      provider: {
+        title: string;
+        active: string;
+        configured: string;
+        fallback: string;
+        cacheTtl: string;
+        apiKey: string;
+        apiKeyReady: string;
+        apiKeyMissing: string;
+      };
+      time: {
+        seconds: string;
+        minutes: string;
+        hours: string;
+      };
+    };
     filters: {
       ariaLabel: string;
       searchLabel: string;

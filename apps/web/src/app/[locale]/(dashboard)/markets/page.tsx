@@ -1,8 +1,14 @@
 import { MarketExplorer } from "@/components/markets/market-explorer";
+import { MarketDataStatus } from "@/components/markets/market-data-status";
 import { MarketsHeader } from "@/components/markets/markets-header";
 import { assertLocale } from "@/i18n/config";
 import { getMessages } from "@/i18n/messages";
-import { getMarketQuotes } from "@/lib/server/portfolio-api";
+import {
+  getMarketDataSchedulerRunStatus,
+  getMarketQuoteProviderStatus,
+  getMarketQuoteSnapshotFreshness,
+  getMarketQuotes,
+} from "@/lib/server/portfolio-api";
 import type { MarketsPageProps } from "@/types/markets";
 
 export default async function MarketsPage({ params }: MarketsPageProps) {
@@ -11,16 +17,65 @@ export default async function MarketsPage({ params }: MarketsPageProps) {
   assertLocale(locale);
 
   const messages = getMessages(locale);
-  const marketQuotes = await getMarketQuotes().catch(() => []);
+  const [
+    marketQuotesResult,
+    providerStatusResult,
+    freshnessResult,
+    schedulerStatusResult,
+  ] = await Promise.all([
+    getMarketQuotes().then(toSuccess, toFailure),
+    getMarketQuoteProviderStatus().then(toSuccess, toFailure),
+    getMarketQuoteSnapshotFreshness().then(toSuccess, toFailure),
+    getMarketDataSchedulerRunStatus().then(toSuccess, toFailure),
+  ]);
 
   return (
     <div className="markets-page">
       <MarketsHeader messages={messages.markets.header} />
+      <MarketDataStatus
+        availability={{
+          freshness: freshnessResult.ok,
+          provider: providerStatusResult.ok,
+          quotes: marketQuotesResult.ok,
+          scheduler: schedulerStatusResult.ok,
+        }}
+        freshness={freshnessResult.ok ? freshnessResult.data : []}
+        locale={locale}
+        messages={messages.markets.dataStatus}
+        providerStatus={
+          providerStatusResult.ok ? providerStatusResult.data : null
+        }
+        schedulerStatus={
+          schedulerStatusResult.ok ? schedulerStatusResult.data : null
+        }
+      />
       <MarketExplorer
         locale={locale}
-        marketQuotes={marketQuotes}
+        marketQuotes={marketQuotesResult.ok ? marketQuotesResult.data : []}
         messages={messages.markets}
       />
     </div>
   );
+}
+
+type MarketDataLoadResult<Data> =
+  | Readonly<{
+      data: Data;
+      ok: true;
+    }>
+  | Readonly<{
+      ok: false;
+    }>;
+
+function toSuccess<Data>(data: Data): MarketDataLoadResult<Data> {
+  return {
+    data,
+    ok: true,
+  };
+}
+
+function toFailure(): MarketDataLoadResult<never> {
+  return {
+    ok: false,
+  };
 }

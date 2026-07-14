@@ -7,7 +7,10 @@ import {
 import type {
   CashTransactionCreateApiRequest,
   CashTransactionApiItem,
+  MarketDataSchedulerRunStatusApiItem,
   MarketQuoteApiItem,
+  MarketQuoteProviderStatusApiItem,
+  MarketQuoteSnapshotFreshnessApiItem,
   OrderApiItem,
   OrderCreateApiRequest,
   OrderExecuteApiRequest,
@@ -21,6 +24,28 @@ export async function getMarketQuotes(): Promise<
   readonly MarketQuoteApiItem[]
 > {
   return marketPilotApiRequest<MarketQuoteApiItem[]>("/market-data/quotes");
+}
+
+export async function getMarketQuoteProviderStatus(): Promise<MarketQuoteProviderStatusApiItem> {
+  return marketPilotApiRequest<MarketQuoteProviderStatusApiItem>(
+    "/market-data/quote-provider-status",
+  );
+}
+
+export async function getMarketQuoteSnapshotFreshness(): Promise<
+  readonly MarketQuoteSnapshotFreshnessApiItem[]
+> {
+  return marketPilotApiRequest<MarketQuoteSnapshotFreshnessApiItem[]>(
+    "/market-data/quote-snapshots/freshness",
+  );
+}
+
+export async function getMarketDataSchedulerRunStatus(): Promise<
+  MarketDataSchedulerRunStatusApiItem
+> {
+  return marketPilotApiRequest<MarketDataSchedulerRunStatusApiItem>(
+    "/market-data/scheduler-runs/status?job_name=market-quote-scheduler&limit=20",
+  );
 }
 
 export async function getPortfolios(): Promise<readonly PortfolioApiItem[]> {

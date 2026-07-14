@@ -46,6 +46,14 @@
     grid-template-columns: 1fr;
   }
 
+  .market-data-status-grid,
+  .market-data-scheduler-strip,
+  .market-data-details-grid,
+  .market-data-provider-status dl,
+  .market-data-scheduler-strip dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .backtest-configuration-grid {
     grid-template-columns: 1fr;
   }
@@ -189,6 +197,31 @@
   .markets-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .market-data-status-heading,
+  .market-data-freshness-list > header,
+  .market-data-latest-run > header,
+  .market-data-provider-status > header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .market-data-details-grid,
+  .market-data-scheduler-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .market-data-freshness-row {
+    grid-template-columns:
+      minmax(56px, 0.8fr)
+      minmax(66px, 0.75fr)
+      minmax(88px, 1fr)
+      minmax(52px, 0.55fr);
+  }
+
+  .market-data-freshness-row > :nth-child(5) {
+    display: none;
   }
 
   .backtests-header {

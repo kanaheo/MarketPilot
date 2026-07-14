@@ -122,3 +122,53 @@ export type MarketQuoteApiItem = Readonly<{
   source: string;
   collected_at: string | null;
 }>;
+
+export type MarketQuoteProviderStatusApiItem = Readonly<{
+  configured_provider: string;
+  active_provider: string;
+  fallback_provider: string;
+  finnhub_api_key_configured: boolean;
+  cache_ttl_seconds: number;
+}>;
+
+export type MarketQuoteSnapshotFreshnessApiItem = Readonly<{
+  symbol: string;
+  currency: SupportedCurrency | null;
+  has_snapshot: boolean;
+  is_fresh: boolean;
+  age_seconds: number | null;
+  current_price: string | null;
+  source: string | null;
+  collected_at: string | null;
+  created_at: string | null;
+}>;
+
+export type MarketDataSchedulerRunApiItem = Readonly<{
+  id: string;
+  job_name: string;
+  status: "running" | "succeeded" | "failed";
+  symbols_source: string;
+  currency: SupportedCurrency | null;
+  interval_policy: string;
+  market_phase: string;
+  next_interval_seconds: number;
+  freshness_seconds: number | null;
+  started_at: string;
+  completed_at: string | null;
+  requested_count: number;
+  collectable_count: number;
+  fresh_skipped_count: number;
+  returned_count: number;
+  stored_count: number;
+  skipped_count: number;
+  error_message: string | null;
+  created_at: string;
+}>;
+
+export type MarketDataSchedulerRunStatusApiItem = Readonly<{
+  latest_run: MarketDataSchedulerRunApiItem | null;
+  recent_run_count: number;
+  running_count: number;
+  succeeded_count: number;
+  failed_count: number;
+}>;
