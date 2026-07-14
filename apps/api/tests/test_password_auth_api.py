@@ -67,11 +67,38 @@ def test_password_signup_returns_created_user(monkeypatch) -> None:
     clear_dependency_overrides()
     assert response.status_code == 201
     assert response.json() == {
+        "dev_email_verification_token": "verification-token",
         "user_id": str(user.id),
         "email": "developer@example.com",
         "email_verification_required": True,
     }
     assert create_mock.call_args.kwargs["email"] == "Developer@example.com"
+
+
+def test_password_signup_hides_dev_token_when_disabled(monkeypatch) -> None:
+    user = User(
+        id=uuid.uuid4(),
+        auth_provider="password",
+        auth_subject="developer@example.com",
+        email="developer@example.com",
+    )
+    create_mock = MagicMock(return_value=(user, object(), "verification-token"))
+    monkeypatch.setattr(password_auth_router, "create_password_user", create_mock)
+    monkeypatch.setattr(password_auth_router, "include_dev_token", lambda: False)
+    app.dependency_overrides[get_db_session] = override_session(MagicMock())
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/auth/password/signup",
+            json={
+                "email": "developer@example.com",
+                "password": "MarketPilot2026!",
+            },
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 201
+    assert response.json()["dev_email_verification_token"] is None
 
 
 def test_password_signup_rejects_duplicate_email(monkeypatch) -> None:
@@ -198,7 +225,7 @@ def test_email_verification_confirm_rejects_invalid_token(monkeypatch) -> None:
 
 
 def test_password_reset_request_returns_generic_response(monkeypatch) -> None:
-    reset_mock = MagicMock(return_value=None)
+    reset_mock = MagicMock(return_value="reset-token")
     monkeypatch.setattr(password_auth_router, "request_password_reset_token", reset_mock)
     app.dependency_overrides[get_db_session] = override_session(MagicMock())
 
@@ -211,6 +238,7 @@ def test_password_reset_request_returns_generic_response(monkeypatch) -> None:
     clear_dependency_overrides()
     assert response.status_code == 200
     assert "If the email exists" in response.json()["message"]
+    assert response.json()["dev_token"] == "reset-token"
 
 
 def test_password_reset_complete_rejects_weak_password() -> None:

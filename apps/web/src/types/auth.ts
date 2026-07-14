@@ -20,6 +20,15 @@ export type AuthPageProps = Readonly<{
   }>;
 }>;
 
+export type TokenAuthPageProps = Readonly<{
+  params: Promise<{
+    locale: string;
+  }>;
+  searchParams: Promise<{
+    token?: string;
+  }>;
+}>;
+
 export type AuthScreenProps = Readonly<{
   googleAuthEnabled: boolean;
   initialMode: AuthMode;
@@ -50,6 +59,7 @@ export type PasswordSignupResponse = {
   user_id: string;
   email: string;
   email_verification_required: boolean;
+  dev_email_verification_token: string | null;
 };
 
 export type SyncAuthenticatedUserInput = {

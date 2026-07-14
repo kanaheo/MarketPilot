@@ -12,6 +12,16 @@ export function createEmailAuthSchema(
   });
 }
 
+export function createPasswordOnlySchema(invalidPasswordMessage: string) {
+  return z.object({
+    password: z.string().regex(passwordPolicy, invalidPasswordMessage),
+  });
+}
+
 export type EmailAuthValues = z.infer<
   ReturnType<typeof createEmailAuthSchema>
+>;
+
+export type PasswordOnlyValues = z.infer<
+  ReturnType<typeof createPasswordOnlySchema>
 >;

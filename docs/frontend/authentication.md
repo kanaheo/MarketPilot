@@ -127,9 +127,15 @@ Implementation should be split into small backend-first steps:
 Out of scope for this branch:
 
 - real email delivery
-- email verification link screen
-- password reset request and completion screens
 - Google/password account linking
+
+Local development can still verify the flow without a mail provider. When the
+API environment is not `production`, signup responses include a development
+verification token. The signup UI turns that token into a
+`/{locale}/verify-email?token=...` link so the local flow can confirm the email
+before password login. Password reset requests can also expose a development
+reset link at `/{locale}/reset-password?token=...` in non-production
+environments. Production responses never include these tokens.
 
 References:
 
@@ -215,6 +221,18 @@ Then verify:
 4. Complete account selection and any Google security challenge manually.
 5. Confirm the browser returns to `/en`, `/ko`, or `/ja`.
 6. Confirm `/api/auth/providers` includes the `google` provider.
+
+Password auth can be verified locally before real email delivery is connected:
+
+1. Open `http://localhost:3000/en/signup`.
+2. Submit an email and a password that satisfies the policy.
+3. Open the development verification link shown by the signup screen.
+4. Return to `http://localhost:3000/en/login` and log in with the same email
+   and password.
+5. Open `http://localhost:3000/en/forgot-password`.
+6. Request a reset link for the same email.
+7. Open the development reset link and set a new password.
+8. Confirm the old password no longer works and the new password logs in.
 
 Do not test with a Google account that is absent from the test-user list while
 the OAuth app remains in Testing mode.
@@ -348,9 +366,14 @@ email, 이메일 인증 상태, password hash, hash 알고리즘 metadata, 로�
 이번 브랜치 범위에서 제외:
 
 - 실제 이메일 발송
-- 이메일 인증 링크 화면
-- 비밀번호 재설정 요청/완료 화면
 - Google/password 계정 연결
+
+로컬 개발에서는 mail provider 없이도 흐름을 확인할 수 있습니다. API 환경이
+`production`이 아니면 signup 응답에 개발용 인증 token이 포함됩니다. signup UI는 이 token을
+`/{locale}/verify-email?token=...` 링크로 바꿔서 password login 전에 이메일 인증을 완료할 수
+있게 합니다. password reset 요청도 non-production 환경에서는 개발용 reset link를
+`/{locale}/reset-password?token=...` 형태로 보여줄 수 있습니다. production 응답에는
+이 token들을 절대 포함하지 않습니다.
 
 참고:
 
@@ -436,6 +459,17 @@ npm run dev
 4. 계정 선택과 Google 보안 인증은 사용자가 직접 완료합니다.
 5. 인증 후 `/en`, `/ko` 또는 `/ja`로 돌아오는지 확인합니다.
 6. `/api/auth/providers` 응답에 `google` 제공자가 포함되는지 확인합니다.
+
+실제 이메일 발송을 연결하기 전에도 password auth는 로컬에서 확인할 수 있습니다.
+
+1. `http://localhost:3000/en/signup`에 접속합니다.
+2. 정책을 만족하는 email과 password로 가입합니다.
+3. signup 화면에 표시되는 개발용 인증 링크를 엽니다.
+4. `http://localhost:3000/en/login`으로 돌아가 같은 email/password로 로그인합니다.
+5. `http://localhost:3000/en/forgot-password`에 접속합니다.
+6. 같은 email로 reset link를 요청합니다.
+7. 개발용 reset link를 열고 새 password를 설정합니다.
+8. 기존 password는 실패하고 새 password는 로그인되는지 확인합니다.
 
 OAuth 앱이 테스트 상태인 동안에는 테스트 사용자 목록에 등록된 Google 계정으로만
 검증합니다.
@@ -538,9 +572,14 @@ hashアルゴリズムmetadata、ログイン失敗状態、ロック解除時�
 このbranchの対象外:
 
 - 実際のメール送信
-- メール確認link画面
-- password reset request/complete画面
 - Google/password account linking
+
+local developmentではmail providerなしでもflowを確認できます。API environmentが
+`production`でない場合、signup responseにdevelopment verification tokenを含めます。
+signup UIはそのtokenを`/{locale}/verify-email?token=...` linkに変換し、password login前に
+email verificationを完了できます。password reset requestもnon-production環境では
+development reset linkを`/{locale}/reset-password?token=...`として表示できます。
+production responseにはこれらのtokenを含めません。
 
 References:
 
@@ -626,6 +665,17 @@ npm run dev
 4. アカウント選択とGoogleのセキュリティ認証はユーザーが直接完了します。
 5. 認証後に`/en`、`/ko`、または`/ja`へ戻ることを確認します。
 6. `/api/auth/providers`の応答に`google`プロバイダーが含まれることを確認します。
+
+実際のメール送信を接続する前でも、password authはローカルで確認できます。
+
+1. `http://localhost:3000/en/signup`を開きます。
+2. policyを満たすemailとpasswordでsignupします。
+3. signup画面に表示されるdevelopment verification linkを開きます。
+4. `http://localhost:3000/en/login`へ戻り、同じemail/passwordでloginします。
+5. `http://localhost:3000/en/forgot-password`を開きます。
+6. 同じemailでreset linkをrequestします。
+7. development reset linkを開き、新しいpasswordを設定します。
+8. 古いpasswordでは失敗し、新しいpasswordでloginできることを確認します。
 
 OAuthアプリがテスト状態の間は、テストユーザーとして登録したGoogleアカウントで
 検証します。

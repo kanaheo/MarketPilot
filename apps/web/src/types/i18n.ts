@@ -63,6 +63,7 @@ export type Messages = Readonly<{
       title: string;
       description: string;
       emailAction: string;
+      forgotPassword: string;
       switchPrompt: string;
       switchAction: string;
       termsPrefix: string;
@@ -101,7 +102,31 @@ export type Messages = Readonly<{
       cancelledDescription: string;
       verificationTitle: string;
       verificationDescription: string;
+      devVerificationLink: string;
       dismiss: string;
+    };
+    verifyEmail: {
+      successTitle: string;
+      successDescription: string;
+      errorTitle: string;
+      errorDescription: string;
+      loginAction: string;
+    };
+    resetPassword: {
+      requestTitle: string;
+      requestDescription: string;
+      requestAction: string;
+      requestSuccessTitle: string;
+      requestSuccessDescription: string;
+      devResetLink: string;
+      completeTitle: string;
+      completeDescription: string;
+      completeAction: string;
+      completeSuccessTitle: string;
+      completeSuccessDescription: string;
+      invalidTokenTitle: string;
+      invalidTokenDescription: string;
+      loginAction: string;
     };
     or: string;
     terms: string;
