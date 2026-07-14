@@ -82,15 +82,14 @@ blocking, and generic responses:
 Signup flow:
 
 1. User submits email and password from `/{locale}/signup`.
-2. Next.js server action validates input shape and calls FastAPI.
+2. Next.js server route validates input shape and calls FastAPI.
 3. FastAPI normalizes the email, checks rate limits and password policy, hashes
    the password, creates the user and credential records in one transaction,
    and creates a short-lived email verification token.
-4. FastAPI sends or queues the verification email in production. Local
-   development may log a safe preview token only when explicitly configured.
-5. The first version may allow dashboard access before verification only if
-   high-risk actions stay blocked. The safer default is to require verification
-   before authenticated dashboard access.
+4. Email delivery is deferred to a later mail-provider step. Until then, the
+   backend stores only the token hash and the UI shows that email verification
+   is required.
+5. The current version requires verification before password login succeeds.
 
 Login flow:
 
@@ -124,6 +123,13 @@ Implementation should be split into small backend-first steps:
    Done.
 6. Add abuse-defense tests for duplicate email, weak password, wrong password,
    lockout, reset token expiry, and generic responses.
+
+Out of scope for this branch:
+
+- real email delivery
+- email verification link screen
+- password reset request and completion screens
+- Google/password account linking
 
 References:
 
@@ -305,12 +311,12 @@ email, 이메일 인증 상태, password hash, hash 알고리즘 metadata, 로�
 회원가입 흐름:
 
 1. 사용자가 `/{locale}/signup`에서 email과 password 입력
-2. Next.js server action이 입력 형태를 검증하고 FastAPI 호출
+2. Next.js server route가 입력 형태를 검증하고 FastAPI 호출
 3. FastAPI가 email 정규화, rate limit, 비밀번호 정책 검사를 수행
 4. FastAPI가 password를 hash하고 user와 credential을 하나의 transaction으로 생성
 5. FastAPI가 짧은 수명의 이메일 인증 token 생성
-6. 운영 환경에서는 인증 메일을 발송하거나 queue에 넣음
-7. 첫 버전은 이메일 인증 전 dashboard 접근을 막는 쪽이 더 안전함
+6. 실제 메일 발송은 후속 mail provider 작업으로 분리
+7. 현재 버전은 이메일 인증 전 password login을 막음
 
 로그인 흐름:
 
@@ -338,6 +344,13 @@ email, 이메일 인증 상태, password hash, hash 알고리즘 metadata, 로�
 5. 현재 email-only placeholder UI를 email/password 입력으로 교체 완료
 6. 중복 email, 약한 password, 잘못된 password, lockout, reset token 만료,
    일반화된 응답 테스트 추가
+
+이번 브랜치 범위에서 제외:
+
+- 실제 이메일 발송
+- 이메일 인증 링크 화면
+- 비밀번호 재설정 요청/완료 화면
+- Google/password 계정 연결
 
 참고:
 
@@ -521,6 +534,13 @@ hashアルゴリズムmetadata、ログイン失敗状態、ロック解除時�
 5. 現在のemail-only placeholder UIをemail/password入力へ置き換え済み
 6. duplicate email、weak password、wrong password、lockout、reset token expiry、
    generic responseのテストを追加
+
+このbranchの対象外:
+
+- 実際のメール送信
+- メール確認link画面
+- password reset request/complete画面
+- Google/password account linking
 
 References:
 
