@@ -37,3 +37,20 @@ class PasswordSignupResponse(BaseModel):
 class PasswordVerifyRequest(BaseModel):
     email: EmailStr
     password: str = Field(min_length=1, max_length=128)
+
+
+class EmailVerificationConfirmRequest(BaseModel):
+    token: str = Field(min_length=32, max_length=512)
+
+
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+
+class PasswordResetCompleteRequest(BaseModel):
+    token: str = Field(min_length=32, max_length=512)
+    new_password: str = Field(min_length=1, max_length=128)
+
+
+class AuthActionResponse(BaseModel):
+    message: str

@@ -28,6 +28,9 @@ incrementally while preserving reproducibility and auditability.
 - one-time auth token table for email verification and password reset
 - `POST /auth/password/signup` endpoint
 - `POST /auth/password/verify` endpoint for Auth.js Credentials bridge
+- `POST /auth/password/email-verification/confirm` endpoint
+- generic `POST /auth/password/password-reset/request` endpoint
+- `POST /auth/password/password-reset/complete` endpoint
 - user-owned `portfolios` table
 - immutable `cash_transactions` ledger table
 - internal Auth.js user synchronization endpoint
@@ -163,7 +166,9 @@ verification flow, then continue using the existing encrypted HTTP-only session
 and short-lived signed user API token boundary. Password hashing uses Argon2id
 through `argon2-cffi` with per-password salts and safe library verification, so
 no plaintext password is stored or compared directly. Email request validation
-uses Pydantic `EmailStr` through `email-validator`.
+uses Pydantic `EmailStr` through `email-validator`. Password reset requests
+return the same response whether the email exists or not, so account existence
+is not exposed through that endpoint.
 
 ---
 
@@ -193,6 +198,9 @@ MarketPilot은 모듈형 FastAPI 백엔드를 사용합니다. PostgreSQL 기반
 - 이메일 인증과 비밀번호 재설정을 위한 1회용 auth token 테이블
 - `POST /auth/password/signup` endpoint
 - Auth.js Credentials 연결용 `POST /auth/password/verify` endpoint
+- `POST /auth/password/email-verification/confirm` endpoint
+- 일반화된 응답을 반환하는 `POST /auth/password/password-reset/request` endpoint
+- `POST /auth/password/password-reset/complete` endpoint
 - 사용자별 `portfolios` 테이블
 - 변경하지 않고 계속 쌓는 `cash_transactions` 원장 테이블
 - Auth.js 로그인 사용자를 저장하는 내부 동기화 endpoint
@@ -313,6 +321,8 @@ Credentials provider를 이 백엔드 검증 흐름으로 들어가는 서버 �
 password hashing은 `argon2-cffi`의 Argon2id를 사용하며, 비밀번호마다 salt를 따로 만들고
 라이브러리의 안전한 검증 함수를 사용합니다. 그래서 평문 비밀번호를 저장하거나 직접
 비교하지 않습니다. email 요청 검증은 `email-validator` 기반 Pydantic `EmailStr`을 사용합니다.
+비밀번호 재설정 요청은 email 존재 여부와 상관없이 같은 응답을 반환해서 계정 존재 여부를
+노출하지 않습니다.
 
 ---
 
@@ -342,6 +352,9 @@ PostgreSQLベースのポートフォリオ、市場データ、バックテス�
 - email verificationとpassword reset用のone-time auth tokenテーブル
 - `POST /auth/password/signup` endpoint
 - Auth.js Credentials bridge用`POST /auth/password/verify` endpoint
+- `POST /auth/password/email-verification/confirm` endpoint
+- generic responseを返す`POST /auth/password/password-reset/request` endpoint
+- `POST /auth/password/password-reset/complete` endpoint
 - ユーザー別の`portfolios`テーブル
 - 変更せず積み上げる`cash_transactions`元帳テーブル
 - Auth.jsログインユーザーを保存する内部同期endpoint
@@ -463,3 +476,5 @@ Auth.js Credentials providerをバックエンド検証フローへのserver-sid
 password hashingは`argon2-cffi`のArgon2idを使い、passwordごとのsaltと安全なlibrary
 verificationを使用します。そのため平文passwordを保存したり直接比較したりしません。
 email request validationは`email-validator`ベースのPydantic `EmailStr`を使用します。
+password reset requestはemailの存在有無に関係なく同じresponseを返し、account existenceを
+そのendpointから露出しません。

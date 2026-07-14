@@ -10,6 +10,7 @@ from marketpilot_api.repositories.password_auth import (
     PasswordAuthDuplicateEmailError,
     PasswordAuthEmailNotVerifiedError,
     PasswordAuthInvalidCredentialsError,
+    PasswordAuthInvalidTokenError,
 )
 from marketpilot_api.routers import password_auth as password_auth_router
 
@@ -49,7 +50,7 @@ def test_password_signup_returns_created_user(monkeypatch) -> None:
         auth_subject="developer@example.com",
         email="developer@example.com",
     )
-    create_mock = MagicMock(return_value=(user, object()))
+    create_mock = MagicMock(return_value=(user, object(), "verification-token"))
     monkeypatch.setattr(password_auth_router, "create_password_user", create_mock)
     app.dependency_overrides[get_db_session] = override_session(MagicMock())
 
@@ -155,3 +156,94 @@ def test_password_verify_requires_email_verification(monkeypatch) -> None:
     clear_dependency_overrides()
     assert response.status_code == 403
     assert response.json()["detail"] == "Email verification is required"
+
+
+def test_email_verification_confirm_returns_success(monkeypatch) -> None:
+    confirm_mock = MagicMock(return_value=None)
+    monkeypatch.setattr(
+        password_auth_router,
+        "confirm_email_verification_token",
+        confirm_mock,
+    )
+    app.dependency_overrides[get_db_session] = override_session(MagicMock())
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/auth/password/email-verification/confirm",
+            json={"token": "a" * 48},
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 200
+    assert response.json()["message"] == "Email verified"
+
+
+def test_email_verification_confirm_rejects_invalid_token(monkeypatch) -> None:
+    confirm_mock = MagicMock(side_effect=PasswordAuthInvalidTokenError)
+    monkeypatch.setattr(
+        password_auth_router,
+        "confirm_email_verification_token",
+        confirm_mock,
+    )
+    app.dependency_overrides[get_db_session] = override_session(MagicMock())
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/auth/password/email-verification/confirm",
+            json={"token": "a" * 48},
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 400
+
+
+def test_password_reset_request_returns_generic_response(monkeypatch) -> None:
+    reset_mock = MagicMock(return_value=None)
+    monkeypatch.setattr(password_auth_router, "request_password_reset_token", reset_mock)
+    app.dependency_overrides[get_db_session] = override_session(MagicMock())
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/auth/password/password-reset/request",
+            json={"email": "missing@example.com"},
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 200
+    assert "If the email exists" in response.json()["message"]
+
+
+def test_password_reset_complete_rejects_weak_password() -> None:
+    app.dependency_overrides[get_db_session] = override_session(MagicMock())
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/auth/password/password-reset/complete",
+            json={
+                "token": "a" * 48,
+                "new_password": "weak",
+            },
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 422
+    assert response.json()["detail"]["code"] == "password_policy_failed"
+
+
+def test_password_reset_complete_returns_success(monkeypatch) -> None:
+    complete_mock = MagicMock(return_value=None)
+    monkeypatch.setattr(password_auth_router, "complete_password_reset", complete_mock)
+    app.dependency_overrides[get_db_session] = override_session(MagicMock())
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/auth/password/password-reset/complete",
+            json={
+                "token": "a" * 48,
+                "new_password": "NewMarketPilot2026!",
+            },
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 200
+    assert response.json()["message"] == "Password reset complete"

@@ -9,11 +9,19 @@ from marketpilot_api.repositories.password_auth import (
     PasswordAuthDuplicateEmailError,
     PasswordAuthEmailNotVerifiedError,
     PasswordAuthInvalidCredentialsError,
+    PasswordAuthInvalidTokenError,
+    complete_password_reset,
+    confirm_email_verification_token,
     create_password_user,
+    request_password_reset_token,
     verify_password_user,
 )
 from marketpilot_api.schemas.auth import (
+    AuthActionResponse,
     AuthenticatedUserResponse,
+    EmailVerificationConfirmRequest,
+    PasswordResetCompleteRequest,
+    PasswordResetRequest,
     PasswordSignupRequest,
     PasswordSignupResponse,
     PasswordVerifyRequest,
@@ -42,7 +50,7 @@ def signup_with_password(
         )
 
     try:
-        user, _credential = create_password_user(
+        user, _credential, _verification_token = create_password_user(
             session,
             email=str(data.email),
             password=data.password,
@@ -84,3 +92,60 @@ def verify_password_login(
         ) from exc
 
     return AuthenticatedUserResponse.model_validate(user)
+
+
+@router.post("/email-verification/confirm", response_model=AuthActionResponse)
+def confirm_email_verification(
+    data: EmailVerificationConfirmRequest,
+    session: Annotated[Session, Depends(get_db_session)],
+) -> AuthActionResponse:
+    try:
+        confirm_email_verification_token(session, token=data.token)
+    except PasswordAuthInvalidTokenError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired verification token",
+        ) from exc
+
+    return AuthActionResponse(message="Email verified")
+
+
+@router.post("/password-reset/request", response_model=AuthActionResponse)
+def request_password_reset(
+    data: PasswordResetRequest,
+    session: Annotated[Session, Depends(get_db_session)],
+) -> AuthActionResponse:
+    request_password_reset_token(session, email=str(data.email))
+    return AuthActionResponse(
+        message="If the email exists, password reset instructions will be sent",
+    )
+
+
+@router.post("/password-reset/complete", response_model=AuthActionResponse)
+def complete_password_reset_request(
+    data: PasswordResetCompleteRequest,
+    session: Annotated[Session, Depends(get_db_session)],
+) -> AuthActionResponse:
+    policy_result = validate_password_policy(data.new_password)
+    if not policy_result.is_valid:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={
+                "code": "password_policy_failed",
+                "errors": list(policy_result.errors),
+            },
+        )
+
+    try:
+        complete_password_reset(
+            session,
+            token=data.token,
+            new_password=data.new_password,
+        )
+    except PasswordAuthInvalidTokenError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired reset token",
+        ) from exc
+
+    return AuthActionResponse(message="Password reset complete")
