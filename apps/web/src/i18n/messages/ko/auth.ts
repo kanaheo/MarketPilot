@@ -62,7 +62,15 @@ export const auth = {
     verificationTitle: "이메일 인증이 필요합니다",
     verificationDescription:
       "가입은 완료됐습니다. 이메일 인증을 마치면 로그인할 수 있어요.",
+    devVerificationLink: "개발용 인증 링크 열기",
     dismiss: "알림 닫기",
+  },
+  verifyEmail: {
+    successTitle: "이메일 인증이 완료됐습니다",
+    successDescription: "이제 이메일과 비밀번호로 로그인할 수 있어요.",
+    errorTitle: "이메일 인증을 완료하지 못했습니다",
+    errorDescription: "인증 링크가 만료됐거나 이미 사용됐을 수 있어요.",
+    loginAction: "로그인으로 이동",
   },
   or: "또는",
   terms: "이용약관",

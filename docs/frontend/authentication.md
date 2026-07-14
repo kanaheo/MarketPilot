@@ -127,9 +127,14 @@ Implementation should be split into small backend-first steps:
 Out of scope for this branch:
 
 - real email delivery
-- email verification link screen
 - password reset request and completion screens
 - Google/password account linking
+
+Local development can still verify the flow without a mail provider. When the
+API environment is not `production`, signup responses include a development
+verification token. The signup UI turns that token into a
+`/{locale}/verify-email?token=...` link so the local flow can confirm the email
+before password login. Production responses never include this token.
 
 References:
 
@@ -348,9 +353,13 @@ email, 이메일 인증 상태, password hash, hash 알고리즘 metadata, 로�
 이번 브랜치 범위에서 제외:
 
 - 실제 이메일 발송
-- 이메일 인증 링크 화면
 - 비밀번호 재설정 요청/완료 화면
 - Google/password 계정 연결
+
+로컬 개발에서는 mail provider 없이도 흐름을 확인할 수 있습니다. API 환경이
+`production`이 아니면 signup 응답에 개발용 인증 token이 포함됩니다. signup UI는 이 token을
+`/{locale}/verify-email?token=...` 링크로 바꿔서 password login 전에 이메일 인증을 완료할 수
+있게 합니다. production 응답에는 이 token을 절대 포함하지 않습니다.
 
 참고:
 
@@ -538,9 +547,13 @@ hashアルゴリズムmetadata、ログイン失敗状態、ロック解除時�
 このbranchの対象外:
 
 - 実際のメール送信
-- メール確認link画面
 - password reset request/complete画面
 - Google/password account linking
+
+local developmentではmail providerなしでもflowを確認できます。API environmentが
+`production`でない場合、signup responseにdevelopment verification tokenを含めます。
+signup UIはそのtokenを`/{locale}/verify-email?token=...` linkに変換し、password login前に
+email verificationを完了できます。production responseにはこのtokenを含めません。
 
 References:
 

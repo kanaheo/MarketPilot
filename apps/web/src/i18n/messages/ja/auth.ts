@@ -62,7 +62,15 @@ export const auth = {
     verificationTitle: "メール確認が必要です",
     verificationDescription:
       "アカウントは作成されました。メール確認後にログインできます。",
+    devVerificationLink: "開発用確認リンクを開く",
     dismiss: "通知を閉じる",
+  },
+  verifyEmail: {
+    successTitle: "メール確認が完了しました",
+    successDescription: "メールアドレスとパスワードでログインできます。",
+    errorTitle: "メール確認を完了できませんでした",
+    errorDescription: "確認リンクが期限切れ、またはすでに使用済みの可能性があります。",
+    loginAction: "ログインへ移動",
   },
   or: "または",
   terms: "利用規約",

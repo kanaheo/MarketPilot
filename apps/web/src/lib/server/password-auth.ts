@@ -14,6 +14,11 @@ type PasswordVerifyInput = {
   password: string;
 };
 
+type AuthActionResponse = {
+  message: string;
+  dev_token: string | null;
+};
+
 export async function signupWithPassword(
   input: PasswordSignupInput,
 ): Promise<PasswordSignupResponse> {
@@ -64,4 +69,27 @@ export async function verifyPasswordCredentials(
   }
 
   return (await response.json()) as AuthenticatedUser;
+}
+
+export async function confirmEmailVerification(
+  token: string,
+): Promise<AuthActionResponse> {
+  const apiUrl = getRequiredServerEnv("MARKETPILOT_API_URL");
+  const response = await fetch(
+    `${apiUrl}/auth/password/email-verification/confirm`,
+    {
+      body: JSON.stringify({ token }),
+      cache: "no-store",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`Email verification failed: ${response.status}`);
+  }
+
+  return (await response.json()) as AuthActionResponse;
 }

@@ -101,7 +101,15 @@ export type Messages = Readonly<{
       cancelledDescription: string;
       verificationTitle: string;
       verificationDescription: string;
+      devVerificationLink: string;
       dismiss: string;
+    };
+    verifyEmail: {
+      successTitle: string;
+      successDescription: string;
+      errorTitle: string;
+      errorDescription: string;
+      loginAction: string;
     };
     or: string;
     terms: string;

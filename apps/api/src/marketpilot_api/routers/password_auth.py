@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from marketpilot_api.core.config import get_settings
 from marketpilot_api.core.password_policy import validate_password_policy
 from marketpilot_api.db.session import get_db_session
 from marketpilot_api.repositories.password_auth import (
@@ -40,6 +41,10 @@ def raise_password_policy_error(errors: tuple[str, ...]) -> None:
     )
 
 
+def include_dev_token() -> bool:
+    return get_settings().environment != "production"
+
+
 @router.post(
     "/signup",
     response_model=PasswordSignupResponse,
@@ -54,7 +59,7 @@ def signup_with_password(
         raise_password_policy_error(policy_result.errors)
 
     try:
-        user, _credential, _verification_token = create_password_user(
+        user, _credential, verification_token = create_password_user(
             session,
             email=str(data.email),
             password=data.password,
@@ -70,6 +75,9 @@ def signup_with_password(
         user_id=user.id,
         email=user.email or str(data.email),
         email_verification_required=True,
+        dev_email_verification_token=(
+            verification_token if include_dev_token() else None
+        ),
     )
 
 
@@ -119,9 +127,10 @@ def request_password_reset(
     data: PasswordResetRequest,
     session: Annotated[Session, Depends(get_db_session)],
 ) -> AuthActionResponse:
-    request_password_reset_token(session, email=str(data.email))
+    reset_token = request_password_reset_token(session, email=str(data.email))
     return AuthActionResponse(
         message="If the email exists, password reset instructions will be sent",
+        dev_token=reset_token if include_dev_token() else None,
     )
 
 

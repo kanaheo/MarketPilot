@@ -42,6 +42,7 @@ export function AuthScreen({
   const [activeProvider, setActiveProvider] = useState<AuthProvider | null>(
     null,
   );
+  const [verificationLink, setVerificationLink] = useState<string | null>(null);
   const {
     formState: { errors, isSubmitting },
     handleSubmit,
@@ -111,7 +112,23 @@ export function AuthScreen({
     });
 
     setActiveProvider(null);
-    setStatus(response.ok ? "verification" : "error");
+    if (!response.ok) {
+      setVerificationLink(null);
+      setStatus("error");
+      return;
+    }
+
+    const body = (await response.json()) as {
+      dev_email_verification_token?: string | null;
+    };
+    setVerificationLink(
+      body.dev_email_verification_token
+        ? `/${locale}/verify-email?token=${encodeURIComponent(
+            body.dev_email_verification_token,
+          )}`
+        : null,
+    );
+    setStatus("verification");
   }
 
   const isLoading = status === "loading" || isSubmitting;
@@ -243,6 +260,11 @@ export function AuthScreen({
               <div>
                 <strong>{messages.status.verificationTitle}</strong>
                 <span>{messages.status.verificationDescription}</span>
+                {verificationLink ? (
+                  <Link href={verificationLink}>
+                    {messages.status.devVerificationLink}
+                  </Link>
+                ) : null}
               </div>
               <button
                 aria-label={messages.status.dismiss}

@@ -62,7 +62,15 @@ export const auth = {
     verificationTitle: "Email verification required",
     verificationDescription:
       "Your account was created. Verify your email before signing in.",
+    devVerificationLink: "Open development verification link",
     dismiss: "Dismiss notification",
+  },
+  verifyEmail: {
+    successTitle: "Email verified",
+    successDescription: "You can now sign in with your email and password.",
+    errorTitle: "We couldn't verify your email",
+    errorDescription: "The verification link may be expired or already used.",
+    loginAction: "Go to sign in",
   },
   or: "or",
   terms: "Terms of Service",

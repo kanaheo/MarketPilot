@@ -32,6 +32,7 @@ class PasswordSignupResponse(BaseModel):
     user_id: uuid.UUID
     email: str
     email_verification_required: bool
+    dev_email_verification_token: str | None = None
 
 
 class PasswordVerifyRequest(BaseModel):
@@ -54,3 +55,4 @@ class PasswordResetCompleteRequest(BaseModel):
 
 class AuthActionResponse(BaseModel):
     message: str
+    dev_token: str | None = None
