@@ -1,6 +1,7 @@
 import { createHmac } from "node:crypto";
 
 import { auth } from "@/auth";
+import { getRequiredServerEnv } from "@/lib/server/env";
 
 const USER_API_TOKEN_AUDIENCE = "marketpilot-api";
 const USER_API_TOKEN_ISSUER = "marketpilot-web";
@@ -49,11 +50,10 @@ export async function marketPilotApiFetch(
     throw new Error("Authentication required");
   }
 
-  const apiUrl = process.env.MARKETPILOT_API_URL;
-  const signingSecret = process.env.MARKETPILOT_USER_API_SIGNING_SECRET;
-  if (!apiUrl || !signingSecret) {
-    throw new Error("MarketPilot user API authentication is not configured");
-  }
+  const apiUrl = getRequiredServerEnv("MARKETPILOT_API_URL");
+  const signingSecret = getRequiredServerEnv(
+    "MARKETPILOT_USER_API_SIGNING_SECRET",
+  );
 
   const headers = new Headers(init.headers);
   headers.set(

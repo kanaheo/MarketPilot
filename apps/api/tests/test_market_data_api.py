@@ -30,6 +30,7 @@ from marketpilot_api.repositories.price_quotes import (
 
 FIXTURE_COLLECTED_AT = "2026-07-01T00:00:00Z"
 EXTERNAL_COLLECTED_AT = datetime(2026, 7, 2, tzinfo=timezone.utc)
+INTERNAL_API_TOKEN = "expected-market-data-token"
 
 
 @pytest.fixture(autouse=True)
@@ -509,6 +510,8 @@ def test_retrieve_quote_provider_status_hides_finnhub_api_key(
 def test_collect_market_quote_snapshots_records_provider_quotes(
     monkeypatch,
 ) -> None:
+    monkeypatch.setenv("MARKETPILOT_INTERNAL_API_TOKEN", INTERNAL_API_TOKEN)
+    get_settings.cache_clear()
     session = object()
     provider = CountingMarketQuoteProvider()
     configure_market_quote_provider(provider)
@@ -527,9 +530,11 @@ def test_collect_market_quote_snapshots_records_provider_quotes(
     with TestClient(app) as client:
         response = client.post(
             "/market-data/quote-snapshots/collect",
+            headers={"X-MarketPilot-Internal-Token": INTERNAL_API_TOKEN},
             params=[("symbols", "MSFT")],
         )
 
+    get_settings.cache_clear()
     assert response.status_code == 200
     assert response.json() == {
         "requested_count": 1,
@@ -551,9 +556,30 @@ def test_collect_market_quote_snapshots_records_provider_quotes(
     assert record_mock.call_args.args[0] is session
 
 
+def test_collect_market_quote_snapshots_rejects_missing_internal_token(
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("MARKETPILOT_INTERNAL_API_TOKEN", INTERNAL_API_TOKEN)
+    get_settings.cache_clear()
+    provider = CountingMarketQuoteProvider()
+    configure_market_quote_provider(provider)
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/market-data/quote-snapshots/collect",
+            params=[("symbols", "MSFT")],
+        )
+
+    get_settings.cache_clear()
+    assert response.status_code == 401
+    assert provider.call_count == 0
+
+
 def test_collect_market_quote_snapshots_skips_fresh_symbols(
     monkeypatch,
 ) -> None:
+    monkeypatch.setenv("MARKETPILOT_INTERNAL_API_TOKEN", INTERNAL_API_TOKEN)
+    get_settings.cache_clear()
     session = object()
     provider = CountingMarketQuoteProvider()
     configure_market_quote_provider(provider)
@@ -577,6 +603,7 @@ def test_collect_market_quote_snapshots_skips_fresh_symbols(
     with TestClient(app) as client:
         response = client.post(
             "/market-data/quote-snapshots/collect",
+            headers={"X-MarketPilot-Internal-Token": INTERNAL_API_TOKEN},
             params=[
                 ("symbols", "MSFT"),
                 ("symbols", "NVDA"),
@@ -585,6 +612,7 @@ def test_collect_market_quote_snapshots_skips_fresh_symbols(
             ],
         )
 
+    get_settings.cache_clear()
     assert response.status_code == 200
     assert response.json()["requested_count"] == 2
     assert response.json()["fresh_skipped_count"] == 1

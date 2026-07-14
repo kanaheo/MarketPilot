@@ -112,7 +112,10 @@ whether a Finnhub key is configured without returning the key itself.
 provider boundary and stores collected symbol, currency, price, source, and
 collection time in `market_quote_snapshots` for later audit, backtest, and data
 pipeline work. It also accepts `skip_fresh_seconds` so manual API collection
-can reuse the same duplicate-collection guard as the local command.
+can reuse the same duplicate-collection guard as the local command. Because it
+writes snapshot data, this endpoint requires the
+`X-MarketPilot-Internal-Token` header and is intended for server-side jobs or
+trusted operational calls only.
 `GET /market-data/quote-snapshots` returns stored snapshots in latest-first
 order with optional symbol, currency, and limit filters.
 `GET /market-data/quote-snapshots/freshness` returns one freshness row per
@@ -245,7 +248,9 @@ cache TTL, Finnhub key 설정 여부만 반환하고 key 값 자체는 반환하
 symbol, currency, price, source, collection time을 `market_quote_snapshots`에 저장합니다.
 이 이력은 이후 감사, 백테스트, 데이터 파이프라인 작업에 사용합니다. 또한
 `skip_fresh_seconds`를 지원해 수동 API 수집도 로컬 command와 같은 중복 수집 방지
-정책을 사용할 수 있습니다.
+정책을 사용할 수 있습니다. 이 endpoint는 snapshot 데이터를 쓰기 때문에
+`X-MarketPilot-Internal-Token` header가 필요하며, 서버 작업이나 신뢰할 수 있는 운영
+호출에만 사용합니다.
 `GET /market-data/quote-snapshots`는 저장된 snapshot을 최신순으로 반환하고 symbol,
 currency, limit 필터를 지원합니다.
 `GET /market-data/quote-snapshots/freshness`는 요청한 symbol마다 `has_snapshot`,
@@ -376,7 +381,9 @@ provider、cache TTL、Finnhub key設定有無だけを返し、key値自体は�
 currency、price、source、collection timeを`market_quote_snapshots`へ保存します。
 この履歴は後続の監査、バックテスト、データパイプライン作業に使用します。また、
 `skip_fresh_seconds`に対応し、手動API収集でもローカルcommandと同じ重複収集防止
-ポリシーを使用できます。
+ポリシーを使用できます。このendpointはsnapshotデータを書き込むため、
+`X-MarketPilot-Internal-Token` headerが必要で、サーバー側jobまたは信頼できる運用
+呼び出しでのみ使用します。
 `GET /market-data/quote-snapshots`は保存済みsnapshotを新しい順で返し、symbol、
 currency、limitフィルターをサポートします。
 `GET /market-data/quote-snapshots/freshness`は、リクエストされたsymbolごとに

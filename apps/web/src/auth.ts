@@ -2,9 +2,22 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 
 import { syncAuthenticatedUser } from "@/lib/server/auth-user-sync";
+import {
+  getOptionalServerEnv,
+  requireProductionServerEnv,
+} from "@/lib/server/env";
 
-const googleClientId = process.env.AUTH_GOOGLE_ID;
-const googleClientSecret = process.env.AUTH_GOOGLE_SECRET;
+requireProductionServerEnv([
+  "AUTH_SECRET",
+  "AUTH_GOOGLE_ID",
+  "AUTH_GOOGLE_SECRET",
+  "MARKETPILOT_API_URL",
+  "MARKETPILOT_INTERNAL_API_TOKEN",
+  "MARKETPILOT_USER_API_SIGNING_SECRET",
+]);
+
+const googleClientId = getOptionalServerEnv("AUTH_GOOGLE_ID");
+const googleClientSecret = getOptionalServerEnv("AUTH_GOOGLE_SECRET");
 const googleProvider =
   googleClientId && googleClientSecret
     ? Google({
@@ -38,9 +51,11 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     },
   },
   providers: googleProvider ? [googleProvider] : [],
-  secret: process.env.AUTH_SECRET,
+  secret: getOptionalServerEnv("AUTH_SECRET") ?? undefined,
   session: {
+    maxAge: 60 * 60 * 24 * 7,
     strategy: "jwt",
+    updateAge: 60 * 60 * 24,
   },
   trustHost: true,
 });

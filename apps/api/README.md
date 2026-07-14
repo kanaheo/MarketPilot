@@ -30,7 +30,7 @@ python -m marketpilot_api.commands.collect_market_quotes --from-holdings --curre
 python -m marketpilot_api.commands.collect_market_quotes --from-holdings --currency USD --skip-fresh-seconds 300
 python -m marketpilot_api.commands.collect_market_quotes --from-holdings --currency USD --skip-fresh-seconds 300 --dry-run
 python -m marketpilot_api.commands.run_market_data_scheduler --from-holdings --currency USD --interval-policy market-hours --max-runs 12
-curl -X POST "http://127.0.0.1:8000/market-data/quote-snapshots/collect?symbols=AAPL&skip_fresh_seconds=300"
+curl -X POST "http://127.0.0.1:8000/market-data/quote-snapshots/collect?symbols=AAPL&skip_fresh_seconds=300" -H "X-MarketPilot-Internal-Token: $MARKETPILOT_INTERNAL_API_TOKEN"
 curl "http://127.0.0.1:8000/market-data/quote-snapshots/freshness?symbols=AAPL&freshness_seconds=300"
 curl "http://127.0.0.1:8000/market-data/scheduler-runs?limit=20"
 curl "http://127.0.0.1:8000/market-data/scheduler-runs/status?limit=20"
@@ -69,7 +69,7 @@ python -m marketpilot_api.commands.collect_market_quotes --from-holdings --curre
 python -m marketpilot_api.commands.collect_market_quotes --from-holdings --currency USD --skip-fresh-seconds 300
 python -m marketpilot_api.commands.collect_market_quotes --from-holdings --currency USD --skip-fresh-seconds 300 --dry-run
 python -m marketpilot_api.commands.run_market_data_scheduler --from-holdings --currency USD --interval-policy market-hours --max-runs 12
-curl -X POST "http://127.0.0.1:8000/market-data/quote-snapshots/collect?symbols=AAPL&skip_fresh_seconds=300"
+curl -X POST "http://127.0.0.1:8000/market-data/quote-snapshots/collect?symbols=AAPL&skip_fresh_seconds=300" -H "X-MarketPilot-Internal-Token: $MARKETPILOT_INTERNAL_API_TOKEN"
 curl "http://127.0.0.1:8000/market-data/quote-snapshots/freshness?symbols=AAPL&freshness_seconds=300"
 curl "http://127.0.0.1:8000/market-data/scheduler-runs?limit=20"
 curl "http://127.0.0.1:8000/market-data/scheduler-runs/status?limit=20"
@@ -109,7 +109,7 @@ python -m marketpilot_api.commands.collect_market_quotes --from-holdings --curre
 python -m marketpilot_api.commands.collect_market_quotes --from-holdings --currency USD --skip-fresh-seconds 300
 python -m marketpilot_api.commands.collect_market_quotes --from-holdings --currency USD --skip-fresh-seconds 300 --dry-run
 python -m marketpilot_api.commands.run_market_data_scheduler --from-holdings --currency USD --interval-policy market-hours --max-runs 12
-curl -X POST "http://127.0.0.1:8000/market-data/quote-snapshots/collect?symbols=AAPL&skip_fresh_seconds=300"
+curl -X POST "http://127.0.0.1:8000/market-data/quote-snapshots/collect?symbols=AAPL&skip_fresh_seconds=300" -H "X-MarketPilot-Internal-Token: $MARKETPILOT_INTERNAL_API_TOKEN"
 curl "http://127.0.0.1:8000/market-data/quote-snapshots/freshness?symbols=AAPL&freshness_seconds=300"
 curl "http://127.0.0.1:8000/market-data/scheduler-runs?limit=20"
 curl "http://127.0.0.1:8000/market-data/scheduler-runs/status?limit=20"

@@ -50,7 +50,11 @@ def verify_user_api_token(token: str) -> uuid.UUID:
         )
 
     try:
-        payload_segment, signature_segment = token.split(".")
+        token_segments = token.split(".")
+        if len(token_segments) != 2:
+            raise ValueError
+
+        payload_segment, signature_segment = token_segments
         supplied_signature = _decode_base64url(signature_segment)
         expected_signature = hmac.new(
             signing_secret.get_secret_value().encode(),

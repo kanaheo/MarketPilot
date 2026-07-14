@@ -30,16 +30,18 @@ def protected_route(
 def create_token(
     user_id: uuid.UUID,
     *,
+    audience: str = "marketpilot-api",
     issued_at: int | None = None,
     expires_at: int | None = None,
+    issuer: str = "marketpilot-web",
     signing_secret: str = TEST_SIGNING_SECRET,
 ) -> str:
     now = int(time.time())
     payload = {
-        "aud": "marketpilot-api",
+        "aud": audience,
         "exp": expires_at if expires_at is not None else now + 60,
         "iat": issued_at if issued_at is not None else now,
-        "iss": "marketpilot-web",
+        "iss": issuer,
         "sub": str(user_id),
     }
     payload_segment = base64.urlsafe_b64encode(
@@ -79,6 +81,66 @@ def test_protected_route_rejects_missing_authentication() -> None:
 def test_protected_route_rejects_invalid_signature(monkeypatch) -> None:
     configure_auth(monkeypatch)
     token = create_token(uuid.uuid4(), signing_secret="wrong-secret")
+
+    with TestClient(app_under_test) as client:
+        response = client.get(
+            "/protected",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+    clear_auth_state()
+    assert response.status_code == 401
+
+
+def test_protected_route_rejects_malformed_token(monkeypatch) -> None:
+    configure_auth(monkeypatch)
+
+    with TestClient(app_under_test) as client:
+        response = client.get(
+            "/protected",
+            headers={"Authorization": "Bearer payload.signature.extra"},
+        )
+
+    clear_auth_state()
+    assert response.status_code == 401
+
+
+def test_protected_route_rejects_wrong_issuer(monkeypatch) -> None:
+    configure_auth(monkeypatch)
+    token = create_token(uuid.uuid4(), issuer="other-web")
+
+    with TestClient(app_under_test) as client:
+        response = client.get(
+            "/protected",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+    clear_auth_state()
+    assert response.status_code == 401
+
+
+def test_protected_route_rejects_wrong_audience(monkeypatch) -> None:
+    configure_auth(monkeypatch)
+    token = create_token(uuid.uuid4(), audience="other-api")
+
+    with TestClient(app_under_test) as client:
+        response = client.get(
+            "/protected",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+    clear_auth_state()
+    assert response.status_code == 401
+
+
+def test_protected_route_rejects_future_issued_at(monkeypatch) -> None:
+    configure_auth(monkeypatch)
+    now = int(time.time())
+    token = create_token(
+        uuid.uuid4(),
+        issued_at=now + 6,
+        expires_at=now + 60,
+    )
 
     with TestClient(app_under_test) as client:
         response = client.get(

@@ -1,3 +1,6 @@
+import pytest
+from pydantic import ValidationError
+
 from marketpilot_api.core.config import Settings
 
 
@@ -75,3 +78,28 @@ def test_settings_read_prefixed_environment_variables(
     assert settings.market_data_scheduler_open_freshness_seconds == 120
     assert settings.market_data_scheduler_closed_freshness_seconds == 7200
     assert settings.market_data_scheduler_market_timezone == "America/Chicago"
+
+
+def test_production_settings_require_auth_secrets(monkeypatch) -> None:
+    monkeypatch.setenv("MARKETPILOT_ENVIRONMENT", "production")
+    monkeypatch.delenv("MARKETPILOT_INTERNAL_API_TOKEN", raising=False)
+    monkeypatch.delenv("MARKETPILOT_USER_API_SIGNING_SECRET", raising=False)
+
+    with pytest.raises(ValidationError) as exc_info:
+        Settings(_env_file=None)
+
+    error_message = str(exc_info.value)
+    assert "internal_api_token" in error_message
+    assert "user_api_signing_secret" in error_message
+
+
+def test_production_settings_accept_required_auth_secrets(monkeypatch) -> None:
+    monkeypatch.setenv("MARKETPILOT_ENVIRONMENT", "production")
+    monkeypatch.setenv("MARKETPILOT_INTERNAL_API_TOKEN", "internal-token")
+    monkeypatch.setenv("MARKETPILOT_USER_API_SIGNING_SECRET", "signing-secret")
+
+    settings = Settings(_env_file=None)
+
+    assert settings.environment == "production"
+    assert settings.internal_api_token is not None
+    assert settings.user_api_signing_secret is not None
