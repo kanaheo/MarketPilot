@@ -50,10 +50,13 @@ export function AuthScreen({
   } = useForm<EmailAuthValues>({
     defaultValues: {
       email: "",
+      password: "",
     },
     mode: "onChange",
     reValidateMode: "onChange",
-    resolver: zodResolver(createEmailAuthSchema(messages.email.invalid)),
+    resolver: zodResolver(
+      createEmailAuthSchema(messages.email.invalid, messages.password.invalid),
+    ),
   });
 
   const mode = initialMode;
@@ -75,14 +78,40 @@ export function AuthScreen({
     }
   }
 
-  async function submitEmail() {
+  async function submitEmail(values: EmailAuthValues) {
     setActiveProvider("email");
     setStatus("loading");
 
-    await new Promise((resolve) => window.setTimeout(resolve, 900));
+    if (mode === "login") {
+      const result = await signIn("credentials", {
+        email: values.email,
+        password: values.password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setActiveProvider(null);
+        setStatus("error");
+        return;
+      }
+
+      window.location.assign(`/${locale}`);
+      return;
+    }
+
+    const response = await fetch("/api/auth/password/signup", {
+      body: JSON.stringify({
+        email: values.email,
+        password: values.password,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    });
 
     setActiveProvider(null);
-    setStatus("idle");
+    setStatus(response.ok ? "verification" : "error");
   }
 
   const isLoading = status === "loading" || isSubmitting;
@@ -208,6 +237,23 @@ export function AuthScreen({
             </div>
           ) : null}
 
+          {status === "verification" ? (
+            <div className="auth-notice neutral" role="status">
+              <CircleAlert size={17} aria-hidden="true" />
+              <div>
+                <strong>{messages.status.verificationTitle}</strong>
+                <span>{messages.status.verificationDescription}</span>
+              </div>
+              <button
+                aria-label={messages.status.dismiss}
+                onClick={() => setStatus("idle")}
+                type="button"
+              >
+                <X size={15} />
+              </button>
+            </div>
+          ) : null}
+
           <div className="auth-provider-grid">
             <button
               className="auth-provider-button"
@@ -243,27 +289,83 @@ export function AuthScreen({
             noValidate
             onSubmit={handleSubmit(submitEmail)}
           >
-            <label htmlFor={`${mode}-email`}>{messages.email.label}</label>
-            <div className="auth-email-control">
-              <input
-                aria-describedby={
-                  errors.email ? `${mode}-email-error` : undefined
-                }
-                aria-invalid={errors.email ? "true" : "false"}
-                autoComplete="email"
-                disabled={isLoading}
-                id={`${mode}-email`}
-                placeholder={messages.email.placeholder}
-                type="email"
-                {...register("email", {
-                  onBlur: () => {
-                    void trigger("email");
-                  },
-                  onChange: () => {
-                    void trigger("email");
-                  },
-                })}
-              />
+            <div className="auth-email-fields">
+              <div>
+                <label htmlFor={`${mode}-email`}>{messages.email.label}</label>
+                <input
+                  aria-describedby={
+                    errors.email ? `${mode}-email-error` : undefined
+                  }
+                  aria-invalid={errors.email ? "true" : "false"}
+                  autoComplete="email"
+                  disabled={isLoading}
+                  id={`${mode}-email`}
+                  placeholder={messages.email.placeholder}
+                  type="email"
+                  {...register("email", {
+                    onBlur: () => {
+                      void trigger("email");
+                    },
+                    onChange: () => {
+                      void trigger("email");
+                    },
+                  })}
+                />
+                {errors.email ? (
+                  <p
+                    className="auth-field-error"
+                    id={`${mode}-email-error`}
+                    role="alert"
+                  >
+                    <CircleAlert
+                      size={14}
+                      strokeWidth={2.25}
+                      aria-hidden="true"
+                    />
+                    <span>{errors.email.message}</span>
+                  </p>
+                ) : null}
+              </div>
+              <div>
+                <label htmlFor={`${mode}-password`}>
+                  {messages.password.label}
+                </label>
+                <input
+                  aria-describedby={
+                    errors.password ? `${mode}-password-error` : undefined
+                  }
+                  aria-invalid={errors.password ? "true" : "false"}
+                  autoComplete={
+                    mode === "login" ? "current-password" : "new-password"
+                  }
+                  disabled={isLoading}
+                  id={`${mode}-password`}
+                  placeholder={messages.password.placeholder}
+                  type="password"
+                  {...register("password", {
+                    onBlur: () => {
+                      void trigger("password");
+                    },
+                    onChange: () => {
+                      void trigger("password");
+                    },
+                  })}
+                />
+                {errors.password ? (
+                  <p
+                    className="auth-field-error"
+                    id={`${mode}-password-error`}
+                    role="alert"
+                  >
+                    <CircleAlert
+                      size={14}
+                      strokeWidth={2.25}
+                      aria-hidden="true"
+                    />
+                    <span>{errors.password.message}</span>
+                  </p>
+                ) : null}
+              </div>
               <button disabled={isLoading} type="submit">
                 {isLoading && activeProvider === "email" ? (
                   <LoaderCircle
@@ -277,16 +379,6 @@ export function AuthScreen({
                 <span>{modeMessages.emailAction}</span>
               </button>
             </div>
-            {errors.email ? (
-              <p
-                className="auth-field-error"
-                id={`${mode}-email-error`}
-                role="alert"
-              >
-                <CircleAlert size={14} strokeWidth={2.25} aria-hidden="true" />
-                <span>{errors.email.message}</span>
-              </p>
-            ) : null}
           </form>
 
           <p className="auth-switch">

@@ -16,6 +16,7 @@ Google account represents login.
 - Auth.js API route: `/api/auth/[...nextauth]`
 - session strategy: encrypted JWT session stored in an HTTP-only cookie
 - provider: Google OAuth/OpenID Connect
+- provider: email/password through Auth.js Credentials
 - callback after Google authentication: `/{locale}`
 - supported locale callbacks: `/ko`, `/en`, and `/ja`
 - Google buttons stay disabled when credentials are missing
@@ -26,7 +27,9 @@ Google account represents login.
 
 Successful Google authentication synchronizes the identity with the FastAPI
 backend and stores the project user ID in the encrypted Auth.js session.
-Email authentication and account linking are future work.
+Email/password authentication uses the same Auth.js session boundary as Google.
+The web server calls FastAPI for signup and credential verification, so backend
+API origins and secrets stay server-only. Account linking is future work.
 
 For authenticated user APIs, Next.js reads that ID on the server and creates a
 60-second HMAC-signed bearer token. FastAPI verifies the signature, issuer,
@@ -116,8 +119,9 @@ Implementation should be split into small backend-first steps:
 1. Add password credential and token models with Alembic migrations.
 2. Add password hashing and token helpers with unit tests.
 3. Add signup, login verification, email verification, and reset endpoints.
-4. Add Auth.js Credentials provider and server actions.
+4. Add Auth.js Credentials provider and server routes. Done.
 5. Replace the current email-only placeholder UI with email/password fields.
+   Done.
 6. Add abuse-defense tests for duplicate email, weak password, wrong password,
    lockout, reset token expiry, and generic responses.
 
@@ -239,6 +243,7 @@ Google OAuth입니다. Google 로그인과 회원가입은 같은 OAuth 흐름�
 - Auth.js API 경로: `/api/auth/[...nextauth]`
 - 세션 방식: HTTP-only 쿠키에 저장되는 암호화 JWT 세션
 - 인증 제공자: Google OAuth/OpenID Connect
+- 인증 제공자: Auth.js Credentials를 통한 이메일/비밀번호
 - Google 인증 후 이동 경로: `/{locale}`
 - 지원 언어 경로: `/ko`, `/en`, `/ja`
 - Google 인증정보가 없으면 Google 버튼 비활성화
@@ -248,8 +253,9 @@ Google OAuth입니다. Google 로그인과 회원가입은 같은 OAuth 흐름�
 - 사이드바에 Google 프로필과 실제 로그아웃 기능 표시
 
 Google 인증에 성공하면 FastAPI가 사용자를 프로젝트 DB와 동기화하고, 프로젝트의
-사용자 ID를 암호화된 Auth.js 세션에 저장합니다. 이메일 실제 인증과 계정 연결은
-후속 작업입니다.
+사용자 ID를 암호화된 Auth.js 세션에 저장합니다. 이메일/비밀번호 인증도 같은 Auth.js
+세션 경계를 사용합니다. web 서버가 FastAPI에 회원가입과 비밀번호 검증을 요청하므로
+backend API 주소와 비밀값은 server-only로 유지됩니다. 계정 연결은 후속 작업입니다.
 
 로그인 사용자 API를 호출할 때 Next.js 서버가 이 ID를 읽고 60초 HMAC 서명 bearer
 token을 생성합니다. FastAPI는 보호된 router를 실행하기 전에 서명, 발급자, 대상,
@@ -328,8 +334,8 @@ email, 이메일 인증 상태, password hash, hash 알고리즘 metadata, 로�
 1. password credential/token model과 Alembic migration 추가
 2. password hashing/token helper와 unit test 추가
 3. signup, login verify, email verify, password reset endpoint 추가
-4. Auth.js Credentials provider와 server action 연결
-5. 현재 email-only placeholder UI를 email/password 입력으로 교체
+4. Auth.js Credentials provider와 server route 연결 완료
+5. 현재 email-only placeholder UI를 email/password 입력으로 교체 완료
 6. 중복 email, 약한 password, 잘못된 password, lockout, reset token 만료,
    일반화된 응답 테스트 추가
 
@@ -449,6 +455,7 @@ Google OAuthです。Googleログインと新規登録は同じOAuthフローを
 - Auth.js APIパス: `/api/auth/[...nextauth]`
 - セッション方式: HTTP-only Cookieに保存される暗号化JWTセッション
 - 認証プロバイダー: Google OAuth/OpenID Connect
+- 認証プロバイダー: Auth.js Credentialsによるメール/パスワード
 - Google認証後の遷移先: `/{locale}`
 - 対応言語パス: `/ko`、`/en`、`/ja`
 - Google認証情報がない場合はGoogleボタンを無効化
@@ -459,7 +466,9 @@ Google OAuthです。Googleログインと新規登録は同じOAuthフローを
 
 Google認証に成功すると、FastAPIがユーザーをプロジェクトDBと同期し、
 プロジェクトのユーザーIDを暗号化されたAuth.jsセッションに保存します。
-メール認証とアカウント連携は今後の作業です。
+メール/パスワード認証も同じAuth.js session境界を使用します。web serverがFastAPIへ
+signupとcredential verificationを依頼するため、backend API originとsecretはserver-onlyに
+保たれます。アカウント連携は今後の作業です。
 
 認証済みユーザーAPIを呼び出す際、Next.jsサーバーがこのIDを読み取り、60秒の
 HMAC署名付きbearer tokenを生成します。FastAPIは保護routerを実行する前に、
@@ -508,8 +517,8 @@ hashアルゴリズムmetadata、ログイン失敗状態、ロック解除時�
 1. password credential/token modelとAlembic migrationを追加
 2. password hashing/token helperとunit testを追加
 3. signup、login verify、email verify、password reset endpointを追加
-4. Auth.js Credentials providerとserver actionを接続
-5. 現在のemail-only placeholder UIをemail/password入力へ置き換え
+4. Auth.js Credentials providerとserver routeを接続済み
+5. 現在のemail-only placeholder UIをemail/password入力へ置き換え済み
 6. duplicate email、weak password、wrong password、lockout、reset token expiry、
    generic responseのテストを追加
 

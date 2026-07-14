@@ -528,11 +528,11 @@
     display: none;
   }
 
-  .auth-email-control {
+  .auth-email-fields {
     grid-template-columns: 1fr;
   }
 
-  .auth-email-control button {
+  .auth-email-fields button {
     width: 100%;
   }
 

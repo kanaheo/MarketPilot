@@ -3,7 +3,12 @@ import type { Locale } from "@/types/i18n";
 
 export type AuthMode = "login" | "signup";
 export type AuthProvider = "google" | "email";
-export type AuthStatus = "idle" | "loading" | "error" | "cancelled";
+export type AuthStatus =
+  | "idle"
+  | "loading"
+  | "error"
+  | "cancelled"
+  | "verification";
 
 export type AuthPageProps = Readonly<{
   params: Promise<{
@@ -39,6 +44,12 @@ export type AuthenticatedUser = {
   email: string | null;
   display_name: string | null;
   image_url: string | null;
+};
+
+export type PasswordSignupResponse = {
+  user_id: string;
+  email: string;
+  email_verification_required: boolean;
 };
 
 export type SyncAuthenticatedUserInput = {
