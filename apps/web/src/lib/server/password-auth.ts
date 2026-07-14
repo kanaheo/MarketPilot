@@ -19,6 +19,15 @@ type AuthActionResponse = {
   dev_token: string | null;
 };
 
+type PasswordResetRequestInput = {
+  email: string;
+};
+
+type PasswordResetCompleteInput = {
+  token: string;
+  newPassword: string;
+};
+
 export async function signupWithPassword(
   input: PasswordSignupInput,
 ): Promise<PasswordSignupResponse> {
@@ -89,6 +98,49 @@ export async function confirmEmailVerification(
 
   if (!response.ok) {
     throw new Error(`Email verification failed: ${response.status}`);
+  }
+
+  return (await response.json()) as AuthActionResponse;
+}
+
+export async function requestPasswordReset(
+  input: PasswordResetRequestInput,
+): Promise<AuthActionResponse> {
+  const apiUrl = getRequiredServerEnv("MARKETPILOT_API_URL");
+  const response = await fetch(`${apiUrl}/auth/password/password-reset/request`, {
+    body: JSON.stringify({ email: input.email }),
+    cache: "no-store",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    throw new Error(`Password reset request failed: ${response.status}`);
+  }
+
+  return (await response.json()) as AuthActionResponse;
+}
+
+export async function completePasswordReset(
+  input: PasswordResetCompleteInput,
+): Promise<AuthActionResponse> {
+  const apiUrl = getRequiredServerEnv("MARKETPILOT_API_URL");
+  const response = await fetch(`${apiUrl}/auth/password/password-reset/complete`, {
+    body: JSON.stringify({
+      new_password: input.newPassword,
+      token: input.token,
+    }),
+    cache: "no-store",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    throw new Error(`Password reset completion failed: ${response.status}`);
   }
 
   return (await response.json()) as AuthActionResponse;

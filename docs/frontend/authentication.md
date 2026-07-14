@@ -127,14 +127,15 @@ Implementation should be split into small backend-first steps:
 Out of scope for this branch:
 
 - real email delivery
-- password reset request and completion screens
 - Google/password account linking
 
 Local development can still verify the flow without a mail provider. When the
 API environment is not `production`, signup responses include a development
 verification token. The signup UI turns that token into a
 `/{locale}/verify-email?token=...` link so the local flow can confirm the email
-before password login. Production responses never include this token.
+before password login. Password reset requests can also expose a development
+reset link at `/{locale}/reset-password?token=...` in non-production
+environments. Production responses never include these tokens.
 
 References:
 

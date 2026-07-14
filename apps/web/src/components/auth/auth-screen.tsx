@@ -408,6 +408,14 @@ export function AuthScreen({
             <Link href={alternateHref}>{modeMessages.switchAction}</Link>
           </p>
 
+          {mode === "login" ? (
+            <p className="auth-switch">
+              <Link href={`/${locale}/forgot-password`}>
+                {messages.login.forgotPassword}
+              </Link>
+            </p>
+          ) : null}
+
           <p className="auth-terms">
             {modeMessages.termsPrefix} <a href="#terms">{messages.terms}</a>
             {messages.termsSeparator}
