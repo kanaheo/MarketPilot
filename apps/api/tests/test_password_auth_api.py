@@ -128,7 +128,7 @@ def test_password_signup_rejects_duplicate_email(monkeypatch) -> None:
     assert response.status_code == 409
 
 
-def test_password_signup_returns_unavailable_when_email_delivery_fails(
+def test_password_signup_returns_dev_token_when_local_email_delivery_fails(
     monkeypatch,
 ) -> None:
     user = User(
@@ -141,6 +141,36 @@ def test_password_signup_returns_unavailable_when_email_delivery_fails(
     send_mock = MagicMock(side_effect=password_auth_router.EmailDeliveryError)
     monkeypatch.setattr(password_auth_router, "create_password_user", create_mock)
     monkeypatch.setattr(password_auth_router, "send_email_verification", send_mock)
+    app.dependency_overrides[get_db_session] = override_session(MagicMock())
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/auth/password/signup",
+            json={
+                "email": "developer@example.com",
+                "password": "MarketPilot2026!",
+            },
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 201
+    assert response.json()["dev_email_verification_token"] == "verification-token"
+
+
+def test_password_signup_returns_unavailable_when_production_email_delivery_fails(
+    monkeypatch,
+) -> None:
+    user = User(
+        id=uuid.uuid4(),
+        auth_provider="password",
+        auth_subject="developer@example.com",
+        email="developer@example.com",
+    )
+    create_mock = MagicMock(return_value=(user, object(), "verification-token"))
+    send_mock = MagicMock(side_effect=password_auth_router.EmailDeliveryError)
+    monkeypatch.setattr(password_auth_router, "create_password_user", create_mock)
+    monkeypatch.setattr(password_auth_router, "send_email_verification", send_mock)
+    monkeypatch.setattr(password_auth_router, "include_dev_token", lambda: False)
     app.dependency_overrides[get_db_session] = override_session(MagicMock())
 
     with TestClient(app) as client:

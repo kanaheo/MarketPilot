@@ -87,10 +87,17 @@ def signup_with_password(
             token=verification_token,
         )
     except EmailDeliveryError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Email delivery is temporarily unavailable",
-        ) from exc
+        logger.exception("Email verification delivery failed")
+        if include_dev_token():
+            logger.warning(
+                "Continuing signup after email delivery failure in "
+                "non-production environment"
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Email delivery is temporarily unavailable",
+            ) from exc
 
     return PasswordSignupResponse(
         user_id=user.id,
