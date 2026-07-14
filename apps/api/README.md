@@ -39,6 +39,23 @@ curl "http://127.0.0.1:8000/market-data/scheduler-runs/status?limit=20"
 Create `.env` only for server-only overrides such as the internal user-sync
 token. Never commit it. See [Backend setup](../../docs/setup/backend-setup.md#english).
 
+Password-auth email delivery is disabled by default. To send verification and
+password reset emails through SMTP, set server-only values in `apps/api/.env`:
+
+```dotenv
+MARKETPILOT_EMAIL_PROVIDER=smtp
+MARKETPILOT_EMAIL_FROM=no-reply@example.com
+MARKETPILOT_AUTH_EMAIL_BASE_URL=http://localhost:3000/en
+MARKETPILOT_SMTP_HOST=
+MARKETPILOT_SMTP_PORT=587
+MARKETPILOT_SMTP_USERNAME=
+MARKETPILOT_SMTP_PASSWORD=
+MARKETPILOT_SMTP_USE_TLS=true
+```
+
+AWS SES can use this path through SES SMTP credentials. Do not expose SMTP
+secrets to the web app or any `NEXT_PUBLIC_` variable.
+
 ---
 
 <a id="한국어"></a>
@@ -79,6 +96,23 @@ curl "http://127.0.0.1:8000/market-data/scheduler-runs/status?limit=20"
 않습니다. 자세한 순서는 [백엔드 설치 문서](../../docs/setup/backend-setup.md#한국어)를
 참고합니다.
 
+password auth 이메일 발송은 기본값이 꺼짐입니다. SMTP로 이메일 인증/비밀번호
+재설정 메일을 보내려면 `apps/api/.env`에 서버 전용 값만 설정합니다.
+
+```dotenv
+MARKETPILOT_EMAIL_PROVIDER=smtp
+MARKETPILOT_EMAIL_FROM=no-reply@example.com
+MARKETPILOT_AUTH_EMAIL_BASE_URL=http://localhost:3000/en
+MARKETPILOT_SMTP_HOST=
+MARKETPILOT_SMTP_PORT=587
+MARKETPILOT_SMTP_USERNAME=
+MARKETPILOT_SMTP_PASSWORD=
+MARKETPILOT_SMTP_USE_TLS=true
+```
+
+AWS SES도 SES SMTP 자격증명을 쓰면 이 흐름으로 연결할 수 있습니다. SMTP 비밀값은
+web app이나 `NEXT_PUBLIC_` 변수에 절대 노출하지 않습니다.
+
 ---
 
 <a id="日本語"></a>
@@ -118,3 +152,20 @@ curl "http://127.0.0.1:8000/market-data/scheduler-runs/status?limit=20"
 内部ユーザー同期トークンなどサーバー専用値を上書きする場合のみ`.env`を作成し、
 コミットしません。詳細は[バックエンド設定](../../docs/setup/backend-setup.md#日本語)
 を参照してください。
+
+password authのメール送信はデフォルトで無効です。SMTPでメール確認と
+パスワードリセットメールを送る場合は、`apps/api/.env`にサーバー専用値を設定します。
+
+```dotenv
+MARKETPILOT_EMAIL_PROVIDER=smtp
+MARKETPILOT_EMAIL_FROM=no-reply@example.com
+MARKETPILOT_AUTH_EMAIL_BASE_URL=http://localhost:3000/en
+MARKETPILOT_SMTP_HOST=
+MARKETPILOT_SMTP_PORT=587
+MARKETPILOT_SMTP_USERNAME=
+MARKETPILOT_SMTP_PASSWORD=
+MARKETPILOT_SMTP_USE_TLS=true
+```
+
+AWS SESもSES SMTP認証情報を使えばこの流れで接続できます。SMTPシークレットは
+web appや`NEXT_PUBLIC_`変数に公開しないでください。

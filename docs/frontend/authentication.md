@@ -86,9 +86,9 @@ Signup flow:
 3. FastAPI normalizes the email, checks rate limits and password policy, hashes
    the password, creates the user and credential records in one transaction,
    and creates a short-lived email verification token.
-4. Email delivery is deferred to a later mail-provider step. Until then, the
-   backend stores only the token hash and the UI shows that email verification
-   is required.
+4. FastAPI stores only the token hash and sends the verification link when an
+   email provider is configured. Local development can still show a development
+   token for manual testing.
 5. The current version requires verification before password login succeeds.
 
 Login flow:
@@ -126,12 +126,12 @@ Implementation should be split into small backend-first steps:
 
 Out of scope for this branch:
 
-- real email delivery
 - Google/password account linking
 
-Local development can still verify the flow without a mail provider. When the
-API environment is not `production`, signup responses include a development
-verification token. The signup UI turns that token into a
+Local development can still verify the flow without a mail provider. SMTP email
+delivery can be enabled from the FastAPI `.env`, including AWS SES SMTP
+credentials. When the API environment is not `production`, signup responses
+include a development verification token. The signup UI turns that token into a
 `/{locale}/verify-email?token=...` link so the local flow can confirm the email
 before password login. Password reset requests can also expose a development
 reset link at `/{locale}/reset-password?token=...` in non-production

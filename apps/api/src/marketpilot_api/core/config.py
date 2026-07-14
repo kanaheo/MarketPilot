@@ -16,6 +16,15 @@ class Settings(BaseSettings):
     user_api_signing_secret: SecretStr | None = None
     finnhub_api_key: SecretStr | None = None
     market_data_quote_provider: Literal["fixture", "finnhub"] = "fixture"
+    email_provider: Literal["disabled", "smtp"] = "disabled"
+    email_from: str | None = None
+    auth_email_base_url: str = "http://localhost:3000/en"
+    smtp_host: str | None = None
+    smtp_port: int = Field(default=587, ge=1, le=65535)
+    smtp_username: SecretStr | None = None
+    smtp_password: SecretStr | None = None
+    smtp_use_tls: bool = True
+    smtp_timeout_seconds: int = Field(default=10, ge=1)
     market_data_cache_ttl_seconds: int = Field(default=300, ge=0)
     market_data_scheduler_open_interval_seconds: int = Field(default=300, ge=1)
     market_data_scheduler_closed_interval_seconds: int = Field(default=3600, ge=1)
@@ -52,6 +61,21 @@ class Settings(BaseSettings):
                 "Production settings require: "
                 + ", ".join(sorted(missing_secrets))
             )
+
+        if self.email_provider == "smtp":
+            missing_email_settings = [
+                name
+                for name, value in {
+                    "email_from": self.email_from,
+                    "smtp_host": self.smtp_host,
+                }.items()
+                if value is None
+            ]
+            if missing_email_settings:
+                raise ValueError(
+                    "Production SMTP email settings require: "
+                    + ", ".join(sorted(missing_email_settings))
+                )
 
         return self
 

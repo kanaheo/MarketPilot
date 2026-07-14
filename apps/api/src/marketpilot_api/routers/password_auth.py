@@ -1,3 +1,4 @@
+import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -27,8 +28,14 @@ from marketpilot_api.schemas.auth import (
     PasswordSignupResponse,
     PasswordVerifyRequest,
 )
+from marketpilot_api.services.email_delivery import (
+    EmailDeliveryError,
+    send_email_verification,
+    send_password_reset,
+)
 
 router = APIRouter(prefix="/auth/password", tags=["password-auth"])
+logger = logging.getLogger(__name__)
 
 
 def raise_password_policy_error(errors: tuple[str, ...]) -> None:
@@ -71,9 +78,23 @@ def signup_with_password(
             detail="Email is already registered",
         ) from exc
 
+    settings = get_settings()
+    delivery_email = user.email or str(data.email)
+    try:
+        send_email_verification(
+            settings=settings,
+            to_email=delivery_email,
+            token=verification_token,
+        )
+    except EmailDeliveryError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Email delivery is temporarily unavailable",
+        ) from exc
+
     return PasswordSignupResponse(
         user_id=user.id,
-        email=user.email or str(data.email),
+        email=delivery_email,
         email_verification_required=True,
         dev_email_verification_token=(
             verification_token if include_dev_token() else None
@@ -128,6 +149,16 @@ def request_password_reset(
     session: Annotated[Session, Depends(get_db_session)],
 ) -> AuthActionResponse:
     reset_token = request_password_reset_token(session, email=str(data.email))
+    if reset_token is not None:
+        try:
+            send_password_reset(
+                settings=get_settings(),
+                to_email=str(data.email),
+                token=reset_token,
+            )
+        except EmailDeliveryError:
+            logger.exception("Password reset email delivery failed")
+
     return AuthActionResponse(
         message="If the email exists, password reset instructions will be sent",
         dev_token=reset_token if include_dev_token() else None,
