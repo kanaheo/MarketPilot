@@ -1,4 +1,5 @@
 import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 
 import { syncAuthenticatedUser } from "@/lib/server/auth-user-sync";
@@ -6,6 +7,7 @@ import {
   getOptionalServerEnv,
   requireProductionServerEnv,
 } from "@/lib/server/env";
+import { verifyPasswordCredentials } from "@/lib/server/password-auth";
 
 requireProductionServerEnv([
   "AUTH_SECRET",
@@ -26,10 +28,39 @@ const googleProvider =
       })
     : null;
 
+const passwordProvider = Credentials({
+  credentials: {
+    email: {},
+    password: {},
+  },
+  async authorize(credentials) {
+    const email = credentials?.email;
+    const password = credentials?.password;
+
+    if (typeof email !== "string" || typeof password !== "string") {
+      return null;
+    }
+
+    const user = await verifyPasswordCredentials({ email, password });
+    if (user === null) {
+      return null;
+    }
+
+    return {
+      email: user.email,
+      id: user.id,
+      image: user.image_url,
+      name: user.display_name,
+    };
+  },
+});
+
 export const { auth, handlers, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ account, token, user }) {
-      if (account) {
+      if (account?.provider === "credentials") {
+        token.marketPilotUserId = user.id;
+      } else if (account) {
         const syncedUser = await syncAuthenticatedUser({
           authProvider: account.provider,
           authSubject: account.providerAccountId,
@@ -50,7 +81,9 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       return session;
     },
   },
-  providers: googleProvider ? [googleProvider] : [],
+  providers: googleProvider
+    ? [googleProvider, passwordProvider]
+    : [passwordProvider],
   secret: getOptionalServerEnv("AUTH_SECRET") ?? undefined,
   session: {
     maxAge: 60 * 60 * 24 * 7,

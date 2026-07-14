@@ -24,6 +24,13 @@ incrementally while preserving reproducibility and auditability.
 - database-aware `GET /readiness` endpoint
 - SQLAlchemy declarative model foundation
 - provider-neutral `users` table
+- password credential table separate from `users`
+- one-time auth token table for email verification and password reset
+- `POST /auth/password/signup` endpoint
+- `POST /auth/password/verify` endpoint for Auth.js Credentials bridge
+- `POST /auth/password/email-verification/confirm` endpoint
+- generic `POST /auth/password/password-reset/request` endpoint
+- `POST /auth/password/password-reset/complete` endpoint
 - user-owned `portfolios` table
 - immutable `cash_transactions` ledger table
 - internal Auth.js user synchronization endpoint
@@ -145,6 +152,24 @@ includes `source` and `collected_at`. Order executions store the execution-time
 FX rate snapshot, and cross-currency portfolio valuation uses the current FX
 provider rate.
 
+Password authentication is planned as a backend-owned credential feature rather
+than extra nullable fields on `users`. The backend keeps `users` as the
+canonical project user table and adds `user_password_credentials` for
+normalized email, email verification state, password hash, hash metadata,
+failure counters, lockout timestamps, and password-change audit timestamps.
+`user_auth_tokens` stores one-time token hashes for email verification and
+password reset flows; raw token values must not be stored. FastAPI should own
+signup, password verification, email verification, password reset tokens, rate
+limiting, and generic authentication errors. The web app should use Auth.js
+Credentials provider only as the server-side bridge into that backend
+verification flow, then continue using the existing encrypted HTTP-only session
+and short-lived signed user API token boundary. Password hashing uses Argon2id
+through `argon2-cffi` with per-password salts and safe library verification, so
+no plaintext password is stored or compared directly. Email request validation
+uses Pydantic `EmailStr` through `email-validator`. Password reset requests
+return the same response whether the email exists or not, so account existence
+is not exposed through that endpoint.
+
 ---
 
 <a id="한국어"></a>
@@ -169,6 +194,13 @@ MarketPilot은 모듈형 FastAPI 백엔드를 사용합니다. PostgreSQL 기반
 - DB 상태를 확인하는 `GET /readiness` endpoint
 - SQLAlchemy 선언형 모델 기반
 - 인증 제공자에 종속되지 않는 `users` 테이블
+- `users`와 분리된 password credential 테이블
+- 이메일 인증과 비밀번호 재설정을 위한 1회용 auth token 테이블
+- `POST /auth/password/signup` endpoint
+- Auth.js Credentials 연결용 `POST /auth/password/verify` endpoint
+- `POST /auth/password/email-verification/confirm` endpoint
+- 일반화된 응답을 반환하는 `POST /auth/password/password-reset/request` endpoint
+- `POST /auth/password/password-reset/complete` endpoint
 - 사용자별 `portfolios` 테이블
 - 변경하지 않고 계속 쌓는 `cash_transactions` 원장 테이블
 - Auth.js 로그인 사용자를 저장하는 내부 동기화 endpoint
@@ -277,6 +309,21 @@ provider 호출이나 snapshot 저장 없이 대상 종목과 skip 개수만 미
 체결 시점 환율 snapshot을 저장하고, 서로 다른 통화의 포트폴리오 평가는 현재 FX
 provider rate를 사용합니다.
 
+비밀번호 인증은 `users`에 nullable field를 계속 추가하는 방식이 아니라, 백엔드가
+소유하는 별도 credential 기능으로 설계합니다. 백엔드는 `users`를 프로젝트 사용자의
+기준 테이블로 유지하고, `user_password_credentials`에 정규화된 email, 이메일 인증 상태,
+password hash, hash metadata, 실패 횟수, 잠금 시각, 비밀번호 변경 감사 시각을 저장합니다.
+`user_auth_tokens`는 이메일 인증과 비밀번호 재설정에 사용할 1회용 token hash를 저장하며,
+token 원문은 저장하지 않습니다. FastAPI는 회원가입, 비밀번호 검증, 이메일 인증,
+비밀번호 reset token, rate limit, 일반화된 인증 에러를 담당합니다. web app은 Auth.js
+Credentials provider를 이 백엔드 검증 흐름으로 들어가는 서버 측 연결부로만 사용하고,
+이후에는 기존 암호화 HTTP-only 세션과 짧은 수명 서명 user API token 경계를 계속 사용합니다.
+password hashing은 `argon2-cffi`의 Argon2id를 사용하며, 비밀번호마다 salt를 따로 만들고
+라이브러리의 안전한 검증 함수를 사용합니다. 그래서 평문 비밀번호를 저장하거나 직접
+비교하지 않습니다. email 요청 검증은 `email-validator` 기반 Pydantic `EmailStr`을 사용합니다.
+비밀번호 재설정 요청은 email 존재 여부와 상관없이 같은 응답을 반환해서 계정 존재 여부를
+노출하지 않습니다.
+
 ---
 
 <a id="日本語"></a>
@@ -301,6 +348,13 @@ PostgreSQLベースのポートフォリオ、市場データ、バックテス�
 - DB状態を確認する`GET /readiness` endpoint
 - SQLAlchemy宣言型モデル基盤
 - 認証プロバイダーに依存しない`users`テーブル
+- `users`と分離したpassword credentialテーブル
+- email verificationとpassword reset用のone-time auth tokenテーブル
+- `POST /auth/password/signup` endpoint
+- Auth.js Credentials bridge用`POST /auth/password/verify` endpoint
+- `POST /auth/password/email-verification/confirm` endpoint
+- generic responseを返す`POST /auth/password/password-reset/request` endpoint
+- `POST /auth/password/password-reset/complete` endpoint
 - ユーザー別の`portfolios`テーブル
 - 変更せず積み上げる`cash_transactions`元帳テーブル
 - Auth.jsログインユーザーを保存する内部同期endpoint
@@ -409,3 +463,18 @@ FXレートも同じcached provider patternの背後にfixtureとして用意し
 対応通貨間の単一レートを返し、`source`と`collected_at`を含めます。注文約定記録には
 約定時点のFXレートsnapshotを保存し、通貨が異なるポートフォリオ評価は現在のFX
 provider rateを使用します。
+
+パスワード認証は、`users`へnullable fieldを増やす形ではなく、バックエンドが所有する
+別credential機能として設計します。バックエンドは`users`をproject userの基準tableとして
+維持し、`user_password_credentials`に正規化email、メール確認状態、password hash、
+hash metadata、失敗回数、lockout timestamp、password change audit timestampを保存します。
+`user_auth_tokens`はemail verificationとpassword reset用のone-time token hashを保存し、
+raw token値は保存しません。FastAPIはsignup、password verification、email verification、
+password reset token、rate limit、generic authentication errorを担当します。web appは
+Auth.js Credentials providerをバックエンド検証フローへのserver-side bridgeとして使い、
+その後は既存の暗号化HTTP-only sessionと短命signed user API token境界を維持します。
+password hashingは`argon2-cffi`のArgon2idを使い、passwordごとのsaltと安全なlibrary
+verificationを使用します。そのため平文passwordを保存したり直接比較したりしません。
+email request validationは`email-validator`ベースのPydantic `EmailStr`を使用します。
+password reset requestはemailの存在有無に関係なく同じresponseを返し、account existenceを
+そのendpointから露出しません。

@@ -46,6 +46,12 @@ export const auth = {
     placeholder: "name@example.com",
     invalid: "올바른 이메일 주소를 입력해 주세요.",
   },
+  password: {
+    label: "비밀번호",
+    placeholder: "12자 이상",
+    invalid:
+      "12자 이상, 영문 대문자/소문자, 숫자, 특수문자를 각각 1개 이상 포함해 주세요.",
+  },
   status: {
     connecting: "연결 중...",
     errorTitle: "로그인을 완료하지 못했습니다",
@@ -53,6 +59,9 @@ export const auth = {
     cancelledTitle: "로그인이 취소되었습니다",
     cancelledDescription:
       "계정 정보는 저장되지 않았습니다. 원할 때 다시 시작할 수 있어요.",
+    verificationTitle: "이메일 인증이 필요합니다",
+    verificationDescription:
+      "가입은 완료됐습니다. 이메일 인증을 마치면 로그인할 수 있어요.",
     dismiss: "알림 닫기",
   },
   or: "또는",

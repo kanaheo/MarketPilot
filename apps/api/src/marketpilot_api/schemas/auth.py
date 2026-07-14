@@ -1,6 +1,6 @@
 import uuid
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class UserSyncRequest(BaseModel):
@@ -20,3 +20,37 @@ class AuthenticatedUserResponse(BaseModel):
     email: str | None
     display_name: str | None
     image_url: str | None
+
+
+class PasswordSignupRequest(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=1, max_length=128)
+    display_name: str | None = Field(default=None, max_length=120)
+
+
+class PasswordSignupResponse(BaseModel):
+    user_id: uuid.UUID
+    email: str
+    email_verification_required: bool
+
+
+class PasswordVerifyRequest(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=1, max_length=128)
+
+
+class EmailVerificationConfirmRequest(BaseModel):
+    token: str = Field(min_length=32, max_length=512)
+
+
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+
+class PasswordResetCompleteRequest(BaseModel):
+    token: str = Field(min_length=32, max_length=512)
+    new_password: str = Field(min_length=1, max_length=128)
+
+
+class AuthActionResponse(BaseModel):
+    message: str

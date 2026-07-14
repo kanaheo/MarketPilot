@@ -46,6 +46,12 @@ export const auth = {
     placeholder: "name@example.com",
     invalid: "Enter a valid email address.",
   },
+  password: {
+    label: "Password",
+    placeholder: "At least 12 characters",
+    invalid:
+      "Use at least 12 characters with uppercase, lowercase, number, and special character.",
+  },
   status: {
     connecting: "Connecting...",
     errorTitle: "We couldn't complete sign-in",
@@ -53,6 +59,9 @@ export const auth = {
     cancelledTitle: "Sign-in was cancelled",
     cancelledDescription:
       "Nothing was saved. You can restart whenever you're ready.",
+    verificationTitle: "Email verification required",
+    verificationDescription:
+      "Your account was created. Verify your email before signing in.",
     dismiss: "Dismiss notification",
   },
   or: "or",

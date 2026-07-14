@@ -46,6 +46,12 @@ export const auth = {
     placeholder: "name@example.com",
     invalid: "有効なメールアドレスを入力してください。",
   },
+  password: {
+    label: "パスワード",
+    placeholder: "12文字以上",
+    invalid:
+      "12文字以上で、英大文字、英小文字、数字、特殊文字をそれぞれ1文字以上含めてください。",
+  },
   status: {
     connecting: "接続中...",
     errorTitle: "ログインを完了できませんでした",
@@ -53,6 +59,9 @@ export const auth = {
       "しばらくしてから再度試すか、別の方法を選択してください。",
     cancelledTitle: "ログインがキャンセルされました",
     cancelledDescription: "情報は保存されていません。いつでも再開できます。",
+    verificationTitle: "メール確認が必要です",
+    verificationDescription:
+      "アカウントは作成されました。メール確認後にログインできます。",
     dismiss: "通知を閉じる",
   },
   or: "または",

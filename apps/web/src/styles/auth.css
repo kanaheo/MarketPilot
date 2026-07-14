@@ -393,13 +393,13 @@
   font-weight: 700;
 }
 
-.auth-email-control {
+.auth-email-fields {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px;
+  gap: 10px;
 }
 
-.auth-email-control input {
+.auth-email-fields input {
+  width: 100%;
   min-width: 0;
   height: 42px;
   border: 1px solid #dbe2de;
@@ -415,21 +415,21 @@
     box-shadow 150ms ease;
 }
 
-.auth-email-control input::placeholder {
+.auth-email-fields input::placeholder {
   color: #a5aeaa;
 }
 
-.auth-email-control input:focus {
+.auth-email-fields input:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(22, 121, 111, 0.1);
 }
 
-.auth-email-control input[aria-invalid="true"] {
+.auth-email-fields input[aria-invalid="true"] {
   border-color: #d84950;
   box-shadow: 0 0 0 3px rgba(216, 73, 80, 0.08);
 }
 
-.auth-email-control button {
+.auth-email-fields button {
   display: inline-flex;
   height: 42px;
   align-items: center;
@@ -446,7 +446,7 @@
   white-space: nowrap;
 }
 
-.auth-email-control button:hover:not(:disabled) {
+.auth-email-fields button:hover:not(:disabled) {
   border-color: var(--color-primary-strong);
   background: var(--color-primary-strong);
 }

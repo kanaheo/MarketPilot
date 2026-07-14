@@ -88,12 +88,19 @@ export type Messages = Readonly<{
       placeholder: string;
       invalid: string;
     };
+    password: {
+      label: string;
+      placeholder: string;
+      invalid: string;
+    };
     status: {
       connecting: string;
       errorTitle: string;
       errorDescription: string;
       cancelledTitle: string;
       cancelledDescription: string;
+      verificationTitle: string;
+      verificationDescription: string;
       dismiss: string;
     };
     or: string;
