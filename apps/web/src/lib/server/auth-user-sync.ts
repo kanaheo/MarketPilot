@@ -2,16 +2,13 @@ import type {
   AuthenticatedUser,
   SyncAuthenticatedUserInput,
 } from "@/types/auth";
+import { getRequiredServerEnv } from "@/lib/server/env";
 
 export async function syncAuthenticatedUser(
   input: SyncAuthenticatedUserInput,
 ): Promise<AuthenticatedUser> {
-  const apiUrl = process.env.MARKETPILOT_API_URL;
-  const internalToken = process.env.MARKETPILOT_INTERNAL_API_TOKEN;
-
-  if (!apiUrl || !internalToken) {
-    throw new Error("MarketPilot backend authentication is not configured");
-  }
+  const apiUrl = getRequiredServerEnv("MARKETPILOT_API_URL");
+  const internalToken = getRequiredServerEnv("MARKETPILOT_INTERNAL_API_TOKEN");
 
   const response = await fetch(`${apiUrl}/internal/auth/users/sync`, {
     body: JSON.stringify({
