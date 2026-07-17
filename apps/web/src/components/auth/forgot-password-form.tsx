@@ -28,7 +28,7 @@ export function ForgotPasswordForm({
     setHasFailed(false);
 
     const response = await fetch("/api/auth/password/reset/request", {
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, locale }),
       headers: {
         "Content-Type": "application/json",
       },

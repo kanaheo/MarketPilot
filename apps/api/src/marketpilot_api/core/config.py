@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     market_data_quote_provider: Literal["fixture", "finnhub"] = "fixture"
     email_provider: Literal["disabled", "smtp"] = "disabled"
     email_from: str | None = None
-    auth_email_base_url: str = "http://localhost:3000/en"
+    auth_email_base_url: str = "http://localhost:3000"
     smtp_host: str | None = None
     smtp_port: int = Field(default=587, ge=1, le=65535)
     smtp_username: SecretStr | None = None

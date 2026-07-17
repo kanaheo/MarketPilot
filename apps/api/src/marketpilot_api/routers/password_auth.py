@@ -85,6 +85,7 @@ def signup_with_password(
             settings=settings,
             to_email=delivery_email,
             token=verification_token,
+            locale=data.locale,
         )
     except EmailDeliveryError as exc:
         logger.exception("Email verification delivery failed")
@@ -162,6 +163,7 @@ def request_password_reset(
                 settings=get_settings(),
                 to_email=str(data.email),
                 token=reset_token,
+                locale=data.locale,
             )
         except EmailDeliveryError:
             logger.exception("Password reset email delivery failed")

@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 
+import { isLocale } from "@/i18n/config";
 import { requestPasswordReset } from "@/lib/server/password-auth";
 
 type PasswordResetRequestBody = {
   email?: unknown;
+  locale?: unknown;
 };
 
 export async function POST(request: Request) {
@@ -18,7 +20,12 @@ export async function POST(request: Request) {
     );
   }
 
-  if (typeof body.email !== "string" || body.email.trim().length === 0) {
+  if (
+    typeof body.email !== "string" ||
+    body.email.trim().length === 0 ||
+    typeof body.locale !== "string" ||
+    !isLocale(body.locale)
+  ) {
     return NextResponse.json(
       { error: "Invalid password reset request" },
       { status: 400 },
@@ -26,7 +33,10 @@ export async function POST(request: Request) {
   }
 
   try {
-    const response = await requestPasswordReset({ email: body.email.trim() });
+    const response = await requestPasswordReset({
+      email: body.email.trim(),
+      locale: body.locale,
+    });
     return NextResponse.json(response);
   } catch {
     return NextResponse.json(

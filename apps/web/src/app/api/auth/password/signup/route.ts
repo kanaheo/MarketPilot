@@ -1,16 +1,32 @@
 import { NextResponse } from "next/server";
 
+import { isLocale } from "@/i18n/config";
 import { signupWithPassword } from "@/lib/server/password-auth";
 
 type PasswordSignupBody = {
   email?: unknown;
+  locale?: unknown;
   password?: unknown;
 };
 
 export async function POST(request: Request) {
-  const body = (await request.json()) as PasswordSignupBody;
+  let body: PasswordSignupBody;
 
-  if (typeof body.email !== "string" || typeof body.password !== "string") {
+  try {
+    body = (await request.json()) as PasswordSignupBody;
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid signup request" },
+      { status: 400 },
+    );
+  }
+
+  if (
+    typeof body.email !== "string" ||
+    typeof body.password !== "string" ||
+    typeof body.locale !== "string" ||
+    !isLocale(body.locale)
+  ) {
     return NextResponse.json(
       { error: "Invalid signup request" },
       { status: 400 },
@@ -20,6 +36,7 @@ export async function POST(request: Request) {
   try {
     const response = await signupWithPassword({
       email: body.email,
+      locale: body.locale,
       password: body.password,
     });
     return NextResponse.json(response, { status: 201 });

@@ -61,6 +61,7 @@ def test_password_signup_returns_created_user(monkeypatch) -> None:
             "/auth/password/signup",
             json={
                 "email": "Developer@Example.com",
+                "locale": "ja",
                 "password": "MarketPilot2026!",
                 "display_name": "Market Pilot",
             },
@@ -77,6 +78,7 @@ def test_password_signup_returns_created_user(monkeypatch) -> None:
     assert create_mock.call_args.kwargs["email"] == "Developer@example.com"
     assert send_mock.call_args.kwargs["to_email"] == "developer@example.com"
     assert send_mock.call_args.kwargs["token"] == "verification-token"
+    assert send_mock.call_args.kwargs["locale"] == "ja"
 
 
 def test_password_signup_hides_dev_token_when_disabled(monkeypatch) -> None:
@@ -108,6 +110,26 @@ def test_password_signup_hides_dev_token_when_disabled(monkeypatch) -> None:
     clear_dependency_overrides()
     assert response.status_code == 201
     assert response.json()["dev_email_verification_token"] is None
+
+
+def test_password_signup_rejects_invalid_locale(monkeypatch) -> None:
+    create_mock = MagicMock()
+    monkeypatch.setattr(password_auth_router, "create_password_user", create_mock)
+    app.dependency_overrides[get_db_session] = override_session(MagicMock())
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/auth/password/signup",
+            json={
+                "email": "developer@example.com",
+                "locale": "fr",
+                "password": "MarketPilot2026!",
+            },
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 422
+    create_mock.assert_not_called()
 
 
 def test_password_signup_rejects_duplicate_email(monkeypatch) -> None:
@@ -310,6 +332,25 @@ def test_password_reset_request_returns_generic_response(monkeypatch) -> None:
     assert response.json()["dev_token"] == "reset-token"
     assert send_mock.call_args.kwargs["to_email"] == "missing@example.com"
     assert send_mock.call_args.kwargs["token"] == "reset-token"
+    assert send_mock.call_args.kwargs["locale"] == "ko"
+
+
+def test_password_reset_request_uses_requested_locale(monkeypatch) -> None:
+    reset_mock = MagicMock(return_value="reset-token")
+    send_mock = MagicMock()
+    monkeypatch.setattr(password_auth_router, "request_password_reset_token", reset_mock)
+    monkeypatch.setattr(password_auth_router, "send_password_reset", send_mock)
+    app.dependency_overrides[get_db_session] = override_session(MagicMock())
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/auth/password/password-reset/request",
+            json={"email": "developer@example.com", "locale": "en"},
+        )
+
+    clear_dependency_overrides()
+    assert response.status_code == 200
+    assert send_mock.call_args.kwargs["locale"] == "en"
 
 
 def test_password_reset_request_skips_email_when_account_is_missing(

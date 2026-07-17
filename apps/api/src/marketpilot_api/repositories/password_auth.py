@@ -4,7 +4,7 @@ import hashlib
 import secrets
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -45,6 +45,12 @@ def create_password_user(
     display_name: str | None,
 ) -> tuple[User, UserPasswordCredential, str]:
     normalized_email = normalize_email(email)
+    existing_user = session.scalar(
+        select(User).where(func.lower(User.email) == normalized_email)
+    )
+    if existing_user is not None:
+        raise PasswordAuthDuplicateEmailError
+
     password_hash, hash_algorithm, hash_parameters = hash_password(password)
     now = datetime.now(timezone.utc)
     user = User(

@@ -2,10 +2,12 @@ import type {
   AuthenticatedUser,
   PasswordSignupResponse,
 } from "@/types/auth";
+import type { Locale } from "@/types/i18n";
 import { getRequiredServerEnv } from "@/lib/server/env";
 
 type PasswordSignupInput = {
   email: string;
+  locale: Locale;
   password: string;
 };
 
@@ -21,6 +23,7 @@ type AuthActionResponse = {
 
 type PasswordResetRequestInput = {
   email: string;
+  locale: Locale;
 };
 
 type PasswordResetCompleteInput = {
@@ -35,6 +38,7 @@ export async function signupWithPassword(
   const response = await fetch(`${apiUrl}/auth/password/signup`, {
     body: JSON.stringify({
       email: input.email,
+      locale: input.locale,
       password: input.password,
     }),
     cache: "no-store",
@@ -108,7 +112,7 @@ export async function requestPasswordReset(
 ): Promise<AuthActionResponse> {
   const apiUrl = getRequiredServerEnv("MARKETPILOT_API_URL");
   const response = await fetch(`${apiUrl}/auth/password/password-reset/request`, {
-    body: JSON.stringify({ email: input.email }),
+    body: JSON.stringify({ email: input.email, locale: input.locale }),
     cache: "no-store",
     headers: {
       "Content-Type": "application/json",

@@ -103,6 +103,7 @@ export function AuthScreen({
     const response = await fetch("/api/auth/password/signup", {
       body: JSON.stringify({
         email: values.email,
+        locale,
         password: values.password,
       }),
       headers: {

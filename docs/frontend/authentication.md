@@ -135,7 +135,9 @@ include a development verification token. The signup UI turns that token into a
 `/{locale}/verify-email?token=...` link so the local flow can confirm the email
 before password login. Password reset requests can also expose a development
 reset link at `/{locale}/reset-password?token=...` in non-production
-environments. Production responses never include these tokens.
+environments. Email delivery uses the locale submitted by the web signup or
+reset screen, so `/ko`, `/en`, and `/ja` requests produce matching links.
+Production responses never include these tokens.
 
 References:
 
@@ -365,15 +367,16 @@ email, 이메일 인증 상태, password hash, hash 알고리즘 metadata, 로�
 
 이번 브랜치 범위에서 제외:
 
-- 실제 이메일 발송
 - Google/password 계정 연결
 
-로컬 개발에서는 mail provider 없이도 흐름을 확인할 수 있습니다. API 환경이
-`production`이 아니면 signup 응답에 개발용 인증 token이 포함됩니다. signup UI는 이 token을
+로컬 개발에서는 mail provider 없이도 흐름을 확인할 수 있습니다. SMTP 이메일 발송은
+FastAPI `.env`에서 켤 수 있습니다. API 환경이 `production`이 아니면 signup 응답에
+개발용 인증 token이 포함됩니다. signup UI는 이 token을
 `/{locale}/verify-email?token=...` 링크로 바꿔서 password login 전에 이메일 인증을 완료할 수
 있게 합니다. password reset 요청도 non-production 환경에서는 개발용 reset link를
-`/{locale}/reset-password?token=...` 형태로 보여줄 수 있습니다. production 응답에는
-이 token들을 절대 포함하지 않습니다.
+`/{locale}/reset-password?token=...` 형태로 보여줄 수 있습니다. 이메일 발송은 web의
+signup/reset 화면에서 전달한 locale을 사용하므로 `/ko`, `/en`, `/ja` 요청은 각각 같은
+locale의 링크를 만듭니다. production 응답에는 이 token들을 절대 포함하지 않습니다.
 
 참고:
 
@@ -571,15 +574,17 @@ hashアルゴリズムmetadata、ログイン失敗状態、ロック解除時�
 
 このbranchの対象外:
 
-- 実際のメール送信
 - Google/password account linking
 
-local developmentではmail providerなしでもflowを確認できます。API environmentが
-`production`でない場合、signup responseにdevelopment verification tokenを含めます。
+local developmentではmail providerなしでもflowを確認できます。SMTP email deliveryは
+FastAPI `.env`で有効化できます。API environmentが`production`でない場合、
+signup responseにdevelopment verification tokenを含めます。
 signup UIはそのtokenを`/{locale}/verify-email?token=...` linkに変換し、password login前に
 email verificationを完了できます。password reset requestもnon-production環境では
 development reset linkを`/{locale}/reset-password?token=...`として表示できます。
-production responseにはこれらのtokenを含めません。
+email deliveryはwebのsignup/reset画面から渡されたlocaleを使うため、`/ko`、`/en`、
+`/ja`のrequestはそれぞれ同じlocaleのlinkを作ります。production responseにはこれらの
+tokenを含めません。
 
 References:
 

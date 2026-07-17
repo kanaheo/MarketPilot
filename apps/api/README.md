@@ -45,7 +45,7 @@ password reset emails through SMTP, set server-only values in `apps/api/.env`:
 ```dotenv
 MARKETPILOT_EMAIL_PROVIDER=smtp
 MARKETPILOT_EMAIL_FROM=no-reply@example.com
-MARKETPILOT_AUTH_EMAIL_BASE_URL=http://localhost:3000/en
+MARKETPILOT_AUTH_EMAIL_BASE_URL=http://localhost:3000
 MARKETPILOT_SMTP_HOST=
 MARKETPILOT_SMTP_PORT=587
 MARKETPILOT_SMTP_USERNAME=
@@ -53,8 +53,12 @@ MARKETPILOT_SMTP_PASSWORD=
 MARKETPILOT_SMTP_USE_TLS=true
 ```
 
-AWS SES can use this path through SES SMTP credentials. Do not expose SMTP
-secrets to the web app or any `NEXT_PUBLIC_` variable.
+`MARKETPILOT_AUTH_EMAIL_BASE_URL` is the web origin only. The locale is sent by
+the web signup or reset screen, so `/ko/signup`, `/en/signup`, and `/ja/signup`
+produce matching email links. AWS SES can use this path through SES SMTP
+credentials. Resend's testing sender can only send to the account owner's email
+until a custom domain is verified. Do not expose SMTP secrets to the web app or
+any `NEXT_PUBLIC_` variable.
 
 ---
 
@@ -102,7 +106,7 @@ password auth 이메일 발송은 기본값이 꺼짐입니다. SMTP로 이메�
 ```dotenv
 MARKETPILOT_EMAIL_PROVIDER=smtp
 MARKETPILOT_EMAIL_FROM=no-reply@example.com
-MARKETPILOT_AUTH_EMAIL_BASE_URL=http://localhost:3000/en
+MARKETPILOT_AUTH_EMAIL_BASE_URL=http://localhost:3000
 MARKETPILOT_SMTP_HOST=
 MARKETPILOT_SMTP_PORT=587
 MARKETPILOT_SMTP_USERNAME=
@@ -110,8 +114,12 @@ MARKETPILOT_SMTP_PASSWORD=
 MARKETPILOT_SMTP_USE_TLS=true
 ```
 
-AWS SES도 SES SMTP 자격증명을 쓰면 이 흐름으로 연결할 수 있습니다. SMTP 비밀값은
-web app이나 `NEXT_PUBLIC_` 변수에 절대 노출하지 않습니다.
+`MARKETPILOT_AUTH_EMAIL_BASE_URL`에는 web origin만 넣습니다. locale은 web의
+signup/reset 화면에서 API로 전달하므로 `/ko/signup`, `/en/signup`, `/ja/signup`은
+각각 같은 locale의 이메일 링크를 만듭니다. AWS SES도 SES SMTP 자격증명을 쓰면
+이 흐름으로 연결할 수 있습니다. Resend 테스트 발신자는 custom domain 인증 전까지
+계정 소유자 이메일로만 보낼 수 있습니다. SMTP 비밀값은 web app이나 `NEXT_PUBLIC_`
+변수에 절대 노출하지 않습니다.
 
 ---
 
@@ -159,7 +167,7 @@ password authのメール送信はデフォルトで無効です。SMTPでメー
 ```dotenv
 MARKETPILOT_EMAIL_PROVIDER=smtp
 MARKETPILOT_EMAIL_FROM=no-reply@example.com
-MARKETPILOT_AUTH_EMAIL_BASE_URL=http://localhost:3000/en
+MARKETPILOT_AUTH_EMAIL_BASE_URL=http://localhost:3000
 MARKETPILOT_SMTP_HOST=
 MARKETPILOT_SMTP_PORT=587
 MARKETPILOT_SMTP_USERNAME=
@@ -167,5 +175,9 @@ MARKETPILOT_SMTP_PASSWORD=
 MARKETPILOT_SMTP_USE_TLS=true
 ```
 
-AWS SESもSES SMTP認証情報を使えばこの流れで接続できます。SMTPシークレットは
-web appや`NEXT_PUBLIC_`変数に公開しないでください。
+`MARKETPILOT_AUTH_EMAIL_BASE_URL`にはweb originのみを設定します。localeはwebの
+signup/reset画面からAPIへ渡されるため、`/ko/signup`、`/en/signup`、`/ja/signup`は
+それぞれ同じlocaleのメールリンクを作ります。AWS SESもSES SMTP認証情報を使えば
+この流れで接続できます。Resendのテスト送信者はcustom domainを認証するまで、
+アカウント所有者のメールにのみ送信できます。SMTPシークレットはweb appや
+`NEXT_PUBLIC_`変数に公開しないでください。

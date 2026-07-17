@@ -20,9 +20,11 @@ def send_email_verification(
     settings: Settings,
     to_email: str,
     token: str,
+    locale: str,
 ) -> EmailDeliveryResult:
     verification_url = _build_auth_url(
         settings=settings,
+        locale=locale,
         path="/verify-email",
         token=token,
     )
@@ -43,9 +45,11 @@ def send_password_reset(
     settings: Settings,
     to_email: str,
     token: str,
+    locale: str,
 ) -> EmailDeliveryResult:
     reset_url = _build_auth_url(
         settings=settings,
+        locale=locale,
         path="/reset-password",
         token=token,
     )
@@ -124,7 +128,13 @@ def _send_smtp_email(
         raise EmailDeliveryError("SMTP email delivery failed") from exc
 
 
-def _build_auth_url(*, settings: Settings, path: str, token: str) -> str:
+def _build_auth_url(
+    *,
+    settings: Settings,
+    locale: str,
+    path: str,
+    token: str,
+) -> str:
     base_url = settings.auth_email_base_url.rstrip("/")
     normalized_path = path if path.startswith("/") else f"/{path}"
-    return f"{base_url}{normalized_path}?{urlencode({'token': token})}"
+    return f"{base_url}/{locale}{normalized_path}?{urlencode({'token': token})}"

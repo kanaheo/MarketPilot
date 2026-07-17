@@ -6,6 +6,7 @@ import pytest
 
 from marketpilot_api.models import User, UserPasswordCredential
 from marketpilot_api.repositories.password_auth import (
+    PasswordAuthDuplicateEmailError,
     PasswordAuthEmailNotVerifiedError,
     PasswordAuthInvalidCredentialsError,
     PasswordAuthInvalidTokenError,
@@ -24,6 +25,7 @@ def test_normalize_email_strips_and_casefolds() -> None:
 
 def test_create_password_user_adds_user_and_credential() -> None:
     session = MagicMock()
+    session.scalar.return_value = None
 
     user, credential, verification_token = create_password_user(
         session,
@@ -42,6 +44,27 @@ def test_create_password_user_adds_user_and_credential() -> None:
     assert len(verification_token) >= 32
     assert session.add.call_count == 3
     session.commit.assert_called_once()
+
+
+def test_create_password_user_rejects_existing_user_email() -> None:
+    session = MagicMock()
+    session.scalar.return_value = User(
+        id=uuid.uuid4(),
+        auth_provider="google",
+        auth_subject="google-subject",
+        email="developer@example.com",
+    )
+
+    with pytest.raises(PasswordAuthDuplicateEmailError):
+        create_password_user(
+            session,
+            email="Developer@Example.com",
+            password="MarketPilot2026!",
+            display_name="Market Pilot",
+        )
+
+    session.add.assert_not_called()
+    session.commit.assert_not_called()
 
 
 def test_verify_password_user_rejects_missing_credential() -> None:
@@ -120,6 +143,7 @@ def test_verify_password_user_returns_user_for_valid_credentials(monkeypatch) ->
 
 def test_confirm_email_verification_token_marks_credential_verified() -> None:
     session = MagicMock()
+    session.scalar.return_value = None
     user_id = uuid.uuid4()
     _user, credential, verification_token = create_password_user(
         session,
@@ -140,6 +164,7 @@ def test_confirm_email_verification_token_marks_credential_verified() -> None:
 
 def test_confirm_email_verification_token_rejects_used_token() -> None:
     session = MagicMock()
+    session.scalar.return_value = None
     _user, _credential, verification_token = create_password_user(
         session,
         email="developer@example.com",

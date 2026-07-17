@@ -16,7 +16,7 @@ def test_settings_use_safe_defaults() -> None:
     assert settings.finnhub_api_key is None
     assert settings.email_provider == "disabled"
     assert settings.email_from is None
-    assert settings.auth_email_base_url == "http://localhost:3000/en"
+    assert settings.auth_email_base_url == "http://localhost:3000"
     assert settings.smtp_host is None
     assert settings.smtp_port == 587
     assert settings.smtp_username is None
@@ -44,7 +44,7 @@ def test_settings_read_prefixed_environment_variables(
     monkeypatch.setenv("MARKETPILOT_EMAIL_FROM", "no-reply@example.com")
     monkeypatch.setenv(
         "MARKETPILOT_AUTH_EMAIL_BASE_URL",
-        "https://app.example.com/en",
+        "https://app.example.com",
     )
     monkeypatch.setenv("MARKETPILOT_SMTP_HOST", "smtp.example.com")
     monkeypatch.setenv("MARKETPILOT_SMTP_PORT", "2525")
@@ -94,7 +94,7 @@ def test_settings_read_prefixed_environment_variables(
     assert settings.finnhub_api_key.get_secret_value() == "test-finnhub-key"
     assert settings.email_provider == "smtp"
     assert settings.email_from == "no-reply@example.com"
-    assert settings.auth_email_base_url == "https://app.example.com/en"
+    assert settings.auth_email_base_url == "https://app.example.com"
     assert settings.smtp_host == "smtp.example.com"
     assert settings.smtp_port == 2525
     assert settings.smtp_username is not None

@@ -1,6 +1,9 @@
 import uuid
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
+
+AuthLocale = Literal["ko", "en", "ja"]
 
 
 class UserSyncRequest(BaseModel):
@@ -26,6 +29,7 @@ class PasswordSignupRequest(BaseModel):
     email: EmailStr
     password: str = Field(min_length=1, max_length=128)
     display_name: str | None = Field(default=None, max_length=120)
+    locale: AuthLocale = "ko"
 
 
 class PasswordSignupResponse(BaseModel):
@@ -46,6 +50,7 @@ class EmailVerificationConfirmRequest(BaseModel):
 
 class PasswordResetRequest(BaseModel):
     email: EmailStr
+    locale: AuthLocale = "ko"
 
 
 class PasswordResetCompleteRequest(BaseModel):
