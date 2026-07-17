@@ -60,6 +60,9 @@ export const auth = {
     cancelledTitle: "Sign-in was cancelled",
     cancelledDescription:
       "Nothing was saved. You can restart whenever you're ready.",
+    duplicateTitle: "This email is already registered",
+    duplicateDescription:
+      "If you signed up with Google, use Google sign-in on the login screen.",
     verificationTitle: "Email verification required",
     verificationDescription:
       "Your account was created. Verify your email before signing in.",

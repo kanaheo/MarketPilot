@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { isLocale } from "@/i18n/config";
+import { MarketPilotApiError } from "@/lib/server/marketpilot-api";
 import { signupWithPassword } from "@/lib/server/password-auth";
 
 type PasswordSignupBody = {
@@ -40,7 +41,14 @@ export async function POST(request: Request) {
       password: body.password,
     });
     return NextResponse.json(response, { status: 201 });
-  } catch {
+  } catch (error) {
+    if (error instanceof MarketPilotApiError) {
+      return NextResponse.json(
+        { error: "Password signup failed" },
+        { status: error.status },
+      );
+    }
+
     return NextResponse.json(
       { error: "Password signup failed" },
       { status: 400 },
