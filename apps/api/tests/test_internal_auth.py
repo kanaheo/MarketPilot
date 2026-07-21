@@ -111,7 +111,54 @@ def test_user_sync_creates_identity_for_new_user(monkeypatch) -> None:
     session.refresh.assert_called_once_with(user)
 
 
-def test_user_sync_rejects_existing_email_for_different_provider(
+def test_user_sync_links_google_identity_to_existing_email_user(
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("MARKETPILOT_INTERNAL_API_TOKEN", "expected-token")
+    get_settings.cache_clear()
+
+    existing_user = User(
+        id=uuid.uuid4(),
+        auth_provider="password",
+        auth_subject="developer@example.com",
+        email="developer@example.com",
+        display_name="Market Pilot",
+        image_url=None,
+    )
+    session = MagicMock()
+    session.scalar.side_effect = [None, existing_user, None]
+
+    def override_db_session():
+        yield session
+
+    app.dependency_overrides[get_db_session] = override_db_session
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/internal/auth/users/sync",
+            headers={"X-MarketPilot-Internal-Token": "expected-token"},
+            json={
+                "auth_provider": "google",
+                "auth_subject": "google-user-1",
+                "email": "Developer@Example.com",
+                "display_name": "Market Pilot",
+            },
+        )
+
+    app.dependency_overrides.clear()
+    get_settings.cache_clear()
+
+    assert response.status_code == 200
+    assert response.json()["id"] == str(existing_user.id)
+    identity = session.add.call_args.args[0]
+    assert identity.user_id == existing_user.id
+    assert identity.auth_provider == "google"
+    assert identity.auth_subject == "google-user-1"
+    session.commit.assert_called_once()
+    session.refresh.assert_called_once_with(existing_user)
+
+
+def test_user_sync_rejects_existing_email_for_unlinkable_provider(
     monkeypatch,
 ) -> None:
     monkeypatch.setenv("MARKETPILOT_INTERNAL_API_TOKEN", "expected-token")
@@ -138,8 +185,8 @@ def test_user_sync_rejects_existing_email_for_different_provider(
             "/internal/auth/users/sync",
             headers={"X-MarketPilot-Internal-Token": "expected-token"},
             json={
-                "auth_provider": "google",
-                "auth_subject": "google-user-1",
+                "auth_provider": "github",
+                "auth_subject": "github-user-1",
                 "email": "Developer@Example.com",
                 "display_name": "Market Pilot",
             },

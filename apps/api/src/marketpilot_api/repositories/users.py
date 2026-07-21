@@ -6,6 +6,8 @@ from sqlalchemy.orm import Session
 from marketpilot_api.models import User, UserAuthIdentity
 from marketpilot_api.schemas.auth import UserSyncRequest
 
+EMAIL_LINKABLE_AUTH_PROVIDERS = frozenset({"google"})
+
 
 class UserSyncEmailConflictError(Exception):
     pass
@@ -29,24 +31,17 @@ def upsert_user(session: Session, data: UserSyncRequest) -> User:
     )
 
     if user is None:
-        if data.email is not None:
-            existing_email_user = session.scalar(
-                select(User).where(
-                    func.lower(User.email) == _normalize_email(data.email)
-                )
+        user = _get_linkable_user_by_email(session, data)
+        if user is None:
+            user = User(
+                id=uuid.uuid4(),
+                auth_provider=data.auth_provider,
+                auth_subject=data.auth_subject,
+                email=data.email,
+                display_name=data.display_name,
+                image_url=data.image_url,
             )
-            if existing_email_user is not None:
-                raise UserSyncEmailConflictError
-
-        user = User(
-            id=uuid.uuid4(),
-            auth_provider=data.auth_provider,
-            auth_subject=data.auth_subject,
-            email=data.email,
-            display_name=data.display_name,
-            image_url=data.image_url,
-        )
-        session.add(user)
+            session.add(user)
         session.add(
             UserAuthIdentity(
                 id=uuid.uuid4(),
@@ -55,14 +50,42 @@ def upsert_user(session: Session, data: UserSyncRequest) -> User:
                 auth_subject=data.auth_subject,
             )
         )
-    else:
-        user.email = data.email
-        user.display_name = data.display_name
-        user.image_url = data.image_url
+
+    user.email = data.email
+    user.display_name = data.display_name
+    user.image_url = data.image_url
 
     session.commit()
     session.refresh(user)
     return user
+
+
+def _get_linkable_user_by_email(
+    session: Session,
+    data: UserSyncRequest,
+) -> User | None:
+    if data.email is None:
+        return None
+
+    existing_email_user = session.scalar(
+        select(User).where(func.lower(User.email) == _normalize_email(data.email))
+    )
+    if existing_email_user is None:
+        return None
+
+    if data.auth_provider not in EMAIL_LINKABLE_AUTH_PROVIDERS:
+        raise UserSyncEmailConflictError
+
+    existing_provider_identity = session.scalar(
+        select(UserAuthIdentity).where(
+            UserAuthIdentity.user_id == existing_email_user.id,
+            UserAuthIdentity.auth_provider == data.auth_provider,
+        )
+    )
+    if existing_provider_identity is not None:
+        raise UserSyncEmailConflictError
+
+    return existing_email_user
 
 
 def _normalize_email(email: str) -> str:
