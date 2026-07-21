@@ -3,7 +3,7 @@ import uuid
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from marketpilot_api.models import User
+from marketpilot_api.models import User, UserAuthIdentity
 from marketpilot_api.schemas.auth import UserSyncRequest
 
 
@@ -16,11 +16,16 @@ def get_user_by_id(session: Session, user_id: uuid.UUID) -> User | None:
 
 
 def upsert_user(session: Session, data: UserSyncRequest) -> User:
-    user = session.scalar(
-        select(User).where(
-            User.auth_provider == data.auth_provider,
-            User.auth_subject == data.auth_subject,
+    identity = session.scalar(
+        select(UserAuthIdentity).where(
+            UserAuthIdentity.auth_provider == data.auth_provider,
+            UserAuthIdentity.auth_subject == data.auth_subject,
         )
+    )
+    user = (
+        None
+        if identity is None
+        else session.scalar(select(User).where(User.id == identity.user_id))
     )
 
     if user is None:
@@ -42,6 +47,14 @@ def upsert_user(session: Session, data: UserSyncRequest) -> User:
             image_url=data.image_url,
         )
         session.add(user)
+        session.add(
+            UserAuthIdentity(
+                id=uuid.uuid4(),
+                user_id=user.id,
+                auth_provider=data.auth_provider,
+                auth_subject=data.auth_subject,
+            )
+        )
     else:
         user.email = data.email
         user.display_name = data.display_name
