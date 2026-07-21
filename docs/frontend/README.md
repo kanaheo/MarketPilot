@@ -8,6 +8,7 @@
 
 - [Developer setup](../setup/frontend-setup.md#english)
 - [Authentication](authentication.md#english)
+- [Auth linking visual QA](auth-linking-visual-qa.md#english)
 - [Portfolio page](portfolio-page.md#english)
 - [Market explorer page](market-explorer-page.md#english)
 - [Strategy simulation page](strategy-simulation-page.md#english)
@@ -20,6 +21,7 @@
 
 - [개발 환경 설치](../setup/frontend-setup.md#한국어)
 - [인증](authentication.md#한국어)
+- [계정 연결 시각 확인](auth-linking-visual-qa.md#한국어)
 - [포트폴리오 페이지](portfolio-page.md#한국어)
 - [시장 탐색 페이지](market-explorer-page.md#한국어)
 - [전략 시뮬레이션 페이지](strategy-simulation-page.md#한국어)
@@ -32,6 +34,7 @@
 
 - [開発環境設定](../setup/frontend-setup.md#日本語)
 - [認証](authentication.md#日本語)
+- [アカウント連携の視覚確認](auth-linking-visual-qa.md#日本語)
 - [ポートフォリオページ](portfolio-page.md#日本語)
 - [市場探索ページ](market-explorer-page.md#日本語)
 - [戦略シミュレーションページ](strategy-simulation-page.md#日本語)
