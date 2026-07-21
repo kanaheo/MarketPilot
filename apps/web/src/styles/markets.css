@@ -407,6 +407,16 @@
   text-align: right;
 }
 
+.market-data-provider-notice {
+  margin: 0 0 10px;
+  border-left: 3px solid #d7a531;
+  padding: 8px 10px;
+  background: #fff8e6;
+  color: #6f5215;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
 .market-data-provider-status dl {
   display: grid;
   grid-template-columns:

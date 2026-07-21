@@ -9,6 +9,7 @@ from pydantic import SecretStr
 import pytest
 
 from marketpilot_api.core.config import get_settings
+from marketpilot_api.core.config import Settings
 from marketpilot_api.db.session import get_db_session
 from marketpilot_api.main import app
 from marketpilot_api.models import MarketQuoteSnapshot
@@ -505,6 +506,31 @@ def test_retrieve_quote_provider_status_hides_finnhub_api_key(
         "cache_ttl_seconds": 60,
     }
     assert "test-finnhub-key" not in response.text
+
+
+def test_retrieve_quote_provider_status_falls_back_without_finnhub_key(
+    monkeypatch,
+) -> None:
+    settings = Settings(
+        _env_file=None,
+        market_data_quote_provider="finnhub",
+    )
+    monkeypatch.setattr(
+        "marketpilot_api.repositories.price_quotes.get_settings",
+        lambda: settings,
+    )
+
+    with TestClient(app) as client:
+        response = client.get("/market-data/quote-provider-status")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "configured_provider": "finnhub",
+        "active_provider": "fixture",
+        "fallback_provider": "snapshot-cache,fixture",
+        "finnhub_api_key_configured": False,
+        "cache_ttl_seconds": 300,
+    }
 
 
 def test_collect_market_quote_snapshots_records_provider_quotes(

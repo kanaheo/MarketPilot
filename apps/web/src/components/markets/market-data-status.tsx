@@ -32,6 +32,9 @@ export function MarketDataStatus({
       : providerStatus.finnhub_api_key_configured
         ? messages.provider.apiKeyReady
         : messages.provider.apiKeyMissing;
+  const isProviderFallbackActive =
+    providerStatus !== null &&
+    providerStatus.configured_provider !== providerStatus.active_provider;
   const health = resolveHealth({
     failedCount: schedulerStatus?.failed_count ?? 0,
     freshCount,
@@ -221,6 +224,11 @@ export function MarketDataStatus({
           <h3>{messages.provider.title}</h3>
           <span>{providerApiKeyStatus}</span>
         </header>
+        {isProviderFallbackActive ? (
+          <p className="market-data-provider-notice">
+            {messages.provider.fallbackNotice}
+          </p>
+        ) : null}
         <dl>
           <div>
             <dt>{messages.provider.active}</dt>

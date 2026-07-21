@@ -78,6 +78,8 @@ export const markets = {
       apiKey: "Finnhub key",
       apiKeyReady: "Configured",
       apiKeyMissing: "Missing",
+      fallbackNotice:
+        "Configured provider is unavailable, so MarketPilot is using the active fallback provider.",
     },
     time: {
       seconds: "s",

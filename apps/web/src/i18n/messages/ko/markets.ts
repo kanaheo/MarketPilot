@@ -78,6 +78,8 @@ export const markets = {
       apiKey: "Finnhub key",
       apiKeyReady: "설정됨",
       apiKeyMissing: "미설정",
+      fallbackNotice:
+        "설정한 provider를 사용할 수 없어 현재 fallback provider로 시세를 표시합니다.",
     },
     time: {
       seconds: "초",
