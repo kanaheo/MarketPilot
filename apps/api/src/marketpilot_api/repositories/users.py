@@ -1,10 +1,14 @@
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from marketpilot_api.models import User
 from marketpilot_api.schemas.auth import UserSyncRequest
+
+
+class UserSyncEmailConflictError(Exception):
+    pass
 
 
 def get_user_by_id(session: Session, user_id: uuid.UUID) -> User | None:
@@ -20,6 +24,15 @@ def upsert_user(session: Session, data: UserSyncRequest) -> User:
     )
 
     if user is None:
+        if data.email is not None:
+            existing_email_user = session.scalar(
+                select(User).where(
+                    func.lower(User.email) == _normalize_email(data.email)
+                )
+            )
+            if existing_email_user is not None:
+                raise UserSyncEmailConflictError
+
         user = User(
             id=uuid.uuid4(),
             auth_provider=data.auth_provider,
@@ -37,3 +50,7 @@ def upsert_user(session: Session, data: UserSyncRequest) -> User:
     session.commit()
     session.refresh(user)
     return user
+
+
+def _normalize_email(email: str) -> str:
+    return email.strip().casefold()
