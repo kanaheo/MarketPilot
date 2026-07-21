@@ -8,6 +8,7 @@ export type AuthStatus =
   | "loading"
   | "error"
   | "cancelled"
+  | "duplicate"
   | "verification";
 
 export type AuthPageProps = Readonly<{

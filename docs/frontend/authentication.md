@@ -29,7 +29,9 @@ Successful Google authentication synchronizes the identity with the FastAPI
 backend and stores the project user ID in the encrypted Auth.js session.
 Email/password authentication uses the same Auth.js session boundary as Google.
 The web server calls FastAPI for signup and credential verification, so backend
-API origins and secrets stay server-only. Account linking is future work.
+API origins and secrets stay server-only. Account linking is future work. Until
+then, password signup rejects an email that already belongs to an existing
+user, including a Google OAuth user.
 
 For authenticated user APIs, Next.js reads that ID on the server and creates a
 60-second HMAC-signed bearer token. FastAPI verifies the signature, issuer,
@@ -47,8 +49,8 @@ OAuth foundation. The recommended direction is a hybrid model:
 - use a Credentials provider only as the web bridge for email/password login
 - let FastAPI own password registration, password verification, reset tokens,
   email verification, throttling, and audit fields
-- keep Google OAuth and email/password as separate credentials for the same
-  project user until an explicit account-linking flow is designed
+- reject password signup for an email already used by Google OAuth or another
+  password credential until an explicit account-linking flow is designed
 
 The backend should store password credentials outside the `users` table, for
 example in a `user_password_credentials` table. `users` remains the canonical
@@ -86,9 +88,9 @@ Signup flow:
 3. FastAPI normalizes the email, checks rate limits and password policy, hashes
    the password, creates the user and credential records in one transaction,
    and creates a short-lived email verification token.
-4. Email delivery is deferred to a later mail-provider step. Until then, the
-   backend stores only the token hash and the UI shows that email verification
-   is required.
+4. FastAPI stores only the token hash and sends the verification link when an
+   email provider is configured. Local development can still show a development
+   token for manual testing.
 5. The current version requires verification before password login succeeds.
 
 Login flow:
@@ -126,16 +128,18 @@ Implementation should be split into small backend-first steps:
 
 Out of scope for this branch:
 
-- real email delivery
 - Google/password account linking
 
-Local development can still verify the flow without a mail provider. When the
-API environment is not `production`, signup responses include a development
-verification token. The signup UI turns that token into a
+Local development can still verify the flow without a mail provider. SMTP email
+delivery can be enabled from the FastAPI `.env`, including AWS SES SMTP
+credentials. When the API environment is not `production`, signup responses
+include a development verification token. The signup UI turns that token into a
 `/{locale}/verify-email?token=...` link so the local flow can confirm the email
 before password login. Password reset requests can also expose a development
 reset link at `/{locale}/reset-password?token=...` in non-production
-environments. Production responses never include these tokens.
+environments. Email delivery uses the locale submitted by the web signup or
+reset screen, so `/ko`, `/en`, and `/ja` requests produce matching links,
+subjects, and body copy. Production responses never include these tokens.
 
 References:
 
@@ -280,6 +284,8 @@ Google 인증에 성공하면 FastAPI가 사용자를 프로젝트 DB와 동기�
 사용자 ID를 암호화된 Auth.js 세션에 저장합니다. 이메일/비밀번호 인증도 같은 Auth.js
 세션 경계를 사용합니다. web 서버가 FastAPI에 회원가입과 비밀번호 검증을 요청하므로
 backend API 주소와 비밀값은 server-only로 유지됩니다. 계정 연결은 후속 작업입니다.
+그 전까지는 Google OAuth 사용자를 포함해 이미 존재하는 사용자 이메일로 password
+signup을 만들 수 없습니다.
 
 로그인 사용자 API를 호출할 때 Next.js 서버가 이 ID를 읽고 60초 HMAC 서명 bearer
 token을 생성합니다. FastAPI는 보호된 router를 실행하기 전에 서명, 발급자, 대상,
@@ -296,8 +302,8 @@ MarketPilot은 현재 Google OAuth 기반 위에 이메일/비밀번호 인증�
 - 이메일/비밀번호 로그인은 Auth.js Credentials provider를 web 연결부로 사용
 - 비밀번호 회원가입, 비밀번호 검증, reset token, 이메일 인증, 로그인 제한,
   감사 필드는 FastAPI가 담당
-- Google OAuth와 이메일/비밀번호는 명시적인 계정 연결 흐름을 만들기 전까지
-  같은 프로젝트 사용자에 붙을 수 있는 별도 로그인 수단으로 관리
+- Google OAuth나 다른 password credential에서 이미 사용 중인 email은 명시적인
+  계정 연결 흐름을 만들기 전까지 password signup을 거부
 
 백엔드는 비밀번호 정보를 `users` 테이블에 직접 섞지 않고
 `user_password_credentials` 같은 별도 테이블에 저장하는 방향이 좋습니다.
@@ -365,15 +371,17 @@ email, 이메일 인증 상태, password hash, hash 알고리즘 metadata, 로�
 
 이번 브랜치 범위에서 제외:
 
-- 실제 이메일 발송
 - Google/password 계정 연결
 
-로컬 개발에서는 mail provider 없이도 흐름을 확인할 수 있습니다. API 환경이
-`production`이 아니면 signup 응답에 개발용 인증 token이 포함됩니다. signup UI는 이 token을
+로컬 개발에서는 mail provider 없이도 흐름을 확인할 수 있습니다. SMTP 이메일 발송은
+FastAPI `.env`에서 켤 수 있습니다. API 환경이 `production`이 아니면 signup 응답에
+개발용 인증 token이 포함됩니다. signup UI는 이 token을
 `/{locale}/verify-email?token=...` 링크로 바꿔서 password login 전에 이메일 인증을 완료할 수
 있게 합니다. password reset 요청도 non-production 환경에서는 개발용 reset link를
-`/{locale}/reset-password?token=...` 형태로 보여줄 수 있습니다. production 응답에는
-이 token들을 절대 포함하지 않습니다.
+`/{locale}/reset-password?token=...` 형태로 보여줄 수 있습니다. 이메일 발송은 web의
+signup/reset 화면에서 전달한 locale을 사용하므로 `/ko`, `/en`, `/ja` 요청은 각각 같은
+locale의 링크, 제목, 본문을 만듭니다. production 응답에는 이 token들을 절대 포함하지
+않습니다.
 
 참고:
 
@@ -515,7 +523,8 @@ Google認証に成功すると、FastAPIがユーザーをプロジェクトDB�
 プロジェクトのユーザーIDを暗号化されたAuth.jsセッションに保存します。
 メール/パスワード認証も同じAuth.js session境界を使用します。web serverがFastAPIへ
 signupとcredential verificationを依頼するため、backend API originとsecretはserver-onlyに
-保たれます。アカウント連携は今後の作業です。
+保たれます。アカウント連携は今後の作業です。それまでは、Google OAuth userを含む
+既存userのemailではpassword signupを作成できません。
 
 認証済みユーザーAPIを呼び出す際、Next.jsサーバーがこのIDを読み取り、60秒の
 HMAC署名付きbearer tokenを生成します。FastAPIは保護routerを実行する前に、
@@ -531,8 +540,8 @@ MarketPilotは現在のGoogle OAuth基盤の上に、メール/パスワード�
 - HTTP-only Cookieに保存される暗号化Auth.js JWTセッションを維持
 - メール/パスワードログインはAuth.js Credentials providerをweb側の橋渡しにする
 - パスワード登録、検証、reset token、メール確認、試行制限、監査項目はFastAPIが担当
-- 明示的なアカウント連携を設計するまでは、Google OAuthとメール/パスワードを
-  同じproject userに紐づく別credentialとして扱う
+- Google OAuthや他のpassword credentialで既に使われているemailは、明示的な
+  アカウント連携を設計するまでpassword signupを拒否する
 
 バックエンドでは、パスワード情報を`users`へ直接混ぜず、
 `user_password_credentials`のような別テーブルに保存します。`users`はproject userの
@@ -571,14 +580,16 @@ hashアルゴリズムmetadata、ログイン失敗状態、ロック解除時�
 
 このbranchの対象外:
 
-- 実際のメール送信
 - Google/password account linking
 
-local developmentではmail providerなしでもflowを確認できます。API environmentが
-`production`でない場合、signup responseにdevelopment verification tokenを含めます。
+local developmentではmail providerなしでもflowを確認できます。SMTP email deliveryは
+FastAPI `.env`で有効化できます。API environmentが`production`でない場合、
+signup responseにdevelopment verification tokenを含めます。
 signup UIはそのtokenを`/{locale}/verify-email?token=...` linkに変換し、password login前に
 email verificationを完了できます。password reset requestもnon-production環境では
 development reset linkを`/{locale}/reset-password?token=...`として表示できます。
+email deliveryはwebのsignup/reset画面から渡されたlocaleを使うため、`/ko`、`/en`、
+`/ja`のrequestはそれぞれ同じlocaleのlink、subject、body copyを作ります。
 production responseにはこれらのtokenを含めません。
 
 References:

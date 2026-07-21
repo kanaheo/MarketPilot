@@ -103,6 +103,7 @@ export function AuthScreen({
     const response = await fetch("/api/auth/password/signup", {
       body: JSON.stringify({
         email: values.email,
+        locale,
         password: values.password,
       }),
       headers: {
@@ -114,6 +115,10 @@ export function AuthScreen({
     setActiveProvider(null);
     if (!response.ok) {
       setVerificationLink(null);
+      if (response.status === 409) {
+        setStatus("duplicate");
+        return;
+      }
       setStatus("error");
       return;
     }
@@ -243,6 +248,23 @@ export function AuthScreen({
               <div>
                 <strong>{messages.status.cancelledTitle}</strong>
                 <span>{messages.status.cancelledDescription}</span>
+              </div>
+              <button
+                aria-label={messages.status.dismiss}
+                onClick={() => setStatus("idle")}
+                type="button"
+              >
+                <X size={15} />
+              </button>
+            </div>
+          ) : null}
+
+          {status === "duplicate" ? (
+            <div className="auth-notice error" role="alert">
+              <CircleAlert size={17} aria-hidden="true" />
+              <div>
+                <strong>{messages.status.duplicateTitle}</strong>
+                <span>{messages.status.duplicateDescription}</span>
               </div>
               <button
                 aria-label={messages.status.dismiss}

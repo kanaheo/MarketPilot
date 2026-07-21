@@ -100,6 +100,8 @@ export type Messages = Readonly<{
       errorDescription: string;
       cancelledTitle: string;
       cancelledDescription: string;
+      duplicateTitle: string;
+      duplicateDescription: string;
       verificationTitle: string;
       verificationDescription: string;
       devVerificationLink: string;

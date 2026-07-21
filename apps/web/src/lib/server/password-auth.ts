@@ -2,10 +2,13 @@ import type {
   AuthenticatedUser,
   PasswordSignupResponse,
 } from "@/types/auth";
+import type { Locale } from "@/types/i18n";
 import { getRequiredServerEnv } from "@/lib/server/env";
+import { MarketPilotApiError } from "@/lib/server/marketpilot-api";
 
 type PasswordSignupInput = {
   email: string;
+  locale: Locale;
   password: string;
 };
 
@@ -21,6 +24,7 @@ type AuthActionResponse = {
 
 type PasswordResetRequestInput = {
   email: string;
+  locale: Locale;
 };
 
 type PasswordResetCompleteInput = {
@@ -35,6 +39,7 @@ export async function signupWithPassword(
   const response = await fetch(`${apiUrl}/auth/password/signup`, {
     body: JSON.stringify({
       email: input.email,
+      locale: input.locale,
       password: input.password,
     }),
     cache: "no-store",
@@ -45,7 +50,10 @@ export async function signupWithPassword(
   });
 
   if (!response.ok) {
-    throw new Error(`MarketPilot password signup failed: ${response.status}`);
+    throw new MarketPilotApiError(
+      `MarketPilot password signup failed: ${response.status}`,
+      response.status,
+    );
   }
 
   return (await response.json()) as PasswordSignupResponse;
@@ -72,8 +80,9 @@ export async function verifyPasswordCredentials(
   }
 
   if (!response.ok) {
-    throw new Error(
+    throw new MarketPilotApiError(
       `MarketPilot password verification failed: ${response.status}`,
+      response.status,
     );
   }
 
@@ -97,7 +106,10 @@ export async function confirmEmailVerification(
   );
 
   if (!response.ok) {
-    throw new Error(`Email verification failed: ${response.status}`);
+    throw new MarketPilotApiError(
+      `Email verification failed: ${response.status}`,
+      response.status,
+    );
   }
 
   return (await response.json()) as AuthActionResponse;
@@ -108,7 +120,7 @@ export async function requestPasswordReset(
 ): Promise<AuthActionResponse> {
   const apiUrl = getRequiredServerEnv("MARKETPILOT_API_URL");
   const response = await fetch(`${apiUrl}/auth/password/password-reset/request`, {
-    body: JSON.stringify({ email: input.email }),
+    body: JSON.stringify({ email: input.email, locale: input.locale }),
     cache: "no-store",
     headers: {
       "Content-Type": "application/json",
@@ -117,7 +129,10 @@ export async function requestPasswordReset(
   });
 
   if (!response.ok) {
-    throw new Error(`Password reset request failed: ${response.status}`);
+    throw new MarketPilotApiError(
+      `Password reset request failed: ${response.status}`,
+      response.status,
+    );
   }
 
   return (await response.json()) as AuthActionResponse;
@@ -140,7 +155,10 @@ export async function completePasswordReset(
   });
 
   if (!response.ok) {
-    throw new Error(`Password reset completion failed: ${response.status}`);
+    throw new MarketPilotApiError(
+      `Password reset completion failed: ${response.status}`,
+      response.status,
+    );
   }
 
   return (await response.json()) as AuthActionResponse;

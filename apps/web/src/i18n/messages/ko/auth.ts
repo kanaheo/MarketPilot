@@ -60,6 +60,9 @@ export const auth = {
     cancelledTitle: "로그인이 취소되었습니다",
     cancelledDescription:
       "계정 정보는 저장되지 않았습니다. 원할 때 다시 시작할 수 있어요.",
+    duplicateTitle: "이미 가입된 이메일입니다",
+    duplicateDescription:
+      "Google로 가입한 이메일이라면 로그인 화면에서 Google 로그인을 사용해 주세요.",
     verificationTitle: "이메일 인증이 필요합니다",
     verificationDescription:
       "가입은 완료됐습니다. 이메일 인증을 마치면 로그인할 수 있어요.",

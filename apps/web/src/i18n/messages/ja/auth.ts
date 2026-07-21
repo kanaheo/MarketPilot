@@ -60,6 +60,9 @@ export const auth = {
       "しばらくしてから再度試すか、別の方法を選択してください。",
     cancelledTitle: "ログインがキャンセルされました",
     cancelledDescription: "情報は保存されていません。いつでも再開できます。",
+    duplicateTitle: "このメールアドレスは登録済みです",
+    duplicateDescription:
+      "Googleで登録したメールの場合は、ログイン画面でGoogleログインを使用してください。",
     verificationTitle: "メール確認が必要です",
     verificationDescription:
       "アカウントは作成されました。メール確認後にログインできます。",
