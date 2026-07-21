@@ -48,11 +48,12 @@ def test_smtp_email_verification_sends_message() -> None:
     sent_message = smtp.send_message.call_args.args[0]
     assert sent_message["From"] == "no-reply@example.com"
     assert sent_message["To"] == "developer@example.com"
-    assert sent_message["Subject"] == "Verify your MarketPilot email"
+    assert sent_message["Subject"] == "MarketPilot メール確認"
     assert (
         "https://app.example.com/ja/verify-email?token=verification+token"
         in sent_message.get_content()
     )
+    assert "このリンクは24時間有効です。" in sent_message.get_content()
 
 
 def test_smtp_password_reset_sends_reset_link_without_tls() -> None:
@@ -83,6 +84,35 @@ def test_smtp_password_reset_sends_reset_link_without_tls() -> None:
         "https://app.example.com/en/reset-password?token=reset-token"
         in sent_message.get_content()
     )
+
+
+def test_smtp_password_reset_uses_korean_template() -> None:
+    settings = Settings(
+        _env_file=None,
+        email_provider="smtp",
+        email_from="no-reply@example.com",
+        auth_email_base_url="https://app.example.com",
+        smtp_host="smtp.example.com",
+    )
+    smtp = MagicMock()
+
+    with patch("marketpilot_api.services.email_delivery.smtplib.SMTP") as smtp_cls:
+        smtp_cls.return_value.__enter__.return_value = smtp
+        result = send_password_reset(
+            settings=settings,
+            to_email="developer@example.com",
+            token="reset-token",
+            locale="ko",
+        )
+
+    assert result.delivered is True
+    sent_message = smtp.send_message.call_args.args[0]
+    assert sent_message["Subject"] == "MarketPilot 비밀번호 재설정"
+    assert (
+        "https://app.example.com/ko/reset-password?token=reset-token"
+        in sent_message.get_content()
+    )
+    assert "이 링크는 30분 동안 사용할 수 있습니다." in sent_message.get_content()
 
 
 def test_smtp_provider_requires_sender_and_host() -> None:

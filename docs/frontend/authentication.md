@@ -138,8 +138,8 @@ include a development verification token. The signup UI turns that token into a
 before password login. Password reset requests can also expose a development
 reset link at `/{locale}/reset-password?token=...` in non-production
 environments. Email delivery uses the locale submitted by the web signup or
-reset screen, so `/ko`, `/en`, and `/ja` requests produce matching links.
-Production responses never include these tokens.
+reset screen, so `/ko`, `/en`, and `/ja` requests produce matching links,
+subjects, and body copy. Production responses never include these tokens.
 
 References:
 
@@ -380,7 +380,8 @@ FastAPI `.env`에서 켤 수 있습니다. API 환경이 `production`이 아니�
 있게 합니다. password reset 요청도 non-production 환경에서는 개발용 reset link를
 `/{locale}/reset-password?token=...` 형태로 보여줄 수 있습니다. 이메일 발송은 web의
 signup/reset 화면에서 전달한 locale을 사용하므로 `/ko`, `/en`, `/ja` 요청은 각각 같은
-locale의 링크를 만듭니다. production 응답에는 이 token들을 절대 포함하지 않습니다.
+locale의 링크, 제목, 본문을 만듭니다. production 응답에는 이 token들을 절대 포함하지
+않습니다.
 
 참고:
 
@@ -588,8 +589,8 @@ signup UIはそのtokenを`/{locale}/verify-email?token=...` linkに変換し、
 email verificationを完了できます。password reset requestもnon-production環境では
 development reset linkを`/{locale}/reset-password?token=...`として表示できます。
 email deliveryはwebのsignup/reset画面から渡されたlocaleを使うため、`/ko`、`/en`、
-`/ja`のrequestはそれぞれ同じlocaleのlinkを作ります。production responseにはこれらの
-tokenを含めません。
+`/ja`のrequestはそれぞれ同じlocaleのlink、subject、body copyを作ります。
+production responseにはこれらのtokenを含めません。
 
 References:
 

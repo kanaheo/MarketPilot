@@ -15,6 +15,70 @@ class EmailDeliveryResult:
     delivered: bool
 
 
+@dataclass(frozen=True)
+class _EmailTemplate:
+    subject: str
+    body: str
+
+
+_VERIFICATION_TEMPLATES: dict[str, _EmailTemplate] = {
+    "ko": _EmailTemplate(
+        subject="MarketPilot 이메일 인증",
+        body=(
+            "MarketPilot 이메일 주소를 인증해 주세요.\n\n"
+            "{url}\n\n"
+            "이 링크는 24시간 동안 사용할 수 있습니다."
+        ),
+    ),
+    "en": _EmailTemplate(
+        subject="Verify your MarketPilot email",
+        body=(
+            "Verify your MarketPilot email address:\n\n"
+            "{url}\n\n"
+            "This link expires in 24 hours."
+        ),
+    ),
+    "ja": _EmailTemplate(
+        subject="MarketPilot メール確認",
+        body=(
+            "MarketPilotのメールアドレスを確認してください。\n\n"
+            "{url}\n\n"
+            "このリンクは24時間有効です。"
+        ),
+    ),
+}
+
+_PASSWORD_RESET_TEMPLATES: dict[str, _EmailTemplate] = {
+    "ko": _EmailTemplate(
+        subject="MarketPilot 비밀번호 재설정",
+        body=(
+            "MarketPilot 비밀번호를 재설정해 주세요.\n\n"
+            "{url}\n\n"
+            "이 링크는 30분 동안 사용할 수 있습니다. 요청한 적이 없다면 "
+            "이 메일은 무시해도 됩니다."
+        ),
+    ),
+    "en": _EmailTemplate(
+        subject="Reset your MarketPilot password",
+        body=(
+            "Reset your MarketPilot password:\n\n"
+            "{url}\n\n"
+            "This link expires in 30 minutes. If you did not request this, "
+            "you can ignore this email."
+        ),
+    ),
+    "ja": _EmailTemplate(
+        subject="MarketPilot パスワード再設定",
+        body=(
+            "MarketPilotのパスワードを再設定してください。\n\n"
+            "{url}\n\n"
+            "このリンクは30分有効です。心当たりがない場合は、このメールを"
+            "無視してください。"
+        ),
+    ),
+}
+
+
 def send_email_verification(
     *,
     settings: Settings,
@@ -28,15 +92,12 @@ def send_email_verification(
         path="/verify-email",
         token=token,
     )
+    template = _get_template(_VERIFICATION_TEMPLATES, locale)
     return _send_auth_email(
         settings=settings,
         to_email=to_email,
-        subject="Verify your MarketPilot email",
-        body=(
-            "Verify your MarketPilot email address:\n\n"
-            f"{verification_url}\n\n"
-            "This link expires in 24 hours."
-        ),
+        subject=template.subject,
+        body=template.body.format(url=verification_url),
     )
 
 
@@ -53,16 +114,12 @@ def send_password_reset(
         path="/reset-password",
         token=token,
     )
+    template = _get_template(_PASSWORD_RESET_TEMPLATES, locale)
     return _send_auth_email(
         settings=settings,
         to_email=to_email,
-        subject="Reset your MarketPilot password",
-        body=(
-            "Reset your MarketPilot password:\n\n"
-            f"{reset_url}\n\n"
-            "This link expires in 30 minutes. If you did not request this, "
-            "you can ignore this email."
-        ),
+        subject=template.subject,
+        body=template.body.format(url=reset_url),
     )
 
 
@@ -138,3 +195,10 @@ def _build_auth_url(
     base_url = settings.auth_email_base_url.rstrip("/")
     normalized_path = path if path.startswith("/") else f"/{path}"
     return f"{base_url}/{locale}{normalized_path}?{urlencode({'token': token})}"
+
+
+def _get_template(
+    templates: dict[str, _EmailTemplate],
+    locale: str,
+) -> _EmailTemplate:
+    return templates.get(locale, templates["en"])
