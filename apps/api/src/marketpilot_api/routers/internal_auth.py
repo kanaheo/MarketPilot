@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from marketpilot_api.core.config import get_settings
 from marketpilot_api.db.session import get_db_session
-from marketpilot_api.repositories import upsert_user
+from marketpilot_api.repositories import UserSyncEmailConflictError, upsert_user
 from marketpilot_api.schemas.auth import (
     AuthenticatedUserResponse,
     UserSyncRequest,
@@ -46,5 +46,12 @@ def sync_user(
     data: UserSyncRequest,
     session: Annotated[Session, Depends(get_db_session)],
 ) -> AuthenticatedUserResponse:
-    user = upsert_user(session, data)
+    try:
+        user = upsert_user(session, data)
+    except UserSyncEmailConflictError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Email is already registered with another auth provider",
+        ) from exc
+
     return AuthenticatedUserResponse.model_validate(user)

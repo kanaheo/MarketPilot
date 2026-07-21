@@ -9,7 +9,12 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from marketpilot_api.core.password_hashing import hash_password, verify_password
-from marketpilot_api.models import User, UserAuthToken, UserPasswordCredential
+from marketpilot_api.models import (
+    User,
+    UserAuthIdentity,
+    UserAuthToken,
+    UserPasswordCredential,
+)
 
 EMAIL_VERIFICATION_PURPOSE = "email_verification"
 PASSWORD_RESET_PURPOSE = "password_reset"
@@ -73,6 +78,12 @@ def create_password_user(
         locked_until=None,
         password_changed_at=now,
     )
+    identity = UserAuthIdentity(
+        id=uuid.uuid4(),
+        user_id=user.id,
+        auth_provider="password",
+        auth_subject=normalized_email,
+    )
     verification_token = _create_auth_token(
         user_id=user.id,
         purpose=EMAIL_VERIFICATION_PURPOSE,
@@ -81,6 +92,7 @@ def create_password_user(
 
     try:
         session.add(user)
+        session.add(identity)
         session.add(credential)
         session.add(verification_token.record)
         session.commit()

@@ -4,7 +4,7 @@ import uuid
 
 import pytest
 
-from marketpilot_api.models import User, UserPasswordCredential
+from marketpilot_api.models import User, UserAuthIdentity, UserPasswordCredential
 from marketpilot_api.repositories.password_auth import (
     PasswordAuthDuplicateEmailError,
     PasswordAuthEmailNotVerifiedError,
@@ -42,7 +42,12 @@ def test_create_password_user_adds_user_and_credential() -> None:
     assert credential.password_hash_algorithm == "argon2id"
     assert credential.email_verified_at is None
     assert len(verification_token) >= 32
-    assert session.add.call_count == 3
+    identity = session.add.call_args_list[1].args[0]
+    assert isinstance(identity, UserAuthIdentity)
+    assert identity.user_id == user.id
+    assert identity.auth_provider == "password"
+    assert identity.auth_subject == "developer@example.com"
+    assert session.add.call_count == 4
     session.commit.assert_called_once()
 
 
@@ -151,7 +156,7 @@ def test_confirm_email_verification_token_marks_credential_verified() -> None:
         password="MarketPilot2026!",
         display_name=None,
     )
-    auth_token = session.add.call_args_list[2].args[0]
+    auth_token = session.add.call_args_list[3].args[0]
     session.reset_mock()
     session.scalar.side_effect = [auth_token, credential]
 
@@ -171,7 +176,7 @@ def test_confirm_email_verification_token_rejects_used_token() -> None:
         password="MarketPilot2026!",
         display_name=None,
     )
-    auth_token = session.add.call_args_list[2].args[0]
+    auth_token = session.add.call_args_list[3].args[0]
     auth_token.used_at = datetime.now(timezone.utc)
     session.reset_mock()
     session.scalar.return_value = auth_token
