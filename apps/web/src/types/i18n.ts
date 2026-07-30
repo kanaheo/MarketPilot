@@ -356,6 +356,7 @@ export type Messages = Readonly<{
         apiKey: string;
         apiKeyReady: string;
         apiKeyMissing: string;
+        fallbackNotice: string;
       };
       time: {
         seconds: string;

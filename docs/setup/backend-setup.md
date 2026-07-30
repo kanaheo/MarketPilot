@@ -53,6 +53,11 @@ as `MARKETPILOT_DATABASE_URL` normally do not need local overrides. Never
 commit `.env`.
 Check the active quote provider without exposing secrets at
 `GET /market-data/quote-provider-status`.
+If `MARKETPILOT_MARKET_DATA_QUOTE_PROVIDER=finnhub` is set without a Finnhub
+key, the response should show `configured_provider=finnhub`,
+`active_provider=fixture`, and `finnhub_api_key_configured=false`. The markets
+screen also shows a fallback notice in this state. When the key is present,
+`active_provider` should become `finnhub`.
 
 ### Database, migrations, and API
 
@@ -139,6 +144,11 @@ MARKETPILOT_FINNHUB_API_KEY=
 일반적인 로컬 개발에서는 변경하지 않아도 됩니다. `.env`는 커밋하지 않습니다.
 비밀값을 노출하지 않고 활성 현재가 provider를 확인하려면
 `GET /market-data/quote-provider-status`를 호출합니다.
+`MARKETPILOT_MARKET_DATA_QUOTE_PROVIDER=finnhub`로 설정했지만 Finnhub key가
+없으면 응답은 `configured_provider=finnhub`, `active_provider=fixture`,
+`finnhub_api_key_configured=false`여야 합니다. 이 상태에서는 markets 화면에도
+fallback 안내가 표시됩니다. key가 있으면 `active_provider`가 `finnhub`가 되어야
+합니다.
 
 ### DB, 마이그레이션, API 실행
 
@@ -226,6 +236,11 @@ Finnhubの現在値を取得する場合だけ`finnhub`に変更します。
 `.env`はコミットしません。
 secretを公開せずactiveな価格providerを確認するには、
 `GET /market-data/quote-provider-status`を呼び出します。
+`MARKETPILOT_MARKET_DATA_QUOTE_PROVIDER=finnhub`を設定し、Finnhub keyがない場合、
+responseは`configured_provider=finnhub`、`active_provider=fixture`,
+`finnhub_api_key_configured=false`になるはずです。この状態ではmarkets画面にも
+fallback noticeが表示されます。keyがある場合、`active_provider`は`finnhub`に
+なるはずです。
 
 ### DB、マイグレーション、APIの実行
 
