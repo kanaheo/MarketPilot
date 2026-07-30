@@ -97,6 +97,9 @@ export const portfolio = {
     fxBadge: "FX",
     fxBadgeCollectedAt: "収集時刻",
     fxBadgeSource: "出所",
+    quoteCollectedAt: "収集時刻",
+    quoteMissingCollectedAt: "収集時刻なし",
+    quoteSource: "現在値の出所",
     shareUnit: "株",
     columns: {
       asset: "資産",

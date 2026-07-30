@@ -95,6 +95,9 @@ export const portfolio = {
     fxBadge: "FX",
     fxBadgeCollectedAt: "Collected",
     fxBadgeSource: "Source",
+    quoteCollectedAt: "Collected",
+    quoteMissingCollectedAt: "No collected time",
+    quoteSource: "Price source",
     shareUnit: " sh",
     columns: {
       asset: "Asset",

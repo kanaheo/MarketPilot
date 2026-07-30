@@ -1024,7 +1024,21 @@
 }
 
 .portfolio-holdings-row-live .holding-change-current {
+  display: grid;
+  gap: 3px;
   min-width: 0;
+}
+
+.holding-quote-meta {
+  display: block;
+  max-width: 160px;
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: 9px;
+  font-weight: 720;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .portfolio-holdings-row-live .holding-change-delta {
