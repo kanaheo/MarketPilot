@@ -613,6 +613,10 @@ export type Messages = Readonly<{
       trades: string;
       fixture: string;
     };
+    assumptions: {
+      title: string;
+      description: string;
+    };
     chart: {
       title: string;
       description: string;

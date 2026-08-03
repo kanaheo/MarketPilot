@@ -120,6 +120,11 @@ export const backtests = {
     trades: " trades",
     fixture: "Fixture result",
   },
+  assumptions: {
+    title: "Assumptions used",
+    description:
+      "Stop-loss, costs, and execution timing affect performance and trade prices.",
+  },
   chart: {
     title: "Equity curve and drawdown",
     description:

@@ -260,6 +260,15 @@ export function generateBacktestResult(
 
   return {
     currency: values.currency,
+    assumptions: {
+      cashReserve: values.cashReserve,
+      executionTiming: values.executionTiming,
+      feeRate: values.feeRate,
+      maxPositionWeight: values.maxPositionWeight,
+      rebalanceFrequency: values.rebalanceFrequency,
+      slippageRate: values.slippageRate,
+      stopLoss: values.stopLoss,
+    },
     totalReturn,
     annualizedReturn,
     benchmarkReturn,

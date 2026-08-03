@@ -58,8 +58,19 @@ export type BacktestTrade = Readonly<{
   returnRate: number | null;
 }>;
 
+export type BacktestAssumptions = Readonly<{
+  cashReserve: number;
+  executionTiming: ExecutionTiming;
+  feeRate: number;
+  maxPositionWeight: number;
+  rebalanceFrequency: RebalanceFrequency;
+  slippageRate: number;
+  stopLoss: number;
+}>;
+
 export type BacktestResult = Readonly<{
   currency: BacktestCurrency;
+  assumptions: BacktestAssumptions;
   totalReturn: number;
   annualizedReturn: number;
   benchmarkReturn: number;

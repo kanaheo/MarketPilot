@@ -66,6 +66,10 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .backtest-assumptions-strip dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .backtest-results-grid {
     grid-template-columns: 1fr;
   }
@@ -453,6 +457,20 @@
 
   .backtest-summary-grid,
   .backtest-asset-search-results {
+    grid-template-columns: 1fr;
+  }
+
+  .backtest-assumptions-strip header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .backtest-assumptions-strip header span {
+    max-width: none;
+    text-align: left;
+  }
+
+  .backtest-assumptions-strip dl {
     grid-template-columns: 1fr;
   }
 

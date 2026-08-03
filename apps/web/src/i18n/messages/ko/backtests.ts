@@ -116,6 +116,10 @@ export const backtests = {
     trades: "건 거래",
     fixture: "Fixture 결과",
   },
+  assumptions: {
+    title: "이번 결과에 사용한 가정",
+    description: "손절, 비용, 체결 조건이 성과와 거래가에 반영됩니다.",
+  },
   chart: {
     title: "자산 곡선과 낙폭",
     description: "전략 자산과 벤치마크의 변화 및 고점 대비 하락 폭",
