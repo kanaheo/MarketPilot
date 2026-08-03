@@ -1,11 +1,17 @@
 import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
+from typing import Iterable
 from unittest.mock import MagicMock
 
 import pytest
 
 from marketpilot_api.models import CashTransaction, OrderExecution, Portfolio
+from marketpilot_api.repositories.price_quotes import (
+    MarketQuote,
+    configure_market_quote_provider,
+    configure_market_quote_snapshot_provider,
+)
 from marketpilot_api.repositories.portfolios import (
     InsufficientCashError,
     PortfolioHolding,
@@ -22,6 +28,57 @@ from marketpilot_api.schemas.portfolios import (
 
 
 FIXTURE_COLLECTED_AT = datetime(2026, 7, 1, tzinfo=timezone.utc)
+SNAPSHOT_COLLECTED_AT = datetime(2026, 7, 2, tzinfo=timezone.utc)
+
+
+@pytest.fixture(autouse=True)
+def reset_market_quote_providers() -> None:
+    configure_market_quote_provider(None)
+    configure_market_quote_snapshot_provider(None)
+    yield
+    configure_market_quote_provider(None)
+    configure_market_quote_snapshot_provider(None)
+
+
+class EmptyMarketQuoteProvider:
+    def list_market_quotes(
+        self,
+        *,
+        currency: str | None = None,
+        symbols: Iterable[str] | None = None,
+    ) -> list[MarketQuote]:
+        return []
+
+
+class StaticSnapshotMarketQuoteProvider:
+    def __init__(self, quotes: list[MarketQuote]) -> None:
+        self._quotes = quotes
+
+    def list_market_quotes(
+        self,
+        *,
+        currency: str | None = None,
+        symbols: Iterable[str] | None = None,
+    ) -> list[MarketQuote]:
+        normalized_currency = currency.upper() if currency is not None else None
+        normalized_symbols = (
+            {symbol.strip().upper() for symbol in symbols if symbol.strip()}
+            if symbols is not None
+            else None
+        )
+
+        return [
+            quote
+            for quote in self._quotes
+            if (
+                normalized_currency is None
+                or quote.currency == normalized_currency
+            )
+            and (
+                normalized_symbols is None
+                or quote.symbol in normalized_symbols
+            )
+        ]
 
 
 def test_create_portfolio_adds_initial_deposit_in_one_commit() -> None:
@@ -391,6 +448,82 @@ def test_get_portfolio_detail_values_holdings_in_base_currency() -> None:
             valuation_fx_rate=Decimal("1380.000000"),
             current_price_source="fixture",
             current_price_collected_at=FIXTURE_COLLECTED_AT,
+            valuation_fx_source="fixture",
+            valuation_fx_collected_at=FIXTURE_COLLECTED_AT,
+        )
+    ]
+
+
+def test_get_portfolio_detail_uses_snapshot_quote_before_fixture() -> None:
+    session = MagicMock()
+    user_id = uuid.uuid4()
+    portfolio = Portfolio(
+        id=uuid.uuid4(),
+        user_id=user_id,
+        name="Snapshot portfolio",
+        base_currency="USD",
+    )
+    configure_market_quote_provider(EmptyMarketQuoteProvider())
+    configure_market_quote_snapshot_provider(
+        StaticSnapshotMarketQuoteProvider(
+            [
+                MarketQuote(
+                    symbol="AAPL",
+                    currency="USD",
+                    current_price=Decimal("294.3800"),
+                    source="finnhub:snapshot",
+                    collected_at=SNAPSHOT_COLLECTED_AT,
+                )
+            ]
+        )
+    )
+    session.scalar.side_effect = [
+        portfolio,
+        Decimal("1000.0000"),
+        Decimal("1000.0000"),
+    ]
+    session.scalars.return_value.all.side_effect = [
+        [],
+        [
+            OrderExecution(
+                id=uuid.uuid4(),
+                order_id=uuid.uuid4(),
+                portfolio_id=portfolio.id,
+                symbol="AAPL",
+                side="BUY",
+                quantity=Decimal("2.00000000"),
+                price=Decimal("100.0000"),
+                gross_amount=Decimal("200.0000"),
+                currency="USD",
+                executed_at=datetime(2026, 1, 1, tzinfo=timezone.utc),
+            ),
+        ],
+    ]
+
+    result = get_portfolio_detail(
+        session,
+        portfolio_id=portfolio.id,
+        user_id=user_id,
+    )
+
+    assert result is not None
+    assert result.invested_value == Decimal("588.760000000000")
+    assert result.unrealized_profit_loss == Decimal("388.760000000000")
+    assert result.holdings == [
+        PortfolioHolding(
+            symbol="AAPL",
+            quantity=Decimal("2.00000000"),
+            average_price=Decimal("100.0000"),
+            current_price=Decimal("294.3800"),
+            market_value=Decimal("588.760000000000"),
+            unrealized_profit_loss=Decimal("388.760000000000"),
+            return_rate=Decimal("1.943800000000"),
+            currency="USD",
+            quote_currency="USD",
+            valuation_currency="USD",
+            valuation_fx_rate=Decimal("1.000000"),
+            current_price_source="finnhub:snapshot",
+            current_price_collected_at=SNAPSHOT_COLLECTED_AT,
             valuation_fx_source="fixture",
             valuation_fx_collected_at=FIXTURE_COLLECTED_AT,
         )

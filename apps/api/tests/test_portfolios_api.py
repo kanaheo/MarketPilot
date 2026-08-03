@@ -241,14 +241,18 @@ def test_retrieve_portfolio_returns_detail_for_owner(monkeypatch) -> None:
                     symbol="AAPL",
                     quantity=Decimal("2.00000000"),
                     average_price=Decimal("100.0000"),
-                    current_price=Decimal("100.0000"),
-                    market_value=Decimal("200.0000"),
-                    unrealized_profit_loss=Decimal("0"),
-                    return_rate=Decimal("0"),
+                    current_price=Decimal("294.3800"),
+                    market_value=Decimal("588.760000000000"),
+                    unrealized_profit_loss=Decimal("388.760000000000"),
+                    return_rate=Decimal("1.943800000000"),
                     currency="USD",
                     quote_currency="USD",
                     valuation_currency="USD",
                     valuation_fx_rate=Decimal("1.000000"),
+                    current_price_source="finnhub:snapshot",
+                    current_price_collected_at=now,
+                    valuation_fx_source="fixture",
+                    valuation_fx_collected_at=now,
                 )
             ],
         )
@@ -281,8 +285,24 @@ def test_retrieve_portfolio_returns_detail_for_owner(monkeypatch) -> None:
     )
     assert response.json()["holdings"][0]["symbol"] == "AAPL"
     assert response.json()["holdings"][0]["quantity"] == "2.00000000"
-    assert response.json()["holdings"][0]["market_value"] == "200.0000"
-    assert response.json()["holdings"][0]["unrealized_profit_loss"] == "0"
+    assert response.json()["holdings"][0]["current_price"] == "294.3800"
+    assert response.json()["holdings"][0]["market_value"] == "588.760000000000"
+    assert (
+        response.json()["holdings"][0]["unrealized_profit_loss"]
+        == "388.760000000000"
+    )
+    assert (
+        response.json()["holdings"][0]["current_price_source"]
+        == "finnhub:snapshot"
+    )
+    assert response.json()["holdings"][0]["current_price_collected_at"] == (
+        now.isoformat().replace("+00:00", "Z")
+    )
+    assert response.json()["holdings"][0]["valuation_fx_rate"] == "1.000000"
+    assert response.json()["holdings"][0]["valuation_fx_source"] == "fixture"
+    assert response.json()["holdings"][0]["valuation_fx_collected_at"] == (
+        now.isoformat().replace("+00:00", "Z")
+    )
     assert response.json()["orders"] == []
     detail_mock.assert_called_once_with(
         session,

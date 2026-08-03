@@ -95,6 +95,9 @@ export const portfolio = {
     fxBadge: "환율",
     fxBadgeCollectedAt: "수집 시각",
     fxBadgeSource: "출처",
+    quoteCollectedAt: "수집 시각",
+    quoteMissingCollectedAt: "수집 시각 없음",
+    quoteSource: "현재가 출처",
     shareUnit: "주",
     columns: {
       asset: "자산",

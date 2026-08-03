@@ -50,6 +50,21 @@ function buildFxBadgeDetails(
   };
 }
 
+function buildQuoteMetaText(
+  holding: PortfolioHoldingsProps["holdings"][number],
+  locale: PortfolioHoldingsProps["locale"],
+  messages: PortfolioHoldingsProps["messages"],
+) {
+  const collectedAt = holding.currentPriceCollectedAt
+    ? `${messages.quoteCollectedAt}: ${formatDateTime(
+        holding.currentPriceCollectedAt,
+        locale,
+      )}`
+    : messages.quoteMissingCollectedAt;
+
+  return `${messages.quoteSource}: ${holding.currentPriceSource} · ${collectedAt}`;
+}
+
 export function PortfolioHoldings({
   holdings,
   locale,
@@ -171,6 +186,9 @@ export function PortfolioHoldings({
                   holding.quoteCurrency,
                   locale,
                 )}
+                <small className="holding-quote-meta">
+                  {buildQuoteMetaText(holding, locale, messages)}
+                </small>
               </HoldingChangeValue>
               <HoldingChangeValue
                 className="numeric-cell strong-value"

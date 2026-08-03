@@ -25,6 +25,7 @@
 - asset-allocation donut chart
 - holdings table with quantity, average price, current price, market value, and
   unrealized profit/loss
+- current-price source and collected time shown under each holding price
 - quote-currency display for average/current prices and base-currency display
   for valuation fields
 - FX badge for cross-currency holdings, using the portfolio valuation FX rate
@@ -74,7 +75,7 @@ unauthenticated request to `/{locale}/login`.
 
 ## Deferred work
 
-- connect an external or cached market-data provider
+- visually verify external and cached market-data provider flows
 - expand FX handling beyond the current fixture provider path
 - make the period tabs change the chart dataset
 - add loading, empty, and error states for remote data
@@ -103,6 +104,7 @@ unauthenticated request to `/{locale}/login`.
 - S&P 500 비교선이 포함된 포트폴리오 가치 차트
 - 자산 배분 도넛 차트
 - 수량, 평균 매수가, 현재가, 평가금액, 미실현 손익을 표시하는 보유 종목 표
+- 각 보유 종목 현재가 아래에 현재가 출처와 수집 시각 표시
 - 평균가와 현재가는 종목 현재가 통화로 표시하고, 평가금액과 미실현 손익은
   포트폴리오 기준 통화로 표시
 - 다른 통화 보유 종목에는 포트폴리오 평가 환율을 사용하는 FX 배지 표시
@@ -153,7 +155,7 @@ action에 둡니다.
 
 ### 후속 작업
 
-- 외부 또는 캐시 기반 시장 현재가 provider 연결
+- 외부 및 캐시 기반 시장 현재가 provider 흐름 시각 확인
 - 현재 fixture provider 경로를 넘어서는 환율 처리 확장
 - 기간 탭에 실제 차트 데이터 전환 기능 추가
 - 원격 데이터용 loading, empty 및 error 상태 추가
@@ -182,6 +184,7 @@ action에 둡니다.
 - S&P 500比較線を含むポートフォリオ価値チャート
 - 資産配分ドーナツチャート
 - 数量、平均取得価格、現在値、評価額、未実現損益を表示する保有銘柄表
+- 各保有銘柄の現在値の下に価格の出所と収集時刻を表示
 - 平均価格と現在値は銘柄の価格通貨で表示し、評価額と未実現損益は
   ポートフォリオ基準通貨で表示
 - 通貨が異なる保有銘柄にはポートフォリオ評価FXレートのbadgeを表示
@@ -232,7 +235,7 @@ Componentとし、API呼び出しや認証に関わる処理はServer Component�
 
 ### 今後の作業
 
-- 外部またはキャッシュ型の市場価格providerを接続
+- 外部およびキャッシュ型の市場価格providerフローの視覚確認
 - 現在のfixture provider経路を超えたFX処理の拡張
 - 期間タブによるチャートデータ切り替え
 - リモートデータ向けloading、empty、error状態
