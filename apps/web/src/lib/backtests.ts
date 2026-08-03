@@ -27,6 +27,23 @@ const benchmarkAnnualReturn: Record<BacktestBenchmark, number> = {
   NIKKEI225: 0.108,
 };
 
+const rebalanceTurnoverFactor: Record<
+  BacktestFormValues["rebalanceFrequency"],
+  number
+> = {
+  weekly: 12,
+  monthly: 4,
+  quarterly: 1.5,
+};
+
+const executionTimingSlippageFactor: Record<
+  BacktestFormValues["executionTiming"],
+  number
+> = {
+  nextOpen: 1,
+  sameClose: 0.65,
+};
+
 function getYears(startDate: string, endDate: string) {
   const start = new Date(`${startDate}T00:00:00Z`).getTime();
   const end = new Date(`${endDate}T00:00:00Z`).getTime();
@@ -103,6 +120,8 @@ function createChart(
 ) {
   const points = 13;
   let peak = values.initialCapital;
+  const stopLossFloor =
+    values.stopLoss > 0 ? -(values.stopLoss / 100) : null;
 
   return Array.from({ length: points }, (_, index) => {
     const progress = index / (points - 1);
@@ -114,16 +133,20 @@ function createChart(
         : index === 9
           ? -0.18 - volatility * 0.05
           : 0;
-    const portfolio =
+    const rawPortfolio =
       values.initialCapital *
       Math.max(0.2, 1 + totalReturn * progress + seasonalMove + correction);
+    peak = Math.max(peak, rawPortfolio);
+    const rawDrawdown = rawPortfolio / peak - 1;
+    const portfolio =
+      stopLossFloor !== null && rawDrawdown < stopLossFloor
+        ? peak * (1 + stopLossFloor)
+        : rawPortfolio;
     const benchmark =
       values.initialCapital *
       (1 +
         benchmarkReturn * progress +
         Math.sin(index * 0.92) * 0.018 * progress);
-
-    peak = Math.max(peak, portfolio);
 
     const date = new Date(`${values.startDate}T00:00:00Z`);
     const end = new Date(`${values.endDate}T00:00:00Z`);
@@ -154,7 +177,11 @@ function createTrades(
   const duration = end.getTime() - start.getTime();
 
   return selectedAssets.flatMap((selectedAsset, assetIndex) => {
-    const entryPrice = 80 + (assetIndex + 1) * 37.25;
+    const slippageRate =
+      (values.slippageRate / 100) *
+      executionTimingSlippageFactor[values.executionTiming];
+    const referenceEntryPrice = 80 + (assetIndex + 1) * 37.25;
+    const entryPrice = referenceEntryPrice * (1 + slippageRate);
     const quantity = Math.max(
       1,
       Math.floor(
@@ -162,7 +189,9 @@ function createTrades(
       ),
     );
     const exitPrice =
-      entryPrice * (1 + totalReturn * (0.72 + assetIndex * 0.08));
+      referenceEntryPrice *
+      (1 + totalReturn * (0.72 + assetIndex * 0.08)) *
+      (1 - slippageRate);
     const entryDate = new Date(start.getTime() + duration * 0.04);
     const exitDate = new Date(start.getTime() + duration * 0.92);
 
@@ -198,28 +227,34 @@ export function generateBacktestResult(
   const years = getYears(values.startDate, values.endDate);
   const weightedReturn = getWeightedMetric(selectedAssets, "annualReturn");
   const weightedVolatility = getWeightedMetric(selectedAssets, "volatility");
+  const turnoverFactor =
+    rebalanceTurnoverFactor[values.rebalanceFrequency];
   const annualCosts =
-    ((values.feeRate + values.slippageRate) / 100) *
-    (values.rebalanceFrequency === "weekly"
-      ? 12
-      : values.rebalanceFrequency === "monthly"
-        ? 4
-        : 1.5);
-  const annualizedReturn = Math.max(
+    (values.feeRate / 100) * turnoverFactor +
+    (values.slippageRate / 100) *
+      turnoverFactor *
+      executionTimingSlippageFactor[values.executionTiming];
+  const rawAnnualizedReturn = Math.max(
     -0.85,
     weightedReturn *
       strategyReturnFactor[values.strategy] -
       annualCosts,
   );
-  const totalReturn = (1 + annualizedReturn) ** years - 1;
+  const rawTotalReturn = (1 + rawAnnualizedReturn) ** years - 1;
   const benchmarkReturn =
     (1 + benchmarkAnnualReturn[values.benchmark]) ** years - 1;
   const chart = createChart(
     values,
-    totalReturn,
+    rawTotalReturn,
     benchmarkReturn,
     weightedVolatility * strategyRiskFactor[values.strategy],
   );
+  const finalValue =
+    chart[chart.length - 1]?.portfolio ??
+    values.initialCapital * (1 + rawTotalReturn);
+  const totalReturn = finalValue / values.initialCapital - 1;
+  const annualizedReturn =
+    totalReturn > -1 ? (1 + totalReturn) ** (1 / years) - 1 : -1;
   const maxDrawdown = Math.min(...chart.map((point) => point.drawdown));
   const trades = createTrades(values, selectedAssets, totalReturn);
 
@@ -238,7 +273,7 @@ export function generateBacktestResult(
       ),
     winRate: Math.min(0.88, 0.54 + annualizedReturn * 0.45),
     tradeCount: trades.length,
-    finalValue: values.initialCapital * (1 + totalReturn),
+    finalValue,
     chart,
     trades,
   };

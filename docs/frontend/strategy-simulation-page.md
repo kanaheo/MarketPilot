@@ -22,6 +22,8 @@
 - asset addition, removal, custom weights, and equal-weight allocation
 - React Hook Form and Zod validation
 - deterministic fixture results based on the selected settings and assets
+- stop-loss caps fixture drawdown, while execution timing affects slippage
+  costs and trade prices
 - total return, annualized return, drawdown, Sharpe ratio, and win rate
 - equity curve, benchmark line, and drawdown chart
 - benchmark comparison and fixture trade history
@@ -88,6 +90,8 @@ run again.
 - 종목 추가·삭제, 직접 비중 입력 및 동일 비중 배분
 - React Hook Form과 Zod 검증
 - 선택한 설정과 종목에 따라 달라지는 결정적인 fixture 결과
+- 손절 기준은 fixture 낙폭을 제한하고, 체결 시점은 슬리피지 비용과 거래 가격에
+  반영
 - 총수익률, 연환산 수익률, 최대 낙폭, 샤프 지수 및 승률
 - 자산 곡선, 벤치마크 및 낙폭 차트
 - 벤치마크 비교와 fixture 거래 내역
@@ -149,6 +153,8 @@ run again.
 - 銘柄の追加・削除、比率入力、均等配分
 - React Hook FormとZodによる検証
 - 選択条件に応じて変化する決定論的fixture結果
+- 損切り設定はfixtureのドローダウンを制限し、約定条件はスリッページコストと
+  取引価格に反映
 - 総収益率、年率換算収益率、最大ドローダウン、シャープレシオ、勝率
 - 資産曲線、ベンチマーク、ドローダウンチャート
 - ベンチマーク比較とfixture取引履歴
