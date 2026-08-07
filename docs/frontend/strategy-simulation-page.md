@@ -24,6 +24,8 @@
 - deterministic fixture results based on the selected settings and assets
 - stop-loss caps fixture drawdown, while execution timing affects slippage
   costs and trade prices
+- visible assumption report with selected allocation, cost drag, stop-loss
+  caps, and best/worst checkpoints
 - total return, annualized return, drawdown, Sharpe ratio, and win rate
 - equity curve, benchmark line, and drawdown chart
 - benchmark comparison and fixture trade history
@@ -92,6 +94,8 @@ run again.
 - 선택한 설정과 종목에 따라 달라지는 결정적인 fixture 결과
 - 손절 기준은 fixture 낙폭을 제한하고, 체결 시점은 슬리피지 비용과 거래 가격에
   반영
+- 선택 종목 비중, 비용 영향, 손절 제한 발생 횟수, 최고·최저 체크포인트를
+  결과 화면에서 표시
 - 총수익률, 연환산 수익률, 최대 낙폭, 샤프 지수 및 승률
 - 자산 곡선, 벤치마크 및 낙폭 차트
 - 벤치마크 비교와 fixture 거래 내역
@@ -155,6 +159,8 @@ run again.
 - 選択条件に応じて変化する決定論的fixture結果
 - 損切り設定はfixtureのドローダウンを制限し、約定条件はスリッページコストと
   取引価格に反映
+- 選択銘柄の比率、コスト影響、損切り制限の発生回数、最高・最低チェック
+  ポイントを結果画面に表示
 - 総収益率、年率換算収益率、最大ドローダウン、シャープレシオ、勝率
 - 資産曲線、ベンチマーク、ドローダウンチャート
 - ベンチマーク比較とfixture取引履歴

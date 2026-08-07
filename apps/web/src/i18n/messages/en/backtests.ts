@@ -124,6 +124,13 @@ export const backtests = {
     title: "Assumptions used",
     description:
       "Stop-loss, costs, and execution timing affect performance and trade prices.",
+    allocations: "Selected allocation",
+    diagnostics: "Risk diagnostics",
+    annualCostDrag: "Annual cost drag",
+    stopLossHits: "Stop-loss caps",
+    bestCheckpoint: "Best checkpoint",
+    worstCheckpoint: "Worst checkpoint",
+    hitSuffix: "x",
   },
   chart: {
     title: "Equity curve and drawdown",

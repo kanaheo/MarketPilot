@@ -671,6 +671,90 @@
   white-space: nowrap;
 }
 
+.backtest-assumptions-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 12px;
+  border-top: 1px solid #e5ece9;
+  padding-top: 12px;
+}
+
+.backtest-assumptions-detail-grid section {
+  display: grid;
+  align-content: start;
+  gap: 9px;
+  min-width: 0;
+}
+
+.backtest-assumptions-detail-grid section > strong {
+  color: #45534e;
+  font-size: 10px;
+  font-weight: 820;
+}
+
+.backtest-allocation-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.backtest-allocation-chips span {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #cfe2dd;
+  border-radius: 999px;
+  background: #ffffff;
+  padding: 0 9px;
+  color: var(--color-text);
+  font-size: 10px;
+  font-weight: 820;
+}
+
+.backtest-allocation-chips b {
+  color: var(--color-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.backtest-diagnostics-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.backtest-diagnostics-list div {
+  min-width: 0;
+  border: 1px solid #dfe7e3;
+  border-left: 3px solid var(--color-primary);
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 9px;
+}
+
+.backtest-diagnostics-list dt,
+.backtest-diagnostics-list dd {
+  margin: 0;
+}
+
+.backtest-diagnostics-list dt {
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: 9px;
+  font-weight: 760;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.backtest-diagnostics-list dd {
+  margin-top: 5px;
+  color: var(--color-text);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 860;
+}
+
 .backtest-results-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.6fr) minmax(300px, 0.6fr);

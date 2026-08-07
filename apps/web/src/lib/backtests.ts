@@ -257,9 +257,18 @@ export function generateBacktestResult(
     totalReturn > -1 ? (1 + totalReturn) ** (1 / years) - 1 : -1;
   const maxDrawdown = Math.min(...chart.map((point) => point.drawdown));
   const trades = createTrades(values, selectedAssets, totalReturn);
+  const checkpointReturns = chart.map(
+    (point) => point.portfolio / values.initialCapital - 1,
+  );
+  const stopLossFloor =
+    values.stopLoss > 0 ? -(values.stopLoss / 100) : null;
 
   return {
     currency: values.currency,
+    allocations: selectedAssets.map((asset) => ({
+      symbol: asset.symbol,
+      weight: asset.weight,
+    })),
     assumptions: {
       cashReserve: values.cashReserve,
       executionTiming: values.executionTiming,
@@ -268,6 +277,17 @@ export function generateBacktestResult(
       rebalanceFrequency: values.rebalanceFrequency,
       slippageRate: values.slippageRate,
       stopLoss: values.stopLoss,
+    },
+    diagnostics: {
+      annualCostDrag: annualCosts,
+      bestCheckpointReturn: Math.max(...checkpointReturns),
+      stopLossHitCount:
+        stopLossFloor === null
+          ? 0
+          : chart.filter(
+              (point) => point.drawdown <= stopLossFloor + 0.0001,
+            ).length,
+      worstCheckpointReturn: Math.min(...checkpointReturns),
     },
     totalReturn,
     annualizedReturn,
