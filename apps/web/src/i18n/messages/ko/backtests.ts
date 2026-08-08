@@ -116,6 +116,17 @@ export const backtests = {
     trades: "건 거래",
     fixture: "Fixture 결과",
   },
+  assumptions: {
+    title: "이번 결과에 사용한 가정",
+    description: "손절, 비용, 체결 조건이 성과와 거래가에 반영됩니다.",
+    allocations: "선택 종목 비중",
+    diagnostics: "리스크 진단",
+    annualCostDrag: "연간 비용 영향",
+    stopLossHits: "손절 제한 발생",
+    bestCheckpoint: "최고 체크포인트",
+    worstCheckpoint: "최저 체크포인트",
+    hitSuffix: "회",
+  },
   chart: {
     title: "자산 곡선과 낙폭",
     description: "전략 자산과 벤치마크의 변화 및 고점 대비 하락 폭",

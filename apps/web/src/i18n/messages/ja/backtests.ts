@@ -116,6 +116,17 @@ export const backtests = {
     trades: "件の取引",
     fixture: "Fixture結果",
   },
+  assumptions: {
+    title: "今回使った前提",
+    description: "損切り、コスト、約定条件が成績と取引価格に反映されます。",
+    allocations: "選択銘柄の比率",
+    diagnostics: "リスク診断",
+    annualCostDrag: "年間コスト影響",
+    stopLossHits: "損切り制限の発生",
+    bestCheckpoint: "最高チェックポイント",
+    worstCheckpoint: "最低チェックポイント",
+    hitSuffix: "回",
+  },
   chart: {
     title: "資産曲線とドローダウン",
     description: "戦略とベンチマークの資産推移および高値からの下落幅",
