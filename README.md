@@ -42,7 +42,22 @@ News analysis, macroeconomic scoring, ML ranking, automated paper orders, and
 AWS deployment will be added after the core accounting and backtest are
 trustworthy.
 
-## Planned stack
+## Demo flow
+
+Run the frontend and backend locally, then review these screens:
+
+1. `/{locale}/portfolio` - create or select a paper portfolio, review cash,
+   holdings, valuation, current-price source metadata, FX badges, and paper
+   order history.
+2. `/{locale}/markets` - check the market data and quote-provider surface.
+3. `/{locale}/backtests` - configure a fixture strategy, run a simulation, and
+   review assumptions, selected allocation, risk diagnostics, charts, benchmark
+   comparison, and fixture trades.
+
+Screenshots are intentionally not committed yet. Add them after local secrets
+have been rotated and no `.env` or admin-only screen is visible.
+
+## Current stack
 
 - Frontend: Next.js, TypeScript, Tailwind CSS, Recharts
 - Backend: Python, FastAPI, SQLAlchemy, Alembic
@@ -62,6 +77,7 @@ trustworthy.
 - [Frontend documentation](docs/frontend/README.md)
 - [Backend documentation](docs/backend/README.md)
 - [Developer setup](docs/setup/README.md)
+- [Demo checklist](docs/demo-checklist.md)
 
 ## Quality checks
 
@@ -78,9 +94,9 @@ configured with a GitHub Ruleset after the workflow runs successfully.
 
 ## Current status
 
-Phase 0 complete: product and architecture design.
-
-Next: Phase 1, the responsive PWA web app shell.
+Core portfolio valuation, quote-source metadata, and fixture-based backtest
+reporting are implemented. The project is still a paper-trading demo: several
+market-data, strategy, and deployment paths remain fixture-based or local-only.
 
 No real-money brokerage integration is included in the current scope.
 
@@ -122,7 +138,21 @@ MarketPilot은 수익을 보장하거나 확정적인 예측을 제공하지 않
 뉴스 분석, 거시경제 점수, ML 종목 순위, 자동 모의주문과 AWS 배포는 핵심 회계와
 백테스트의 신뢰성을 확보한 뒤 추가합니다.
 
-### 예정 기술 스택
+### 데모 확인 흐름
+
+프론트엔드와 백엔드를 로컬에서 실행한 뒤 아래 화면을 확인합니다.
+
+1. `/{locale}/portfolio` - 모의 포트폴리오 생성 또는 선택, 현금, 보유 종목,
+   평가금액, 현재가 출처, FX 배지, 모의주문 내역을 확인합니다.
+2. `/{locale}/markets` - 시장 데이터와 quote provider 표시 흐름을 확인합니다.
+3. `/{locale}/backtests` - fixture 전략을 설정하고 시뮬레이션을 실행한 뒤 사용
+   가정, 선택 종목 비중, 리스크 진단, 차트, 벤치마크 비교와 거래 내역을
+   확인합니다.
+
+스크린샷은 아직 커밋하지 않습니다. 로컬 비밀값을 교체하고 `.env`나 관리자용
+화면이 보이지 않는 것을 확인한 뒤 추가합니다.
+
+### 현재 기술 스택
 
 - 프론트엔드: Next.js, TypeScript, Tailwind CSS, Recharts
 - 백엔드: Python, FastAPI, SQLAlchemy, Alembic
@@ -142,6 +172,7 @@ MarketPilot은 수익을 보장하거나 확정적인 예측을 제공하지 않
 - [프론트엔드 문서](docs/frontend/README.md)
 - [백엔드 문서](docs/backend/README.md)
 - [개발 환경 설치](docs/setup/README.md)
+- [데모 체크리스트](docs/demo-checklist.md#한국어)
 
 ### 품질 검사
 
@@ -158,9 +189,9 @@ npm ci -> npm run lint -> npm run build
 
 ### 현재 상태
 
-0단계 완료: 제품 및 아키텍처 설계.
-
-다음 작업: 1단계 반응형 PWA 웹앱 기본 구조.
+포트폴리오 평가, 현재가 출처 메타데이터, fixture 기반 백테스트 리포트 흐름이
+구현되어 있습니다. 아직 모의투자 데모 단계이며, 일부 시장 데이터, 전략 실행과
+배포 흐름은 fixture 또는 로컬 개발 범위에 남아 있습니다.
 
 현재 범위에는 실제 자금을 사용하는 증권사 연동이 포함되지 않습니다.
 
@@ -204,7 +235,21 @@ MarketPilotは、利益を保証したり、確実な予測を提供したりす
 ニュース分析、マクロ経済スコア、MLランキング、自動ペーパー注文、AWSへの
 デプロイは、会計処理とバックテストの信頼性を確立した後に追加します。
 
-### 採用予定の技術スタック
+### デモ確認フロー
+
+フロントエンドとバックエンドをローカルで起動してから、次の画面を確認します。
+
+1. `/{locale}/portfolio` - ペーパーポートフォリオの作成または選択、現金、
+   保有銘柄、評価額、現在値の出所、FXバッジ、ペーパー注文履歴を確認します。
+2. `/{locale}/markets` - 市場データとquote providerの表示フローを確認します。
+3. `/{locale}/backtests` - fixture戦略を設定してシミュレーションを実行し、
+   使用した前提、選択銘柄の比率、リスク診断、チャート、ベンチマーク比較、
+   取引履歴を確認します。
+
+スクリーンショットはまだコミットしません。ローカルの秘密情報を更新し、
+`.env`や管理者向け画面が写っていないことを確認してから追加します。
+
+### 現在の技術スタック
 
 - フロントエンド: Next.js、TypeScript、Tailwind CSS、Recharts
 - バックエンド: Python、FastAPI、SQLAlchemy、Alembic
@@ -224,6 +269,7 @@ MarketPilotは、利益を保証したり、確実な予測を提供したりす
 - [フロントエンド文書](docs/frontend/README.md)
 - [バックエンド文書](docs/backend/README.md)
 - [開発環境セットアップ](docs/setup/README.md)
+- [デモチェックリスト](docs/demo-checklist.md)
 
 ### 品質チェック
 
@@ -240,8 +286,8 @@ GitHub Rulesetでマージ前の必須チェックとして設定する予定で
 
 ### 現在の状況
 
-フェーズ0完了: プロダクトおよびアーキテクチャ設計。
-
-次の作業: フェーズ1、レスポンシブPWA Webアプリの基本構成。
+ポートフォリオ評価、現在値の出所メタデータ、fixtureベースのバックテスト
+レポートフローは実装済みです。まだペーパートレードのデモ段階であり、一部の
+市場データ、戦略実行、デプロイの流れはfixtureまたはローカル開発範囲に残っています。
 
 現在のスコープには、実資金を扱う証券口座との連携は含まれていません。
