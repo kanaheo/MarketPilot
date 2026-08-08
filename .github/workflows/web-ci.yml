@@ -24,6 +24,11 @@ jobs:
     timeout-minutes: 10
     env:
       AUTH_SECRET: marketpilot-ci-build-secret
+      AUTH_GOOGLE_ID: marketpilot-ci-google-id
+      AUTH_GOOGLE_SECRET: marketpilot-ci-google-secret
+      MARKETPILOT_API_URL: http://127.0.0.1:8000
+      MARKETPILOT_INTERNAL_API_TOKEN: marketpilot-ci-internal-token
+      MARKETPILOT_USER_API_SIGNING_SECRET: marketpilot-ci-signing-secret
 
     defaults:
       run:
