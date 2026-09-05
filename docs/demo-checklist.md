@@ -44,11 +44,24 @@ Use this checklist before recording screenshots or sharing the project demo.
 
 ### Screenshot Candidates
 
-- Portfolio overview with holdings and quote source metadata.
-- Portfolio mobile view showing current-price source text.
-- Market data or quote-provider view.
-- Backtest result screen with assumptions and risk diagnostics.
-- Backtest mobile view.
+- `docs/assets/demo/portfolio-overview.png` - portfolio overview with holdings
+  and quote source metadata.
+- `docs/assets/demo/portfolio-mobile.png` - mobile portfolio view showing
+  current-price source text.
+- `docs/assets/demo/markets-overview.png` - market data or quote-provider view.
+- `docs/assets/demo/backtest-results.png` - backtest result screen with
+  assumptions and risk diagnostics.
+- `docs/assets/demo/backtest-mobile.png` - mobile backtest view.
+
+### Before Committing Screenshots
+
+- Re-open every image and confirm no secret, email inbox, terminal token,
+  provider dashboard, or personal account information is visible.
+- Prefer the Korean locale for the first screenshot set because the project
+  demo flow currently points to `/ko`.
+- Keep screenshots focused on the app content. Crop browser chrome only when it
+  does not hide important responsive layout behavior.
+- Update the README image links only after the files exist.
 
 ### Known Limits
 
@@ -102,11 +115,23 @@ Use this checklist before recording screenshots or sharing the project demo.
 
 ### 스크린샷 후보
 
-- 현재가 출처가 보이는 포트폴리오 overview 화면
-- 현재가 출처 텍스트가 보이는 포트폴리오 모바일 화면
-- 시장 데이터 또는 quote provider 화면
-- 사용 가정과 리스크 진단이 보이는 백테스트 결과 화면
-- 백테스트 모바일 화면
+- `docs/assets/demo/portfolio-overview.png` - 현재가 출처가 보이는 포트폴리오
+  overview 화면
+- `docs/assets/demo/portfolio-mobile.png` - 현재가 출처 텍스트가 보이는 포트폴리오
+  모바일 화면
+- `docs/assets/demo/markets-overview.png` - 시장 데이터 또는 quote provider 화면
+- `docs/assets/demo/backtest-results.png` - 사용 가정과 리스크 진단이 보이는
+  백테스트 결과 화면
+- `docs/assets/demo/backtest-mobile.png` - 백테스트 모바일 화면
+
+### 스크린샷 커밋 전 확인
+
+- 모든 이미지를 다시 열어서 비밀값, 이메일함, 터미널 token, provider dashboard,
+  개인 계정 정보가 보이지 않는지 확인합니다.
+- 현재 데모 흐름이 `/ko` 기준이므로 첫 스크린샷 묶음은 한국어 화면을 우선합니다.
+- 앱 내용이 잘 보이도록 캡처합니다. 브라우저 영역은 중요한 반응형 레이아웃을
+  가리지 않을 때만 잘라냅니다.
+- README 이미지 링크는 실제 파일을 추가한 뒤에만 연결합니다.
 
 ### 현재 제한사항
 

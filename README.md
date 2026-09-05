@@ -57,6 +57,20 @@ Run the frontend and backend locally, then review these screens:
 Screenshots are intentionally not committed yet. Add them after local secrets
 have been rotated and no `.env` or admin-only screen is visible.
 
+## Screenshots
+
+Planned screenshot files:
+
+- `docs/assets/demo/portfolio-overview.png`
+- `docs/assets/demo/portfolio-mobile.png`
+- `docs/assets/demo/markets-overview.png`
+- `docs/assets/demo/backtest-results.png`
+- `docs/assets/demo/backtest-mobile.png`
+
+Use the [demo checklist](docs/demo-checklist.md) before capturing these images.
+Each screenshot should show only paper-trading data and must avoid terminals,
+environment files, provider dashboards, and personal account information.
+
 ## Current stack
 
 - Frontend: Next.js, TypeScript, Tailwind CSS, Recharts
@@ -151,6 +165,20 @@ MarketPilot은 수익을 보장하거나 확정적인 예측을 제공하지 않
 
 스크린샷은 아직 커밋하지 않습니다. 로컬 비밀값을 교체하고 `.env`나 관리자용
 화면이 보이지 않는 것을 확인한 뒤 추가합니다.
+
+### 스크린샷
+
+예정된 스크린샷 파일은 다음과 같습니다.
+
+- `docs/assets/demo/portfolio-overview.png`
+- `docs/assets/demo/portfolio-mobile.png`
+- `docs/assets/demo/markets-overview.png`
+- `docs/assets/demo/backtest-results.png`
+- `docs/assets/demo/backtest-mobile.png`
+
+이미지를 찍기 전 [데모 체크리스트](docs/demo-checklist.md#한국어)를 확인합니다.
+모든 스크린샷에는 모의투자 데이터만 보여야 하며, 터미널, 환경변수 파일,
+provider dashboard, 개인 계정 정보는 보이지 않게 합니다.
 
 ### 현재 기술 스택
 
@@ -248,6 +276,20 @@ MarketPilotは、利益を保証したり、確実な予測を提供したりす
 
 スクリーンショットはまだコミットしません。ローカルの秘密情報を更新し、
 `.env`や管理者向け画面が写っていないことを確認してから追加します。
+
+### スクリーンショット
+
+予定しているスクリーンショットファイルは次の通りです。
+
+- `docs/assets/demo/portfolio-overview.png`
+- `docs/assets/demo/portfolio-mobile.png`
+- `docs/assets/demo/markets-overview.png`
+- `docs/assets/demo/backtest-results.png`
+- `docs/assets/demo/backtest-mobile.png`
+
+撮影前に[デモチェックリスト](docs/demo-checklist.md)を確認します。すべての
+スクリーンショットにはペーパートレードデータのみを表示し、ターミナル、環境
+変数ファイル、provider dashboard、個人アカウント情報は写さないようにします。
 
 ### 現在の技術スタック
 
