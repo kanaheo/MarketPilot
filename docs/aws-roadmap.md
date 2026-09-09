@@ -1,6 +1,6 @@
 # AWS Roadmap
 
-[English](#english) | [한국어](#한국어)
+[English](#english) | [한국어](#한국어) | [日本語](#日本語)
 
 <a id="english"></a>
 
@@ -12,12 +12,12 @@ small steps that can be explained in interviews.
 
 ## Current Readiness
 
-Status: Planning started
+Status: Local Docker baseline in progress
 
 - Frontend exists at `apps/web`.
 - Backend exists at `apps/api`.
 - GitHub Actions already has a web CI workflow.
-- Docker files are not added yet.
+- Local Docker files are added for web, api, and PostgreSQL.
 - Terraform files are not added yet.
 - AWS resources are not created yet.
 - Secrets must stay outside source code.
@@ -53,6 +53,8 @@ This document keeps the order simple:
 
 ### Step 1 - Readiness Checklist
 
+Status: Complete
+
 Goal: understand the repository before changing infrastructure.
 
 - identify frontend, backend, database, CI, and docs locations
@@ -62,6 +64,8 @@ Goal: understand the repository before changing infrastructure.
 Exit: the repository has a clear AWS learning roadmap.
 
 ### Step 2 - Local Docker Baseline
+
+Status: In progress
 
 Goal: run the application with containers before AWS.
 
@@ -162,12 +166,12 @@ MarketPilot의 AWS 트랙은 전직을 위한 modernization 학습 경로입니�
 
 ## 현재 준비 상태
 
-상태: 계획 시작
+상태: 로컬 Docker 기준선 진행 중
 
 - Frontend는 `apps/web`에 있습니다.
 - Backend는 `apps/api`에 있습니다.
 - GitHub Actions에는 이미 web CI workflow가 있습니다.
-- Docker 파일은 아직 추가하지 않았습니다.
+- web, api, PostgreSQL용 local Docker 파일을 추가했습니다.
 - Terraform 파일은 아직 추가하지 않았습니다.
 - AWS 리소스는 아직 만들지 않았습니다.
 - Secret은 source code에 넣지 않습니다.
@@ -206,6 +210,8 @@ Cloud 작업은 AWS resource부터 바로 만들면 금방 헷갈립니다. 이 
 
 ### 1단계 - 준비 상태 점검
 
+상태: 완료
+
 목표: infrastructure를 바꾸기 전에 현재 Repository를 이해합니다.
 
 - frontend, backend, database, CI, docs 위치 확인
@@ -215,6 +221,8 @@ Cloud 작업은 AWS resource부터 바로 만들면 금방 헷갈립니다. 이 
 완료 조건: Repository에 명확한 AWS 학습 로드맵이 있다.
 
 ### 2단계 - 로컬 Docker 기준선
+
+상태: 진행 중
 
 목표: AWS 전에 container로 app을 실행합니다.
 
@@ -302,3 +310,159 @@ Cloud 작업은 AWS resource부터 바로 만들면 금방 헷갈립니다. 이 
 - interview talking point 준비
 
 완료 조건: Repository가 app과 cloud architecture를 함께 설명한다.
+
+---
+
+<a id="日本語"></a>
+
+## 日本語
+
+MarketPilotのAWS trackは、転職に向けたmodernization学習ルートです。目的は、
+既存のNext.js、FastAPI、PostgreSQLアプリを、小さく説明しやすいstepでAWSへ
+移していくことです。
+
+## 現在の準備状況
+
+状態: ローカルDocker基準線を進行中
+
+- Frontendは`apps/web`にあります。
+- Backendは`apps/api`にあります。
+- GitHub Actionsにはすでにweb CI workflowがあります。
+- web、api、PostgreSQL用のlocal Docker fileを追加しました。
+- Terraform fileはまだ追加していません。
+- AWS resourceはまだ作成していません。
+- Secretはsource codeに入れません。
+
+## なぜこの文書から始めるのか？
+
+Cloud作業は、いきなりAWS resourceから作ると混乱しやすいです。この文書は順番を
+シンプルに保ちます。
+
+1. 現在のapp構造を理解する。
+2. Dockerでローカル実行をそろえる。
+3. TerraformでAWS infrastructureを定義する。
+4. serviceを一つずつdeployする。
+5. portfolioと面接で説明できるdecisionを文書化する。
+
+## 主要概念
+
+- Dockerはappを実行用の箱としてまとめ、local、CI、AWSで似た形で実行できる
+  ようにします。
+- Docker Composeはweb、api、PostgreSQLのような複数containerをローカルで
+  一緒に実行します。
+- TerraformはAWS consoleで手作業する代わりに、infrastructureをcodeで管理する
+  ためのtoolです。
+- ECRはAWS内にDocker imageを保存する場所です。
+- ECS FargateはEC2 serverを直接管理せずにDocker containerを実行するserviceです。
+- ALBはinternet requestを受け取り、backend serviceへ転送する入口です。
+- RDSはAWSが管理するPostgreSQLです。
+- Secrets Managerはdatabase passwordなどの機密値をapplication codeの外に
+  保管します。
+- CloudWatchはlogとmetricを保存し、debugと運用に使います。
+- GitHub OIDCはAWS access keyをhard codingせずにGitHub Actionsからdeployする
+  ための仕組みです。
+
+## 段階別計画
+
+### 1段階 - 準備状況チェック
+
+状態: 完了
+
+目的: infrastructureを変更する前にRepositoryを理解します。
+
+- frontend、backend、database、CI、docsの位置を確認
+- 不足しているDockerおよびAWS fileを整理
+- 最初に安全なdeploy pathを決める
+
+完了条件: Repositoryに明確なAWS学習ロードマップがある。
+
+### 2段階 - ローカルDocker基準線
+
+状態: 進行中
+
+目的: AWSの前にcontainerでappを実行します。
+
+- FastAPI Dockerfileを追加
+- Next.js Dockerfileを追加
+- local Docker Compose fileを追加
+- PostgreSQLをDocker Composeで実行
+- local container commandを文書化
+
+完了条件: web、api、databaseをDockerでローカル実行できる。
+
+### 3段階 - 最初のTerraform基準線
+
+目的: シンプルで理解しやすいinfrastructure codeを作ります。
+
+- Terraform provider設定を追加
+- 共通namingとtagを準備
+- dev environment folderを準備
+- 高コストserviceはdefaultから外す
+
+完了条件: Terraformで`fmt`と`validate`をローカル実行できる。
+
+### 4段階 - Container Registry
+
+目的: AWSにDocker image保存先を準備します。
+
+- webとapi用のECR repositoryを作成
+- image buildとpushの流れを文書化
+- AWS credentialはsource codeの外で管理
+
+完了条件: Docker imageをECRへpushできる。
+
+### 5段階 - Backend deploy
+
+目的: server boundaryであるFastAPIを先にdeployします。
+
+- ECS Fargate taskとserviceを作成
+- serviceをALBへ接続
+- load balancer経由でhealth endpointを公開
+- CloudWatchへlogを送る
+
+完了条件: FastAPI health endpointをinternetから確認できる。
+
+### 6段階 - Database deploy
+
+目的: BackendをPostgreSQLへ安全に接続します。
+
+- budget alert準備後にRDS PostgreSQLを作成
+- databaseはprivate subnetに配置
+- backend security groupからのみdatabase accessを許可
+- secretはAWS Secrets Managerに保存
+- migration実行の流れを文書化
+
+完了条件: databaseをpublicに公開せず、backendがRDSへ接続できる。
+
+### 7段階 - Frontend deploy
+
+目的: Next.js frontendをdeployします。
+
+- Next.js要件に合わせてECS、Amplify、CloudFront/S3から選ぶ
+- frontend environment variableを設定
+- frontend requestをAWS backend URLへ接続
+
+完了条件: reviewerがdeploy済みweb appを使用できる。
+
+### 8段階 - CI/CD
+
+目的: 繰り返し可能なdeployを自動化します。
+
+- 既存CI checkを維持
+- Docker build checkを追加
+- AWS deployにはGitHub OIDCを使う
+- 長期間使うAWS access keyを避ける
+
+完了条件: GitHub Actionsがhard-coded cloud credentialなしでdeployできる。
+
+### 9段階 - Portfolio文書化
+
+目的: 面接で説明できるprojectにします。
+
+- architecture decisionを文書化
+- security decisionを文書化
+- cost controlを文書化
+- diagramとscreenshotを追加
+- interview talking pointを準備
+
+完了条件: Repositoryがappとcloud architectureを一緒に説明できる。
