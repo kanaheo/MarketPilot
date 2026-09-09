@@ -15,5 +15,32 @@ services:
     volumes:
       - marketpilot_postgres_data:/var/lib/postgresql/data
 
+  api:
+    build:
+      context: ./apps/api
+    environment:
+      MARKETPILOT_DATABASE_URL: postgresql+psycopg://marketpilot:marketpilot@postgres:5432/marketpilot
+      MARKETPILOT_INTERNAL_API_TOKEN: local-internal-api-token
+      MARKETPILOT_USER_API_SIGNING_SECRET: local-user-api-signing-secret
+    ports:
+      - "127.0.0.1:8001:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./apps/web
+    environment:
+      AUTH_SECRET: local-auth-secret-change-before-production
+      AUTH_TRUST_HOST: "true"
+      MARKETPILOT_API_URL: http://api:8000
+      MARKETPILOT_INTERNAL_API_TOKEN: local-internal-api-token
+      MARKETPILOT_USER_API_SIGNING_SECRET: local-user-api-signing-secret
+    ports:
+      - "127.0.0.1:3001:3000"
+    depends_on:
+      - api
+
 volumes:
   marketpilot_postgres_data:
