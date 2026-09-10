@@ -31,6 +31,10 @@ services:
   web:
     build:
       context: ./apps/web
+
+    env_file:
+      - ./apps/web/.env.local
+
     environment:
       AUTH_SECRET: local-auth-secret-change-before-production
       AUTH_TRUST_HOST: "true"
